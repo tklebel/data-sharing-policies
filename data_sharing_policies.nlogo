@@ -37,7 +37,8 @@ end
 
 to generate-proposals
   ask teams [
-    set proposal-strength random-normal resources proposal-sigma
+    set proposal-strength 100 + random-normal resources proposal-sigma ; make sure for now that this cannot be below zero.
+    ; would be better to use something like a gamma distribution
   ]
 
 end
@@ -50,7 +51,7 @@ to award-grants
   set rank-list sort-on [(- proposal-strength)] teams ; need to invert proposal-strength, so that higher values are on top of the list
   set top-teams sublist rank-list 0 20
   set bottom-teams sublist rank-list 20 100
-  foreach top-teams [x -> ask x [ set resources resources * .8 + 15 ] ]
+  foreach top-teams [x -> ask x [ set resources resources * .8 + 15 ] ] ; making proposals is costly proportional to current resources, but additional resources can be obtained
   foreach bottom-teams [x -> ask x [ set resources resources * .8 ] ]
 end
 
@@ -151,8 +152,8 @@ PLOT
 proposal strength
 NIL
 NIL
--50.0
-150.0
+0.0
+250.0
 0.0
 10.0
 true
