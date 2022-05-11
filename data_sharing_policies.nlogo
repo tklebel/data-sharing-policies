@@ -11,7 +11,6 @@ teams-own [
   resources-last-round
   proposal-strength
   effort
-  effort-last-round
   shared-data?
 ]
 
@@ -58,8 +57,8 @@ to award-grants
     set resources resources + .01
   ]
   set rank-list sort-on [(- proposal-strength)] teams ; need to invert proposal-strength, so that higher values are on top of the list
-  set top-teams sublist rank-list 0 20
-  set bottom-teams sublist rank-list 20 100
+  set top-teams sublist rank-list 0 ( n-teams * .2 )
+  set bottom-teams sublist rank-list ( n-teams * .2 ) n-teams
   foreach top-teams [x -> ask x [ set resources resources * .8 + .15 ] ] ; making proposals is costly proportional to current resources, but additional resources can be obtained
   foreach bottom-teams [x -> ask x [ set resources resources * .8 ] ]
 
@@ -74,37 +73,27 @@ end
 to update-utility
   ; something is currently wrong with how agents update their utility. think through again
   ask teams [
-    ifelse resources > resources-last-round [
-      ; if resources are higher or equal
-      ifelse effort-last-round > effort [
-        ; increase effort since data sharing helped
-        increase-effort
-      ] [
-        ; decrease effort since data sharing was bad
-        decrease-effort
-      ]
-    ] [
-      ; if resources are lower
-      ifelse effort-last-round >= effort [
-        ; decrease effort since data sharing was bad
-        decrease-effort
-      ] [
-        ; increase effort since not sharing data was bad
-        increase-effort
-      ]
+    if resources > resources-last-round [
+      ; if resources are higher, increase effort
+      increase-effort
     ]
+
+    if resources < resources-last-round [
+      ; if resources are lower, decrease
+      decrease-effort
+    ]
+
+    ; if resources are equal, do nothing
   ]
 
 end
 
 to increase-effort
-  set effort-last-round effort
   set effort effort + effort-change
   if effort > .999 [set effort .999]
 end
 
 to decrease-effort
-  set effort-last-round effort
   set effort effort - effort-change
   if effort < .001 [set effort .001]
 end
@@ -117,7 +106,7 @@ to share-data
 
   if sharing-costs? [
     ask teams [
-      set resources resources - .01 * effort
+      set resources resources - .1 * effort
       if resources < 0 [ set resources 0 ]
     ]
   ]
@@ -313,10 +302,10 @@ SLIDER
 95
 n-teams
 n-teams
-20
+1
 500
-100.0
-10
+227.0
+1
 1
 NIL
 HORIZONTAL
@@ -428,7 +417,7 @@ initial-effort
 initial-effort
 0
 1
-0.18
+0.13
 .01
 1
 NIL
@@ -443,11 +432,28 @@ initial-resources
 initial-resources
 0
 1
-0.0
+0.08
 .01
 1
 NIL
 HORIZONTAL
+
+BUTTON
+168
+18
+225
+51
+go-once
+go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
