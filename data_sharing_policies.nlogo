@@ -19,7 +19,7 @@ to setup
   clear-all
 
   create-teams 100  [
-    set resources 50
+    set resources 0
   ]
 
   reset-ticks
@@ -37,8 +37,7 @@ end
 
 to generate-proposals
   ask teams [
-    set proposal-strength 100 + random-normal resources proposal-sigma ; make sure for now that this cannot be below zero.
-    ; would be better to use something like a gamma distribution
+    set proposal-strength random-normal resources proposal-sigma
   ]
 
 end
@@ -46,12 +45,12 @@ end
 to award-grants
   ; base funding
   ask teams [
-    set resources resources + 1
+    set resources resources + .01
   ]
   set rank-list sort-on [(- proposal-strength)] teams ; need to invert proposal-strength, so that higher values are on top of the list
   set top-teams sublist rank-list 0 20
   set bottom-teams sublist rank-list 20 100
-  foreach top-teams [x -> ask x [ set resources resources * .8 + 15 ] ] ; making proposals is costly proportional to current resources, but additional resources can be obtained
+  foreach top-teams [x -> ask x [ set resources resources * .8 + .15 ] ] ; making proposals is costly proportional to current resources, but additional resources can be obtained
   foreach bottom-teams [x -> ask x [ set resources resources * .8 ] ]
 end
 
@@ -102,10 +101,10 @@ SLIDER
 165
 proposal-sigma
 proposal-sigma
+0
 1
-50
-25.0
-1
+0.25
+.01
 1
 NIL
 HORIZONTAL
@@ -152,15 +151,15 @@ PLOT
 proposal strength
 NIL
 NIL
-0.0
-250.0
+-1.0
+1.0
 0.0
 10.0
 true
 false
 "" ""
 PENS
-"default" 1.0 1 -16777216 true "" "histogram [proposal-strength] of teams"
+"default" 0.05 1 -16777216 false "" "histogram [proposal-strength] of teams"
 
 PLOT
 514
@@ -170,15 +169,15 @@ PLOT
 resource distribution
 NIL
 NIL
--50.0
-150.0
+0.0
+1.0
 0.0
 10.0
 true
 false
 "" ""
 PENS
-"default" 5.0 1 -16777216 true "" "histogram [resources] of teams"
+"default" 0.05 1 -16777216 true "" "histogram [resources] of teams"
 
 MONITOR
 454
