@@ -8,9 +8,10 @@ breed [teams team]
 
 teams-own [
   resources
+  resources-last-round
   proposal-strength
-  individual-utility
   effort
+  effort-last-round
   shared-data?
 ]
 
@@ -18,20 +19,29 @@ teams-own [
 to setup
   clear-all
 
-  create-teams 100  [
-    set resources 0
+  create-teams n-teams  [
+    set resources initial-resources
+    set effort initial-effort ; effort should be between 0 and 1, and is mapped onto the logit scale
+    set shared-data? false
   ]
 
   reset-ticks
 end
 
 to go
+  tick
+  if data-sharing? [
+    update-utility
+  ]
+
   generate-proposals
   award-grants
-  update-indices
-  share-data
 
-  tick
+  if data-sharing? [
+    share-data
+  ]
+
+  update-indices
 end
 
 
@@ -52,19 +62,92 @@ to award-grants
   set bottom-teams sublist rank-list 20 100
   foreach top-teams [x -> ask x [ set resources resources * .8 + .15 ] ] ; making proposals is costly proportional to current resources, but additional resources can be obtained
   foreach bottom-teams [x -> ask x [ set resources resources * .8 ] ]
+
+  ; set current resources for next round
+  ask teams [
+    set resources-last-round resources
+  ]
+end
+
+
+
+to update-utility
+  ; something is currently wrong with how agents update their utility. think through again
+  ask teams [
+    ifelse resources > resources-last-round [
+      ; if resources are higher or equal
+      ifelse effort-last-round > effort [
+        ; increase effort since data sharing helped
+        increase-effort
+      ] [
+        ; decrease effort since data sharing was bad
+        decrease-effort
+      ]
+    ] [
+      ; if resources are lower
+      ifelse effort-last-round >= effort [
+        ; decrease effort since data sharing was bad
+        decrease-effort
+      ] [
+        ; increase effort since not sharing data was bad
+        increase-effort
+      ]
+    ]
+  ]
+
+end
+
+to increase-effort
+  set effort-last-round effort
+  set effort effort + effort-change
+  if effort > .999 [set effort .999]
+end
+
+to decrease-effort
+  set effort-last-round effort
+  set effort effort - effort-change
+  if effort < .001 [set effort .001]
+end
+
+to share-data
+  ask teams [
+    let logit-effort ln effort - ln (1 - effort)
+    set shared-data? random-float 1 > 1 - (1 / (1 + exp ( - logit-effort )))
+  ]
+
+  if sharing-costs? [
+    ask teams [
+      set resources resources - .01 * effort
+      if resources < 0 [ set resources 0 ]
+    ]
+  ]
+
 end
 
 to update-indices
 
 end
 
-to share-data
-
-end
-
 
 to-report max-resources
   report max [ resources ] of teams
+end
+
+to-report %-sharing
+  report 100 * count teams with [shared-data?] / n-teams
+end
+
+
+; the initial computation for the gini index was adapted from the peer reviewer game, bianchi et al. DOI: 10.1007/s11192-018-2825-4 (https://www.comses.net/codebases/6b77a08b-7e60-4f47-9ebb-6a8a2e87f486/releases/1.0.0/)
+; the below and now used implementation was provided by TurtleZero on Stackoverflow: https://stackoverflow.com/a/70524851/3149349
+to-report gini [ samples ]
+  let n length samples
+  let indexes (range 1 (n + 1))
+  let bias-function [ [ i yi ] -> (n + 1 - i) * yi ]
+  let biased-samples (map bias-function indexes sort samples)
+  let ratio sum biased-samples / sum samples
+  let G (1 / n ) * (n + 1 - 2 * ratio)
+  report G
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -95,10 +178,10 @@ ticks
 30.0
 
 SLIDER
-36
-132
-208
-165
+32
+100
+204
+133
 proposal-sigma
 proposal-sigma
 0
@@ -110,10 +193,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-124
-52
-187
-85
+102
+18
+165
+51
 NIL
 go
 T
@@ -162,10 +245,10 @@ PENS
 "default" 0.05 1 -16777216 false "" "histogram [proposal-strength] of teams"
 
 PLOT
-514
-316
-714
-466
+430
+282
+630
+432
 resource distribution
 NIL
 NIL
@@ -191,10 +274,10 @@ max-resources
 11
 
 MONITOR
-596
-32
-704
-77
+552
+28
+650
+73
 sum of resources
 sum [resources] of teams
 2
@@ -202,15 +285,169 @@ sum [resources] of teams
 11
 
 MONITOR
-758
-53
-847
-98
+652
+27
+741
+72
 min resources
 min [resources] of teams
 2
 1
 11
+
+SWITCH
+33
+138
+165
+171
+data-sharing?
+data-sharing?
+0
+1
+-1000
+
+SLIDER
+35
+62
+207
+95
+n-teams
+n-teams
+20
+500
+100.0
+10
+1
+NIL
+HORIZONTAL
+
+PLOT
+846
+280
+1046
+430
+Effort
+NIL
+NIL
+0.0
+1.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 0.05 1 -16777216 true "" "histogram [effort] of teams"
+
+PLOT
+928
+83
+1204
+271
+% sharing data
+NIL
+NIL
+0.0
+10.0
+0.0
+100.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot %-sharing"
+
+PLOT
+641
+283
+841
+433
+Gini of resources
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot gini [resources] of teams"
+
+SLIDER
+29
+179
+201
+212
+effort-change
+effort-change
+0
+.2
+0.03
+.01
+1
+NIL
+HORIZONTAL
+
+SWITCH
+35
+236
+175
+269
+sharing-costs?
+sharing-costs?
+0
+1
+-1000
+
+PLOT
+663
+84
+917
+268
+Mean effort
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [effort] of teams"
+
+SLIDER
+43
+320
+215
+353
+initial-effort
+initial-effort
+0
+1
+0.18
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+79
+376
+251
+409
+initial-resources
+initial-resources
+0
+1
+0.0
+.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
