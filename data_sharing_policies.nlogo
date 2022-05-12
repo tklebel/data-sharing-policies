@@ -2,7 +2,6 @@ globals [
   rank-list
   top-teams
   bottom-teams
-  redist-resources
 ]
 
 breed [teams team]
@@ -20,7 +19,11 @@ teams-own [
 to setup
   clear-all
 
+  ask patches [set pcolor white]
   create-teams n-teams  [
+    setxy random-xcor random-ycor
+        set shape "circle"
+    set color 65
     set resources initial-resources
     set effort initial-effort ; effort should be between 0 and 1, and is mapped onto the logit scale
     set shared-data? false
@@ -107,43 +110,57 @@ to share-data
   ]
 
   if sharing-costs? [
-    ask teams [
-      set resources resources - .1 * effort
-      if resources < 0 [ set resources 0 ]
+    ask teams with [shared-data?] [
+      ; resources are redistributed as a consequence of data sharing
+      ; the size depends on effort, but with a dampener, so only ever half of resources can get redistributed
+      let r-to-redistribute resources * .5 * effort
+
+      ifelse not redistribute-costs? [
+        ; control case for when resources are not redistributed, but simply subtracted from the team
+        set resources resources - r-to-redistribute
+        if resources < 0 [ set resources 0 ]
+      ] [
+        ; if we redistribute costs, we are here
+        ; we still need to subtract the resources from each team
+        set resources resources - r-to-redistribute
+        if resources < 0 [ set resources 0 ]
+
+        ; if costs are redistributed, effort acts as a multiplier, but again strongly dampened
+        ; furthermore, not all of the costs are translated directly to others (otherwise sharing is the norm)
+        let resource-transfer-ratio .01 ; this is a crucial parameter: if high, most groups share data. maybe because the redistribution always leads them to have more resources, which in turn triggers increasing effort?
+        ; maybe still need to tie decision mechanism better to their own actions
+        set r-to-redistribute r-to-redistribute * (resource-transfer-ratio + 0.1 * effort)
+
+        let r-to-self r-to-redistribute * originator-benefit
+        let r-to-others r-to-redistribute - r-to-self
+
+        ; enter dividends into pool
+        set sharing-dividend-pool sharing-dividend-pool + r-to-self
+
+
+        ask other teams [
+          ; give all other teams something back. this is the pool that is split up
+          set resources resources + r-to-others / (n-teams - 1)
+        ]
+      ]
     ]
-  ]
 
-  ; redistribute resources if sharing happened
-  let n-sharing-teams count teams with [shared-data?]
-  let n-receiving-teams n-teams - n-sharing-teams
-  let total-resources sum [resources] of teams
-  ; this is not correct, since it averages over effort. however, teams with more effort should receive more
-  set redist-resources total-resources * .1 * mean [effort] of teams * n-sharing-teams / n-teams
-
-  ; determine how much goes to other groups, and how much to the data generating team
-  let redist-others redist-resources * (1 - originator-benefit)
-  let redist-originator redist-resources * originator-benefit
-
-  ask teams with [not shared-data?] [
-    set resources resources + redist-others / n-receiving-teams
-  ]
-
-  ask teams with [shared-data?] [
-    ; these teams should get rewards over a couple of ticks, proportional to their effort
-    set sharing-dividend-pool sharing-dividend-pool + redist-originator / n-sharing-teams
-
-    let dividend-rate .3
-    set resources resources + sharing-dividend-pool * dividend-rate
-
-    ; update dividend pool
-    set sharing-dividend-pool sharing-dividend-pool * (1 - dividend-rate)
-
+    ask teams [
+      ; ask all teams to pay themselves dividends, if they have anything in the pool
+      let dividend-rate .3
+      set resources resources + sharing-dividend-pool * dividend-rate
+      ; update dividend pool (remove the dividends paid out)
+      set sharing-dividend-pool sharing-dividend-pool * (1 - dividend-rate)
+    ]
 
   ]
 end
 
 to update-indices
-
+  ; update color to represent effort
+  ask teams [
+    set color 60 + 10 * (1 - effort) ; dark colour represent high effort
+  ]
 end
 
 
@@ -171,11 +188,11 @@ end
 GRAPHICS-WINDOW
 272
 10
-363
-102
+675
+414
 -1
 -1
-2.52
+11.97
 1
 10
 1
@@ -245,10 +262,10 @@ NIL
 1
 
 PLOT
-422
-86
-664
-268
+712
+82
+954
+264
 proposal strength
 NIL
 NIL
@@ -263,10 +280,10 @@ PENS
 "default" 0.05 1 -16777216 false "" "histogram [proposal-strength] of teams"
 
 PLOT
-430
-282
-630
-432
+720
+278
+920
+428
 resource distribution
 NIL
 NIL
@@ -281,10 +298,10 @@ PENS
 "default" 0.05 1 -16777216 true "" "histogram [resources] of teams"
 
 MONITOR
-454
-30
-548
-75
+744
+26
+838
+71
 max resources
 max-resources
 2
@@ -292,10 +309,10 @@ max-resources
 11
 
 MONITOR
-552
-28
-650
-73
+842
+24
+940
+69
 sum of resources
 sum [resources] of teams
 2
@@ -303,10 +320,10 @@ sum [resources] of teams
 11
 
 MONITOR
-652
-27
-741
-72
+942
+23
+1031
+68
 min resources
 min [resources] of teams
 2
@@ -333,17 +350,17 @@ n-teams
 n-teams
 1
 500
-227.0
+154.0
 1
 1
 NIL
 HORIZONTAL
 
 PLOT
-846
-280
-1046
-430
+1136
+276
+1336
+426
 Effort
 NIL
 NIL
@@ -358,10 +375,10 @@ PENS
 "default" 0.05 1 -16777216 true "" "histogram [effort] of teams"
 
 PLOT
-928
-83
-1204
-271
+1218
+79
+1494
+267
 % sharing data
 NIL
 NIL
@@ -376,10 +393,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot %-sharing"
 
 PLOT
-641
-283
-841
-433
+931
+279
+1131
+429
 Gini of resources
 NIL
 NIL
@@ -409,21 +426,21 @@ NIL
 HORIZONTAL
 
 SWITCH
-54
+39
 314
 194
 347
 sharing-costs?
 sharing-costs?
-1
+0
 1
 -1000
 
 PLOT
-663
-84
-917
-268
+953
+80
+1207
+264
 Mean effort
 NIL
 NIL
@@ -446,7 +463,7 @@ initial-effort
 initial-effort
 0
 1
-0.16
+0.2
 .01
 1
 NIL
@@ -485,10 +502,10 @@ NIL
 1
 
 PLOT
-1049
-282
-1249
-432
+1339
+278
+1539
+428
 sum of resources
 NIL
 NIL
@@ -502,38 +519,31 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of teams"
 
-PLOT
-1203
-104
-1403
-254
-redistributed resources
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot redist-resources"
-
 SLIDER
-37
-377
-209
-410
+35
+392
+207
+425
 originator-benefit
 originator-benefit
 0
 1
-0.17
+0.0
 .01
 1
 NIL
 HORIZONTAL
+
+SWITCH
+39
+350
+196
+383
+redistribute-costs?
+redistribute-costs?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
