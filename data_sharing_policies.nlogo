@@ -2,6 +2,7 @@ globals [
   rank-list
   top-teams
   bottom-teams
+  redist-resources
 ]
 
 breed [teams team]
@@ -12,6 +13,7 @@ teams-own [
   proposal-strength
   effort
   shared-data?
+  sharing-dividend-pool
 ]
 
 
@@ -111,6 +113,33 @@ to share-data
     ]
   ]
 
+  ; redistribute resources if sharing happened
+  let n-sharing-teams count teams with [shared-data?]
+  let n-receiving-teams n-teams - n-sharing-teams
+  let total-resources sum [resources] of teams
+  ; this is not correct, since it averages over effort. however, teams with more effort should receive more
+  set redist-resources total-resources * .1 * mean [effort] of teams * n-sharing-teams / n-teams
+
+  ; determine how much goes to other groups, and how much to the data generating team
+  let redist-others redist-resources * (1 - originator-benefit)
+  let redist-originator redist-resources * originator-benefit
+
+  ask teams with [not shared-data?] [
+    set resources resources + redist-others / n-receiving-teams
+  ]
+
+  ask teams with [shared-data?] [
+    ; these teams should get rewards over a couple of ticks, proportional to their effort
+    set sharing-dividend-pool sharing-dividend-pool + redist-originator / n-sharing-teams
+
+    let dividend-rate .3
+    set resources resources + sharing-dividend-pool * dividend-rate
+
+    ; update dividend pool
+    set sharing-dividend-pool sharing-dividend-pool * (1 - dividend-rate)
+
+
+  ]
 end
 
 to update-indices
@@ -285,10 +314,10 @@ min [resources] of teams
 11
 
 SWITCH
-33
-138
-165
-171
+52
+216
+184
+249
 data-sharing?
 data-sharing?
 0
@@ -365,10 +394,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot gini [resources] of teams"
 
 SLIDER
-29
-179
-201
-212
+48
+257
+220
+290
 effort-change
 effort-change
 0
@@ -380,13 +409,13 @@ NIL
 HORIZONTAL
 
 SWITCH
-35
-236
-175
-269
+54
+314
+194
+347
 sharing-costs?
 sharing-costs?
-0
+1
 1
 -1000
 
@@ -409,30 +438,30 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [effort] of teams"
 
 SLIDER
-43
-320
-215
-353
+34
+169
+206
+202
 initial-effort
 initial-effort
 0
 1
-0.13
+0.16
 .01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-79
-376
-251
-409
+34
+136
+206
+169
 initial-resources
 initial-resources
 0
 1
-0.08
+0.11
 .01
 1
 NIL
@@ -454,6 +483,57 @@ NIL
 NIL
 NIL
 1
+
+PLOT
+1049
+282
+1249
+432
+sum of resources
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot sum [resources] of teams"
+
+PLOT
+1203
+104
+1403
+254
+redistributed resources
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot redist-resources"
+
+SLIDER
+37
+377
+209
+410
+originator-benefit
+originator-benefit
+0
+1
+0.17
+.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
