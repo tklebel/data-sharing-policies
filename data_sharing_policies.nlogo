@@ -76,18 +76,26 @@ end
 
 
 to update-utility
-  ; something is currently wrong with how agents update their utility. think through again
   ask teams [
-    if resources > resources-last-round [
+    if shared-data? and resources > resources-last-round [
       ; if resources are higher, increase effort
       increase-effort
     ]
 
-    if resources < resources-last-round [
+    if shared-data? and resources < resources-last-round [
       ; if resources are lower, decrease
       decrease-effort
     ]
 
+    if not shared-data? and resources > resources-last-round [
+      ; if resources are higher from not sharing, decrease effort
+      decrease-effort
+    ]
+
+    if not shared-data? and resources < resources-last-round [
+      ; if resources are lower from not sharing, increase effort
+      increase-effort
+    ]
     ; if resources are equal, do nothing
   ]
 
@@ -125,11 +133,19 @@ to share-data
         set resources resources - r-to-redistribute
         if resources < 0 [ set resources 0 ]
 
-        ; if costs are redistributed, effort acts as a multiplier, but again strongly dampened
-        ; furthermore, not all of the costs are translated directly to others (otherwise sharing is the norm)
-        let resource-transfer-ratio .01 ; this is a crucial parameter: if high, most groups share data. maybe because the redistribution always leads them to have more resources, which in turn triggers increasing effort?
-        ; maybe still need to tie decision mechanism better to their own actions
-        set r-to-redistribute r-to-redistribute * (resource-transfer-ratio + 0.1 * effort)
+
+        ; not all of the costs are translated directly to others.
+        ; the combination with 'effort-multiplier' can be understood as indicating that with no effort, there is fewer resources
+        ; to be redistributed than went into generating the data. Above efforts of .4, there is some surplus starting.
+        ; in practical terms, this ratio prevents the total sum of resources from "running away" into exponential growth
+        let resource-transfer-ratio .8 ; this was not initially conceptualised in the gdoc
+
+        ; effort-multiplier: this sets to which degree invested effort creates a surplus for the community and/or the individual
+        ; together with the resource-transfer-ratio as a base, and with effort/2, this determines how much resources are redistributed
+        ; maybe this, in combination with values for 'originator-benefit' can be used to model different fields:
+        ; in some there would be a high "resource transfer", meaning a strong competition effect, while in others this might be low
+        let effort-multiplier .5 ; this is called "theta" in the gdoc
+        set r-to-redistribute r-to-redistribute * (resource-transfer-ratio + effort-multiplier * effort)
 
         let r-to-self r-to-redistribute * originator-benefit
         let r-to-others r-to-redistribute - r-to-self
@@ -188,11 +204,11 @@ end
 GRAPHICS-WINDOW
 272
 10
-675
-414
+563
+302
 -1
 -1
-11.97
+8.6
 1
 10
 1
@@ -262,10 +278,10 @@ NIL
 1
 
 PLOT
-712
-82
-954
-264
+566
+13
+808
+195
 proposal strength
 NIL
 NIL
@@ -280,10 +296,10 @@ PENS
 "default" 0.05 1 -16777216 false "" "histogram [proposal-strength] of teams"
 
 PLOT
-720
-278
-920
-428
+569
+199
+769
+349
 resource distribution
 NIL
 NIL
@@ -298,10 +314,10 @@ PENS
 "default" 0.05 1 -16777216 true "" "histogram [resources] of teams"
 
 MONITOR
-744
-26
-838
-71
+271
+310
+365
+355
 max resources
 max-resources
 2
@@ -309,10 +325,10 @@ max-resources
 11
 
 MONITOR
-842
-24
-940
-69
+369
+308
+467
+353
 sum of resources
 sum [resources] of teams
 2
@@ -320,10 +336,10 @@ sum [resources] of teams
 11
 
 MONITOR
-942
-23
-1031
-68
+469
+307
+558
+352
 min resources
 min [resources] of teams
 2
@@ -357,10 +373,10 @@ NIL
 HORIZONTAL
 
 PLOT
-1136
-276
-1336
-426
+985
+197
+1185
+347
 Effort
 NIL
 NIL
@@ -375,10 +391,10 @@ PENS
 "default" 0.05 1 -16777216 true "" "histogram [effort] of teams"
 
 PLOT
-1218
-79
-1494
-267
+1064
+10
+1340
+198
 % sharing data
 NIL
 NIL
@@ -393,10 +409,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot %-sharing"
 
 PLOT
-931
-279
-1131
-429
+780
+200
+980
+350
 Gini of resources
 NIL
 NIL
@@ -437,10 +453,10 @@ sharing-costs?
 -1000
 
 PLOT
-953
-80
-1207
-264
+807
+11
+1061
+195
 Mean effort
 NIL
 NIL
@@ -463,7 +479,7 @@ initial-effort
 initial-effort
 0
 1
-0.2
+0.8
 .01
 1
 NIL
@@ -476,9 +492,9 @@ SLIDER
 169
 initial-resources
 initial-resources
-0
+0.01
 1
-0.11
+0.44
 .01
 1
 NIL
@@ -502,10 +518,10 @@ NIL
 1
 
 PLOT
-1339
-278
-1539
-428
+1188
+199
+1388
+349
 sum of resources
 NIL
 NIL
@@ -528,7 +544,7 @@ originator-benefit
 originator-benefit
 0
 1
-0.0
+1.0
 .01
 1
 NIL
