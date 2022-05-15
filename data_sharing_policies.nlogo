@@ -34,15 +34,16 @@ end
 
 to go
   tick
+
   if data-sharing? [
-    update-utility
+    share-data
   ]
 
   generate-proposals
   award-grants
 
   if data-sharing? [
-    share-data
+    update-utility
   ]
 
   update-indices
@@ -51,9 +52,9 @@ end
 
 to generate-proposals
   ask teams [
-    set proposal-strength random-normal resources proposal-sigma
+    let mu ( 1 - sharing-incentive ) * resources + effort * sharing-incentive
+    set proposal-strength random-normal mu proposal-sigma
   ]
-
 end
 
 to award-grants
@@ -61,16 +62,21 @@ to award-grants
   ask teams [
     set resources resources + .01
   ]
-  set rank-list sort-on [(- proposal-strength)] teams ; need to invert proposal-strength, so that higher values are on top of the list
-  set top-teams sublist rank-list 0 ( n-teams * .2 )
-  set bottom-teams sublist rank-list ( n-teams * .2 ) n-teams
-  foreach top-teams [x -> ask x [ set resources resources * .8 + .15 ] ] ; making proposals is costly proportional to current resources, but additional resources can be obtained
-  foreach bottom-teams [x -> ask x [ set resources resources * .8 ] ]
 
-  ; set current resources for next round
-  ask teams [
-    set resources-last-round resources
+  ; if we mandate sharing, we need to remove non-eligible teams
+  let eligible-teams teams
+  if mandate-sharing? [
+    set eligible-teams teams with [shared-data?]
   ]
+
+  let n-grants n-teams * .2
+
+  set rank-list sort-on [(- proposal-strength)] eligible-teams ; need to invert proposal-strength, so that higher values are on top of the list
+  set top-teams ifelse-value (length rank-list < n-grants) [rank-list] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
+
+  ; decrease resources for all, and add further one's for some
+  ask teams [ set resources resources * .8 ]
+  foreach top-teams [x -> ask x [ set resources resources + .15 ] ]
 end
 
 
@@ -173,9 +179,10 @@ to share-data
 end
 
 to update-indices
-  ; update color to represent effort
+  ; update color to represent effort, and set resources for next round
   ask teams [
     set color 60 + 10 * (1 - effort) ; dark colour represent high effort
+    set resources-last-round resources
   ]
 end
 
@@ -304,7 +311,7 @@ resource distribution
 NIL
 NIL
 0.0
-1.0
+3.0
 0.0
 10.0
 true
@@ -366,7 +373,7 @@ n-teams
 n-teams
 1
 500
-154.0
+100.0
 1
 1
 NIL
@@ -448,7 +455,7 @@ SWITCH
 347
 sharing-costs?
 sharing-costs?
-0
+1
 1
 -1000
 
@@ -477,9 +484,9 @@ SLIDER
 202
 initial-effort
 initial-effort
-0
+0.01
 1
-0.8
+0.01
 .01
 1
 NIL
@@ -494,7 +501,7 @@ initial-resources
 initial-resources
 0.01
 1
-0.44
+0.11
 .01
 1
 NIL
@@ -544,7 +551,7 @@ originator-benefit
 originator-benefit
 0
 1
-1.0
+0.0
 .01
 1
 NIL
@@ -557,9 +564,35 @@ SWITCH
 383
 redistribute-costs?
 redistribute-costs?
-0
+1
 1
 -1000
+
+SWITCH
+40
+464
+195
+497
+mandate-sharing?
+mandate-sharing?
+1
+1
+-1000
+
+SLIDER
+202
+461
+374
+494
+sharing-incentive
+sharing-incentive
+0
+1
+0.0
+.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
