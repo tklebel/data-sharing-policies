@@ -1,3 +1,5 @@
+extensions [ nw ]
+
 globals [
   rank-list
   top-teams
@@ -5,6 +7,8 @@ globals [
 ]
 
 breed [teams team]
+
+undirected-link-breed [ team-links team-link ]
 
 teams-own [
   resources
@@ -20,14 +24,34 @@ to setup
   clear-all
 
   ask patches [set pcolor white]
-  create-teams n-teams  [
-    setxy random-xcor random-ycor
-        set shape "circle"
+
+  ifelse network != "none" [
+    if network = "random" [
+      nw:generate-random teams team-links n-teams 0.2 [
+        setxy random-xcor random-ycor
+      ]
+    ]
+    if network = "small-world" [
+      nw:generate-small-world teams team-links 10 10 2 false [
+        (foreach (sort turtles) (sort patches) [ [t p] -> ask t [ move-to p ] ])
+      ]
+    ]
+  ] [
+    create-teams n-teams [
+      setxy random-xcor random-ycor
+    ]
+  ]
+
+
+  ask teams [
+    set shape "circle"
     set color 65
     set resources initial-resources
     set effort initial-effort ; effort should be between 0 and 1, and is mapped onto the logit scale
     set shared-data? false
   ]
+
+
 
   reset-ticks
 end
@@ -209,13 +233,13 @@ to-report gini [ samples ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-272
+270
 10
-563
-302
+514
+255
 -1
 -1
-8.6
+7.152
 1
 10
 1
@@ -593,6 +617,16 @@ sharing-incentive
 1
 NIL
 HORIZONTAL
+
+CHOOSER
+258
+389
+396
+434
+network
+network
+"none" "random" "small-world"
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
