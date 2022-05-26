@@ -33,7 +33,8 @@ to setup
     ]
     if network = "small-world" [
       nw:generate-small-world teams team-links 10 10 2 false [
-        (foreach (sort turtles) (sort patches) [ [t p] -> ask t [ move-to p ] ])
+        ; here we would want the teams to move in some way that the small world network (clustering) becomes visible
+        (foreach (sort turtles) (sort n-of n-teams patches) [ [t p] -> ask t [ move-to p ] ])
       ]
     ]
   ] [
@@ -626,7 +627,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-1
+2
 
 @#$#@#$#@
 ## WHAT IS IT?
