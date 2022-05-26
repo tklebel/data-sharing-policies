@@ -15,6 +15,9 @@ teams-own [
   resources-last-round
   proposal-strength
   effort
+  inv_effort ; the inv_logit of the effort (mapping it back onto [0, 1]
+  individual-utility
+  descriptive-norm
   shared-data?
   sharing-dividend-pool
 ]
@@ -27,14 +30,14 @@ to setup
 
   ifelse network != "none" [
     if network = "random" [
-      nw:generate-random teams team-links n-teams 0.2 [
+      nw:generate-random teams team-links n-teams 0.05 [
         setxy random-xcor random-ycor
       ]
     ]
     if network = "small-world" [
       nw:generate-small-world teams team-links 10 10 2 false [
-        ; here we would want the teams to move in some way that the small world network (clustering) becomes visible
-        (foreach (sort turtles) (sort n-of n-teams patches) [ [t p] -> ask t [ move-to p ] ])
+        ; TODO: here we would want the teams to move in some way that the small world network (clustering) becomes visible
+        setxy random-xcor random-ycor
       ]
     ]
   ] [
@@ -48,7 +51,9 @@ to setup
     set shape "circle"
     set color 65
     set resources initial-resources
-    set effort initial-effort ; effort should be between 0 and 1, and is mapped onto the logit scale
+    set resources-last-round initial-resources
+    set individual-utility initial-utility
+    set descriptive-norm initial-norm
     set shared-data? false
   ]
 
@@ -59,7 +64,7 @@ end
 
 to go
   tick
-
+  update-indices
   if data-sharing? [
     share-data
   ]
@@ -69,15 +74,16 @@ to go
 
   if data-sharing? [
     update-utility
+    update-norms
   ]
 
-  update-indices
+
 end
 
 
 to generate-proposals
   ask teams [
-    let mu ( 1 - sharing-incentive ) * resources + effort * sharing-incentive
+    let mu ( 1 - sharing-incentive ) * resources + inv_effort * sharing-incentive
     set proposal-strength random-normal mu proposal-sigma
   ]
 end
@@ -110,49 +116,58 @@ to update-utility
   ask teams [
     if shared-data? and resources > resources-last-round [
       ; if resources are higher, increase effort
-      increase-effort
+      increase-utility
     ]
 
     if shared-data? and resources < resources-last-round [
       ; if resources are lower, decrease
-      decrease-effort
+      decrease-utility
     ]
 
     if not shared-data? and resources > resources-last-round [
       ; if resources are higher from not sharing, decrease effort
-      decrease-effort
+      decrease-utility
     ]
 
     if not shared-data? and resources < resources-last-round [
       ; if resources are lower from not sharing, increase effort
-      increase-effort
+      increase-utility
     ]
     ; if resources are equal, do nothing
   ]
 
 end
 
-to increase-effort
-  set effort effort + effort-change
-  if effort > .999 [set effort .999]
+to increase-utility
+  set individual-utility individual-utility + utility-change
 end
 
-to decrease-effort
-  set effort effort - effort-change
-  if effort < .001 [set effort .001]
+to decrease-utility
+  set individual-utility individual-utility - utility-change
 end
+
+to update-norms
+  ask teams [
+    let neighbours nw:turtles-in-radius 1
+    let n-neighbours count neighbours
+    let n-neighbours-sharing count neighbours with [shared-data?]
+    set descriptive-norm n-neighbours-sharing / n-neighbours - .5
+  ]
+end
+
 
 to share-data
   ask teams [
-    let logit-effort ln effort - ln (1 - effort)
-    set shared-data? random-float 1 > 1 - (1 / (1 + exp ( - logit-effort )))
+    set effort b_utility * individual-utility + b_norm * descriptive-norm
+    set inv_effort 1 / (1 + exp ( - effort ))
+    set shared-data? random-float 1 > 1 - inv_effort
   ]
 
   if sharing-costs? [
     ask teams with [shared-data?] [
       ; resources are redistributed as a consequence of data sharing
       ; the size depends on effort, but with a dampener, so only ever half of resources can get redistributed
-      let r-to-redistribute resources * .5 * effort
+      let r-to-redistribute resources * .5 * inv_effort ; map the effort back onto [0, 1] so it can serve as a multiplier
 
       ifelse not redistribute-costs? [
         ; control case for when resources are not redistributed, but simply subtracted from the team
@@ -206,7 +221,7 @@ end
 to update-indices
   ; update color to represent effort, and set resources for next round
   ask teams [
-    set color 60 + 10 * (1 - effort) ; dark colour represent high effort
+    set color 60 + 10 * (1 - inv_effort) ; dark colour represent high effort
     set resources-last-round resources
   ]
 end
@@ -412,7 +427,7 @@ PLOT
 Effort
 NIL
 NIL
-0.0
+-1.0
 1.0
 0.0
 10.0
@@ -463,8 +478,8 @@ SLIDER
 257
 220
 290
-effort-change
-effort-change
+utility-change
+utility-change
 0
 .2
 0.03
@@ -494,7 +509,7 @@ NIL
 NIL
 0.0
 10.0
-0.0
+-1.0
 1.0
 true
 false
@@ -507,12 +522,12 @@ SLIDER
 169
 206
 202
-initial-effort
-initial-effort
-0.01
-1
-0.01
-.01
+initial-utility
+initial-utility
+-4
+4
+0.0
+.1
 1
 NIL
 HORIZONTAL
@@ -613,7 +628,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.0
+0.2
 .01
 1
 NIL
@@ -628,6 +643,98 @@ network
 network
 "none" "random" "small-world"
 2
+
+SLIDER
+75
+535
+247
+568
+b_utility
+b_utility
+0
+1
+1.0
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+99
+589
+271
+622
+b_norm
+b_norm
+0
+1
+0.4
+0.01
+1
+NIL
+HORIZONTAL
+
+PLOT
+577
+354
+833
+534
+Mean utility
+NIL
+NIL
+0.0
+10.0
+-4.0
+4.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [individual-utility] of teams"
+
+SLIDER
+53
+646
+225
+679
+initial-norm
+initial-norm
+-.5
+.5
+0.5
+.1
+1
+NIL
+HORIZONTAL
+
+PLOT
+831
+356
+1101
+536
+descriptive norms
+NIL
+NIL
+-0.5
+0.5
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 0.1 1 -16777216 true "" "histogram [descriptive-norm] of teams"
+
+MONITOR
+270
+260
+368
+305
+max effort
+max [effort] of teams
+2
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
