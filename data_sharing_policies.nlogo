@@ -140,10 +140,12 @@ end
 
 to increase-utility
   set individual-utility individual-utility + utility-change
+  if individual-utility > 5 [set individual-utility 5]
 end
 
 to decrease-utility
   set individual-utility individual-utility - utility-change
+  if individual-utility < -5 [set individual-utility -5]
 end
 
 to update-norms
@@ -394,10 +396,10 @@ min [resources] of teams
 11
 
 SWITCH
-52
-216
-184
-249
+49
+268
+181
+301
 data-sharing?
 data-sharing?
 0
@@ -424,10 +426,10 @@ PLOT
 197
 1185
 347
-Effort
+Effort (inverse logit)
 NIL
 NIL
--1.0
+0.0
 1.0
 0.0
 10.0
@@ -435,7 +437,7 @@ true
 false
 "" ""
 PENS
-"default" 0.05 1 -16777216 true "" "histogram [effort] of teams"
+"default" 0.05 1 -16777216 true "" "histogram [inv_effort] of teams"
 
 PLOT
 1064
@@ -474,10 +476,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot gini [resources] of teams"
 
 SLIDER
-48
-257
-220
-290
+45
+309
+217
+342
 utility-change
 utility-change
 0
@@ -489,13 +491,13 @@ NIL
 HORIZONTAL
 
 SWITCH
-39
-314
-194
-347
+36
+366
+191
+399
 sharing-costs?
 sharing-costs?
-1
+0
 1
 -1000
 
@@ -526,7 +528,7 @@ initial-utility
 initial-utility
 -4
 4
-0.0
+-3.3
 .1
 1
 NIL
@@ -583,10 +585,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of teams"
 
 SLIDER
-35
-392
-207
-425
+32
+444
+204
+477
 originator-benefit
 originator-benefit
 0
@@ -598,10 +600,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-39
-350
-196
-383
+36
+402
+193
+435
 redistribute-costs?
 redistribute-costs?
 1
@@ -609,46 +611,46 @@ redistribute-costs?
 -1000
 
 SWITCH
-40
-464
-195
-497
+234
+370
+389
+403
 mandate-sharing?
 mandate-sharing?
-1
+0
 1
 -1000
 
 SLIDER
-202
-461
-374
-494
+389
+369
+561
+402
 sharing-incentive
 sharing-incentive
 0
 1
-0.2
+0.38
 .01
 1
 NIL
 HORIZONTAL
 
 CHOOSER
-258
-389
-396
-434
+210
+515
+348
+560
 network
 network
 "none" "random" "small-world"
-2
+1
 
 SLIDER
-75
-535
-247
-568
+34
+503
+206
+536
 b_utility
 b_utility
 0
@@ -660,15 +662,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-99
-589
-271
-622
+33
+539
+205
+572
 b_norm
 b_norm
 0
 1
-0.4
+0.0
 0.01
 1
 NIL
@@ -693,15 +695,15 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [individual-utility] of teams"
 
 SLIDER
-53
-646
-225
-679
+33
+206
+205
+239
 initial-norm
 initial-norm
 -.5
 .5
-0.5
+0.0
 .1
 1
 NIL
@@ -723,7 +725,7 @@ true
 false
 "" ""
 PENS
-"default" 0.1 1 -16777216 true "" "histogram [descriptive-norm] of teams"
+"default" 0.05 1 -16777216 true "" "histogram [descriptive-norm] of teams"
 
 MONITOR
 270
@@ -735,6 +737,24 @@ max [effort] of teams
 2
 1
 11
+
+PLOT
+577
+536
+839
+688
+Individual-utility
+NIL
+NIL
+-5.0
+5.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 0.1 1 -16777216 true "" "histogram [individual-utility] of teams"
 
 @#$#@#$#@
 ## WHAT IS IT?
