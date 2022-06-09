@@ -22,7 +22,7 @@ to setup
   ask patches [set pcolor white]
   create-teams n-teams  [
     setxy random-xcor random-ycor
-        set shape "circle"
+    set shape "circle"
     set color 65
     set resources initial-resources
     set effort initial-effort ; effort should be between 0 and 1, and is mapped onto the logit scale
@@ -48,18 +48,10 @@ to go
   update-indices
 end
 
-
-to generate-proposals
-  ask teams [
-    set proposal-strength random-normal resources proposal-sigma
-  ]
-
-end
-
 to award-grants
   ; base funding
   ask teams [
-    set resources resources + .01
+    set resources resources + fixed-gain
   ]
   set rank-list sort-on [(- proposal-strength)] teams ; need to invert proposal-strength, so that higher values are on top of the list
   set top-teams sublist rank-list 0 ( n-teams * .2 )
@@ -77,28 +69,18 @@ end
 
 to update-utility
   ask teams [
-    if shared-data? and resources > resources-last-round [
-      ; if resources are higher, increase effort
-      increase-effort
+    ifelse shared-data?
+    [
+      ifelse resources > resources-last-round
+      [ increase-effort ]
+      [ decrease-effort ]
     ]
-
-    if shared-data? and resources < resources-last-round [
-      ; if resources are lower, decrease
-      decrease-effort
+    [
+      ifelse resources > resources-last-round
+      [ decrease-effort ]
+      [ increase-effort ]
     ]
-
-    if not shared-data? and resources > resources-last-round [
-      ; if resources are higher from not sharing, decrease effort
-      decrease-effort
-    ]
-
-    if not shared-data? and resources < resources-last-round [
-      ; if resources are lower from not sharing, increase effort
-      increase-effort
-    ]
-    ; if resources are equal, do nothing
   ]
-
 end
 
 to increase-effort
@@ -109,6 +91,13 @@ end
 to decrease-effort
   set effort effort - effort-change
   if effort < .001 [set effort .001]
+end
+
+
+to generate-proposals
+  ask teams [
+    set proposal-strength random-normal resources proposal-sigma
+  ]
 end
 
 to share-data
@@ -561,6 +550,21 @@ redistribute-costs?
 1
 -1000
 
+SLIDER
+300
+413
+472
+446
+fixed-gain
+fixed-gain
+0
+0.5
+0.01
+0.01
+1
+NIL
+HORIZONTAL
+
 @#$#@#$#@
 ## WHAT IS IT?
 
@@ -903,7 +907,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.2
+NetLogo 6.2.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
