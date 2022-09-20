@@ -1,3 +1,5 @@
+extensions [ nw ]
+
 globals [
   rank-list
   top-teams
@@ -6,11 +8,16 @@ globals [
 
 breed [teams team]
 
+undirected-link-breed [ team-links team-link ]
+
 teams-own [
   resources
   resources-last-round
   proposal-strength
   effort
+  inv_effort ; the inv_logit of the effort (mapping it back onto [0, 1]
+  individual-utility
+  descriptive-norm
   shared-data?
   sharing-dividend-pool
 ]
@@ -20,32 +27,64 @@ to setup
   clear-all
 
   ask patches [set pcolor white]
-  create-teams n-teams  [
-    setxy random-xcor random-ycor
+
+  ifelse network != "none" [
+    if network = "random" [
+      nw:generate-random teams team-links n-teams 0.05 [
+        setxy random-xcor random-ycor
+      ]
+    ]
+    if network = "small-world" [
+      nw:generate-small-world teams team-links 10 10 2 false [
+        ; TODO: here we would want the teams to move in some way that the small world network (clustering) becomes visible
+        setxy random-xcor random-ycor
+      ]
+    ]
+  ] [
+    create-teams n-teams [
+      setxy random-xcor random-ycor
+    ]
+  ]
+
+
+  ask teams [
     set shape "circle"
     set color 65
     set resources initial-resources
-    set effort initial-effort ; effort should be between 0 and 1, and is mapped onto the logit scale
+    set resources-last-round initial-resources
+    set individual-utility initial-utility
+    set descriptive-norm initial-norm
     set shared-data? false
   ]
+
+
 
   reset-ticks
 end
 
 to go
   tick
+  update-indices
   if data-sharing? [
-    update-utility
+    share-data
   ]
 
   generate-proposals
   award-grants
 
   if data-sharing? [
-    share-data
+    update-utility
+    update-norms
   ]
 
-  update-indices
+
+end
+
+to generate-proposals
+  ask teams [
+    let mu ( 1 - sharing-incentive ) * resources + inv_effort * sharing-incentive
+    set proposal-strength random-normal mu proposal-sigma
+  ]
 end
 
 to award-grants
@@ -53,16 +92,21 @@ to award-grants
   ask teams [
     set resources resources + fixed-gain
   ]
-  set rank-list sort-on [(- proposal-strength)] teams ; need to invert proposal-strength, so that higher values are on top of the list
-  set top-teams sublist rank-list 0 ( n-teams * .2 )
-  set bottom-teams sublist rank-list ( n-teams * .2 ) n-teams
-  foreach top-teams [x -> ask x [ set resources resources * .8 + .15 ] ] ; making proposals is costly proportional to current resources, but additional resources can be obtained
-  foreach bottom-teams [x -> ask x [ set resources resources * .8 ] ]
 
-  ; set current resources for next round
-  ask teams [
-    set resources-last-round resources
+  ; if we mandate sharing, we need to remove non-eligible teams
+  let eligible-teams teams
+  if mandate-sharing? [
+    set eligible-teams teams with [shared-data?]
   ]
+
+  let n-grants n-teams * .2
+
+  set rank-list sort-on [(- proposal-strength)] eligible-teams ; need to invert proposal-strength, so that higher values are on top of the list
+  set top-teams ifelse-value (length rank-list < n-grants) [rank-list] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
+
+  ; decrease resources for all, and add further one's for some
+  ask teams [ set resources resources * .8 ]
+  foreach top-teams [x -> ask x [ set resources resources + .15 ] ]
 end
 
 
@@ -83,34 +127,39 @@ to update-utility
   ]
 end
 
-to increase-effort
-  set effort effort + effort-change
-  if effort > .999 [set effort .999]
+to increase-utility
+  set individual-utility individual-utility + utility-change
+  if individual-utility > 5 [set individual-utility 5]
 end
 
-to decrease-effort
-  set effort effort - effort-change
-  if effort < .001 [set effort .001]
+to decrease-utility
+  set individual-utility individual-utility - utility-change
+  if individual-utility < -5 [set individual-utility -5]
 end
 
 
-to generate-proposals
+to update-norms
   ask teams [
-    set proposal-strength random-normal resources proposal-sigma
+    let neighbours nw:turtles-in-radius 1
+    let n-neighbours count neighbours
+    let n-neighbours-sharing count neighbours with [shared-data?]
+    set descriptive-norm n-neighbours-sharing / n-neighbours - .5
   ]
 end
 
+
 to share-data
   ask teams [
-    let logit-effort ln effort - ln (1 - effort)
-    set shared-data? random-float 1 > 1 - (1 / (1 + exp ( - logit-effort )))
+    set effort b_utility * individual-utility + b_norm * descriptive-norm
+    set inv_effort 1 / (1 + exp ( - effort ))
+    set shared-data? random-float 1 > 1 - inv_effort
   ]
 
   if sharing-costs? [
     ask teams with [shared-data?] [
       ; resources are redistributed as a consequence of data sharing
       ; the size depends on effort, but with a dampener, so only ever half of resources can get redistributed
-      let r-to-redistribute resources * .5 * effort
+      let r-to-redistribute resources * .5 * inv_effort ; map the effort back onto [0, 1] so it can serve as a multiplier
 
       ifelse not redistribute-costs? [
         ; control case for when resources are not redistributed, but simply subtracted from the team
@@ -162,9 +211,10 @@ to share-data
 end
 
 to update-indices
-  ; update color to represent effort
+  ; update color to represent effort, and set resources for next round
   ask teams [
-    set color 60 + 10 * (1 - effort) ; dark colour represent high effort
+    set color 60 + 10 * (1 - inv_effort) ; dark colour represent high effort
+    set resources-last-round resources
   ]
 end
 
@@ -191,13 +241,13 @@ to-report gini [ samples ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-272
+270
 10
-563
-302
+514
+255
 -1
 -1
-8.6
+7.152
 1
 10
 1
@@ -293,7 +343,7 @@ resource distribution
 NIL
 NIL
 0.0
-1.0
+3.0
 0.0
 10.0
 true
@@ -336,10 +386,10 @@ min [resources] of teams
 11
 
 SWITCH
-52
-216
-184
-249
+49
+268
+181
+301
 data-sharing?
 data-sharing?
 0
@@ -355,7 +405,7 @@ n-teams
 n-teams
 1
 500
-154.0
+100.0
 1
 1
 NIL
@@ -366,7 +416,7 @@ PLOT
 197
 1185
 347
-Effort
+Effort (inverse logit)
 NIL
 NIL
 0.0
@@ -377,7 +427,7 @@ true
 false
 "" ""
 PENS
-"default" 0.05 1 -16777216 true "" "histogram [effort] of teams"
+"default" 0.05 1 -16777216 true "" "histogram [inv_effort] of teams"
 
 PLOT
 1064
@@ -416,12 +466,12 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot gini [resources] of teams"
 
 SLIDER
-48
-257
-220
-290
-effort-change
-effort-change
+45
+309
+217
+342
+utility-change
+utility-change
 0
 .2
 0.03
@@ -431,10 +481,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-39
-314
-194
-347
+36
+366
+191
+399
 sharing-costs?
 sharing-costs?
 0
@@ -451,7 +501,7 @@ NIL
 NIL
 0.0
 10.0
-0.0
+-1.0
 1.0
 true
 false
@@ -464,12 +514,12 @@ SLIDER
 169
 206
 202
-initial-effort
-initial-effort
-0
-1
-0.8
-.01
+initial-utility
+initial-utility
+-4
+4
+-3.3
+.1
 1
 NIL
 HORIZONTAL
@@ -483,7 +533,7 @@ initial-resources
 initial-resources
 0.01
 1
-0.44
+0.11
 .01
 1
 NIL
@@ -525,12 +575,74 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of teams"
 
 SLIDER
-35
-392
-207
-425
+32
+444
+204
+477
 originator-benefit
 originator-benefit
+0
+1
+0.0
+.01
+1
+NIL
+HORIZONTAL
+
+SWITCH
+36
+402
+193
+435
+redistribute-costs?
+redistribute-costs?
+1
+1
+-1000
+
+SWITCH
+234
+370
+389
+403
+mandate-sharing?
+mandate-sharing?
+0
+1
+-1000
+
+SLIDER
+389
+369
+561
+402
+sharing-incentive
+sharing-incentive
+0
+1
+0.38
+.01
+1
+NIL
+HORIZONTAL
+
+CHOOSER
+210
+515
+348
+560
+network
+network
+"none" "random" "small-world"
+1
+
+SLIDER
+34
+503
+206
+536
+b_utility
+b_utility
 0
 1
 1.0
@@ -539,16 +651,100 @@ originator-benefit
 NIL
 HORIZONTAL
 
-SWITCH
-39
-350
-196
-383
-redistribute-costs?
-redistribute-costs?
+SLIDER
+33
+539
+205
+572
+b_norm
+b_norm
 0
 1
--1000
+0.0
+0.01
+1
+NIL
+HORIZONTAL
+
+PLOT
+577
+354
+833
+534
+Mean utility
+NIL
+NIL
+0.0
+10.0
+-4.0
+4.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [individual-utility] of teams"
+
+SLIDER
+33
+206
+205
+239
+initial-norm
+initial-norm
+-.5
+.5
+0.0
+.1
+1
+NIL
+HORIZONTAL
+
+PLOT
+831
+356
+1101
+536
+descriptive norms
+NIL
+NIL
+-0.5
+0.5
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 0.05 1 -16777216 true "" "histogram [descriptive-norm] of teams"
+
+MONITOR
+270
+260
+368
+305
+max effort
+max [effort] of teams
+2
+1
+11
+
+PLOT
+577
+536
+839
+688
+Individual-utility
+NIL
+NIL
+-5.0
+5.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 0.1 1 -16777216 true "" "histogram [individual-utility] of teams"
 
 SLIDER
 300
