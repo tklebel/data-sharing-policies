@@ -104,10 +104,12 @@ to award-grants
   set rank-list sort-on [(- proposal-strength)] eligible-teams ; need to invert proposal-strength, so that higher values are on top of the list
   set top-teams ifelse-value (length rank-list < n-grants) [rank-list] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
 
-  ; decrease resources for all (since writing grants costs resources), and add further one's for some (when receiving funding)
+  ; decrease resources for all (since writing grants costs resources), and
   let application-penalty-perc application-penalty / 100 ; convert back to percentage
   ask teams [ set resources resources * (1 - application-penalty-perc) ]
-  foreach top-teams [x -> ask x [ set resources resources + funding-gain ] ]
+  ; add further one's for some (when receiving funding)
+  let funding-per-team funder-resources / (funded-share / n-teams)
+  foreach top-teams [x -> ask x [ set resources resources + funding-per-team ] ]
 end
 
 
@@ -519,7 +521,7 @@ initial-utility
 initial-utility
 -4
 4
-0.1
+0.0
 .1
 1
 NIL
@@ -534,7 +536,7 @@ initial-resources
 initial-resources
 0.01
 1
-0.11
+0.1
 .01
 1
 NIL
@@ -608,7 +610,7 @@ SWITCH
 469
 mandate-sharing?
 mandate-sharing?
-0
+1
 1
 -1000
 
@@ -621,7 +623,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.1
+1.0
 .01
 1
 NIL
@@ -661,7 +663,7 @@ b_norm
 b_norm
 0
 1
-1.0
+0.0
 0.01
 1
 NIL
@@ -778,21 +780,6 @@ application-penalty
 HORIZONTAL
 
 SLIDER
-270
-480
-442
-513
-funding-gain
-funding-gain
-0
-.5
-0.15
-.01
-1
-NIL
-HORIZONTAL
-
-SLIDER
 271
 445
 443
@@ -801,10 +788,25 @@ funded-share
 funded-share
 0
 100
-20.0
+32.0
 1
 1
 %
+HORIZONTAL
+
+SLIDER
+269
+524
+441
+557
+funder-resources
+funder-resources
+0
+10
+3.0
+.1
+1
+NIL
 HORIZONTAL
 
 @#$#@#$#@
