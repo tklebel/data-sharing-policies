@@ -99,7 +99,7 @@ to award-grants
     set eligible-teams teams with [shared-data?]
   ]
 
-  let n-grants n-teams * .2
+  let n-grants n-teams * funded-share / 100
 
   set rank-list sort-on [(- proposal-strength)] eligible-teams ; need to invert proposal-strength, so that higher values are on top of the list
   set top-teams ifelse-value (length rank-list < n-grants) [rank-list] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
@@ -519,7 +519,7 @@ initial-utility
 initial-utility
 -4
 4
--3.3
+0.1
 .1
 1
 NIL
@@ -584,7 +584,7 @@ originator-benefit
 originator-benefit
 0
 1
-0.0
+0.1
 .01
 1
 NIL
@@ -621,7 +621,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.38
+0.1
 .01
 1
 NIL
@@ -661,7 +661,7 @@ b_norm
 b_norm
 0
 1
-0.0
+1.0
 0.01
 1
 NIL
@@ -771,17 +771,17 @@ application-penalty
 application-penalty
 0
 50
-13.0
+20.0
 1
 1
 %
 HORIZONTAL
 
 SLIDER
-272
-445
-444
-478
+270
+480
+442
+513
 funding-gain
 funding-gain
 0
@@ -790,6 +790,21 @@ funding-gain
 .01
 1
 NIL
+HORIZONTAL
+
+SLIDER
+271
+445
+443
+478
+funded-share
+funded-share
+0
+100
+20.0
+1
+1
+%
 HORIZONTAL
 
 @#$#@#$#@
