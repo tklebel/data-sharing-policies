@@ -90,7 +90,7 @@ end
 to award-grants
   ; base funding
   ask teams [
-    set resources resources + fixed-gain
+    set resources resources + base-gain
   ]
 
   ; if we mandate sharing, we need to remove non-eligible teams
@@ -104,9 +104,9 @@ to award-grants
   set rank-list sort-on [(- proposal-strength)] eligible-teams ; need to invert proposal-strength, so that higher values are on top of the list
   set top-teams ifelse-value (length rank-list < n-grants) [rank-list] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
 
-  ; decrease resources for all, and add further one's for some
-  ask teams [ set resources resources * .8 ]
-  foreach top-teams [x -> ask x [ set resources resources + .15 ] ]
+  ; decrease resources for all (since writing grants costs resources), and add further one's for some (when receiving funding)
+  ask teams [ set resources resources * (1 - grant-penalty) ]
+  foreach top-teams [x -> ask x [ set resources resources + funding-gain ] ]
 end
 
 
@@ -386,10 +386,10 @@ min [resources] of teams
 11
 
 SWITCH
-49
-268
-181
-301
+33
+248
+165
+281
 data-sharing?
 data-sharing?
 0
@@ -466,10 +466,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot gini [resources] of teams"
 
 SLIDER
-45
-309
-217
-342
+31
+285
+203
+318
 utility-change
 utility-change
 0
@@ -481,10 +481,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-36
-366
-191
-399
+30
+324
+185
+357
 sharing-costs?
 sharing-costs?
 0
@@ -575,10 +575,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of teams"
 
 SLIDER
-32
-444
-204
-477
+30
+396
+202
+429
 originator-benefit
 originator-benefit
 0
@@ -590,10 +590,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-36
-402
-193
-435
+30
+360
+187
+393
 redistribute-costs?
 redistribute-costs?
 1
@@ -601,10 +601,10 @@ redistribute-costs?
 -1000
 
 SWITCH
-234
-370
-389
-403
+30
+436
+185
+469
 mandate-sharing?
 mandate-sharing?
 0
@@ -612,10 +612,10 @@ mandate-sharing?
 -1000
 
 SLIDER
-389
-369
-561
-402
+27
+471
+199
+504
 sharing-incentive
 sharing-incentive
 0
@@ -627,20 +627,20 @@ NIL
 HORIZONTAL
 
 CHOOSER
-210
-515
-348
-560
+342
+585
+480
+630
 network
 network
 "none" "random" "small-world"
 1
 
 SLIDER
-34
-503
-206
-536
+166
+573
+338
+606
 b_utility
 b_utility
 0
@@ -652,10 +652,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-33
-539
-205
-572
+165
+609
+337
+642
 b_norm
 b_norm
 0
@@ -747,16 +747,46 @@ PENS
 "default" 0.1 1 -16777216 true "" "histogram [individual-utility] of teams"
 
 SLIDER
-300
-413
-472
-446
-fixed-gain
-fixed-gain
+270
+367
+442
+400
+base-gain
+base-gain
 0
 0.5
 0.01
 0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+270
+407
+442
+440
+grant-penalty
+grant-penalty
+0
+.5
+0.2
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+272
+445
+444
+478
+funding-gain
+funding-gain
+0
+.5
+0.15
+.01
 1
 NIL
 HORIZONTAL
