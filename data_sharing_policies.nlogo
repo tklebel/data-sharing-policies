@@ -105,7 +105,8 @@ to award-grants
   set top-teams ifelse-value (length rank-list < n-grants) [rank-list] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
 
   ; decrease resources for all (since writing grants costs resources), and add further one's for some (when receiving funding)
-  ask teams [ set resources resources * (1 - grant-penalty) ]
+  let application-penalty-perc application-penalty / 100 ; convert back to percentage
+  ask teams [ set resources resources * (1 - application-penalty-perc) ]
   foreach top-teams [x -> ask x [ set resources resources + funding-gain ] ]
 end
 
@@ -634,7 +635,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-1
+0
 
 SLIDER
 166
@@ -764,16 +765,16 @@ HORIZONTAL
 SLIDER
 270
 407
-442
+447
 440
-grant-penalty
-grant-penalty
+application-penalty
+application-penalty
 0
-.5
-0.2
-.01
+50
+13.0
 1
-NIL
+1
+%
 HORIZONTAL
 
 SLIDER
