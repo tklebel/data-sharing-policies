@@ -117,7 +117,7 @@ to award-grants
   let application-penalty-perc application-penalty / 100 ; convert back to percentage
   ask teams [ set resources resources * (1 - application-penalty-perc) ]
   ; add further one's for some (when receiving funding)
-  let funding-per-team funder-resources / (funded-share / n-teams)
+  let funding-per-team funder-resources / (funded-share / 100 *  n-teams)
   foreach top-teams [x -> ask x [ set resources resources + funding-per-team ] ]
 end
 
@@ -355,14 +355,14 @@ resource distribution
 NIL
 NIL
 0.0
-10.0
+1.0
 0.0
 10.0
 true
 false
 "" ""
 PENS
-"default" 0.1 1 -16777216 true "" "histogram [resources] of teams"
+"default" 0.05 1 -16777216 true "" "histogram [resources] of teams"
 
 MONITOR
 271
@@ -593,7 +593,7 @@ SWITCH
 411
 redistribute-costs?
 redistribute-costs?
-1
+0
 1
 -1000
 
@@ -829,7 +829,7 @@ CHOOSER
 effort-dist
 effort-dist
 "uniform" "left-skewed" "right-skewed"
-2
+0
 
 @#$#@#$#@
 ## WHAT IS IT?
