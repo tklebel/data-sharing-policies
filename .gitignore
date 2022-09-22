@@ -4,3 +4,6 @@
 .Ruserdata
 
 analysis/_targets/
+
+analysis/*files/*/*
+!analysis/*files/*/*png
