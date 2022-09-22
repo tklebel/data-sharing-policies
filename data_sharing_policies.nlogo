@@ -1177,6 +1177,67 @@ NetLogo 6.2.2
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="baseline" repetitions="100" sequentialRunOrder="false" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="base-gain">
+      <value value="0.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="1"/>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sharing-costs?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mandate-sharing?">
+      <value value="true"/>
+      <value value="false"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="originator-benefit" first="0" step="0.05" last="0.35"/>
+    <enumeratedValueSet variable="effort-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_utility">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="funder-resources">
+      <value value="3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="funded-share">
+      <value value="15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="redistribute-costs?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-utility">
+      <value value="0"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
