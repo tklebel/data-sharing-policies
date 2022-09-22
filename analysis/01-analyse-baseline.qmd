@@ -1,0 +1,74 @@
+---
+title: "Baseline analysis"
+format: html
+editor: visual
+execute: 
+  keep-md: true
+---
+
+```{r, echo=FALSE, message=FALSE}
+theme_set(theme_bw())
+```
+
+## Read data
+
+```{r}
+df <- tar_read(baseline)
+df <- rename(df, percentage_sharing = ..sharing)
+```
+
+## Analyse parameters
+
+Parameters which are varied are:
+
+-   sharing-incentive
+-   mandate-sharing?
+-   originator benefit
+
+The rest is not changed at all for now.
+
+Outcome variables are:
+
+-   gini of resources
+-   mean effort of resources
+-   total sum of resources
+-   \% of teams sharing
+
+```{r}
+outcomes <- c("gini..resources..of.teams", "mean..effort..of.teams",
+         "sum..resources..of.teams", "percentage_sharing")
+
+df_small <- df %>% 
+  select(.run.number., .step., sharing.incentive, mandate.sharing., 
+         originator.benefit, all_of(outcomes))
+```
+
+### Vary sharing incentive
+
+Here we hold originator benefit constant at .1, and contrast sharing mandates (sharing mandate is either )
+
+```{r}
+incentive_outcomes <- df_small %>% 
+  filter(originator.benefit == .1) %>% 
+  group_by(sharing.incentive, .step., mandate.sharing.) %>% 
+  summarise(across(all_of(outcomes), mean))
+```
+
+```{r incentives-mandates, fig.width=8, fig.height=8}
+incentive_outcomes %>% 
+  pivot_longer(-c(sharing.incentive, .step., mandate.sharing.),
+               names_to = "outcome") %>% 
+  mutate(mandate.sharing. = ifelse(mandate.sharing., 
+                                   "Sharing mandate", "No mandate")) %>% 
+  ggplot(aes(.step., value, colour = as.factor(sharing.incentive))) +
+  geom_line() +
+  facet_grid(rows = vars(outcome),
+             cols = vars(mandate.sharing.), scales = "free_y") +
+  labs(colour = "Sharing incentive") +
+  theme(legend.position = "top") +
+  guides(colour = guide_legend(nrow = 1))
+```
+
+This is highly peculiar: If sharing is not mandated, incentives work as anticipated: higher incentives lead to higher sharing (but overall still low sharing, up to about 30% of groups sharing). If sharing is mandated, no incentives lead to the highest sharing percentage.
+
+Another issue that seems to be a coding error is observed when looking at the sum of resources: these are very low for "No mandate", although data is being shared. This is very unexpected (redistribution of resources should not depend on the mandate, only on sharing behaviour).
