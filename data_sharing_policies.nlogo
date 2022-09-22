@@ -50,8 +50,17 @@ to setup
   ask teams [
     set shape "circle"
     set color 65
-    set resources initial-resources
-    set resources-last-round initial-resources
+    ; create resource distribution
+    if effort-dist = "uniform" [set resources random-float 1]
+    if effort-dist = "left-skewed" [
+      let x random-gamma 2 1
+      set resources (x / (x + random-gamma 7 1))
+    ]
+    if effort-dist = "right-skewed" [
+      let x random-gamma 7 1
+      set resources (x / (x + random-gamma 2 1))
+    ]
+    set resources-last-round resources
     set individual-utility initial-utility
     set descriptive-norm initial-norm
     set shared-data? false
@@ -346,14 +355,14 @@ resource distribution
 NIL
 NIL
 0.0
-100.0
+10.0
 0.0
 10.0
 true
 false
 "" ""
 PENS
-"default" 1.0 1 -16777216 true "" "histogram [resources] of teams"
+"default" 0.1 1 -16777216 true "" "histogram [resources] of teams"
 
 MONITOR
 271
@@ -389,10 +398,10 @@ min [resources] of teams
 11
 
 SWITCH
-33
-248
-165
-281
+35
+266
+167
+299
 data-sharing?
 data-sharing?
 0
@@ -469,10 +478,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot gini [resources] of teams"
 
 SLIDER
-31
-285
-203
-318
+33
+303
+205
+336
 utility-change
 utility-change
 0
@@ -484,10 +493,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-30
-324
-185
-357
+32
+342
+187
+375
 sharing-costs?
 sharing-costs?
 0
@@ -513,31 +522,16 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [effort] of teams"
 
 SLIDER
-34
-169
-206
-202
+36
+187
+208
+220
 initial-utility
 initial-utility
 -4
 4
 0.0
 .1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-34
-136
-206
-169
-initial-resources
-initial-resources
-0.01
-1
-0.13
-.01
 1
 NIL
 HORIZONTAL
@@ -578,10 +572,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of teams"
 
 SLIDER
-30
-396
-202
-429
+32
+414
+204
+447
 originator-benefit
 originator-benefit
 0
@@ -593,21 +587,21 @@ NIL
 HORIZONTAL
 
 SWITCH
-30
-360
-187
-393
+32
+378
+189
+411
 redistribute-costs?
 redistribute-costs?
-0
+1
 1
 -1000
 
 SWITCH
-30
-436
-185
-469
+32
+454
+187
+487
 mandate-sharing?
 mandate-sharing?
 0
@@ -615,10 +609,10 @@ mandate-sharing?
 -1000
 
 SLIDER
-27
-471
-199
-504
+29
+489
+201
+522
 sharing-incentive
 sharing-incentive
 0
@@ -688,10 +682,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [individual-utility] of teams"
 
 SLIDER
-33
-206
-205
-239
+35
+224
+207
+257
 initial-norm
 initial-norm
 -.5
@@ -826,6 +820,16 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot standard-deviation [individual-utility] of teams"
+
+CHOOSER
+37
+137
+175
+182
+effort-dist
+effort-dist
+"uniform" "left-skewed" "right-skewed"
+2
 
 @#$#@#$#@
 ## WHAT IS IT?
