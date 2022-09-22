@@ -346,14 +346,14 @@ resource distribution
 NIL
 NIL
 0.0
-3.0
+100.0
 0.0
 10.0
 true
 false
 "" ""
 PENS
-"default" 0.05 1 -16777216 true "" "histogram [resources] of teams"
+"default" 1.0 1 -16777216 true "" "histogram [resources] of teams"
 
 MONITOR
 271
@@ -536,7 +536,7 @@ initial-resources
 initial-resources
 0.01
 1
-0.1
+0.13
 .01
 1
 NIL
@@ -585,8 +585,8 @@ SLIDER
 originator-benefit
 originator-benefit
 0
-1
-0.1
+.4
+0.36
 .01
 1
 NIL
@@ -599,7 +599,7 @@ SWITCH
 393
 redistribute-costs?
 redistribute-costs?
-1
+0
 1
 -1000
 
@@ -610,7 +610,7 @@ SWITCH
 469
 mandate-sharing?
 mandate-sharing?
-1
+0
 1
 -1000
 
@@ -623,7 +623,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-1.0
+0.2
 .01
 1
 NIL
@@ -663,7 +663,7 @@ b_norm
 b_norm
 0
 1
-0.0
+0.51
 0.01
 1
 NIL
@@ -786,19 +786,19 @@ SLIDER
 478
 funded-share
 funded-share
-0
+1
 100
-32.0
+15.0
 1
 1
 %
 HORIZONTAL
 
 SLIDER
-269
-524
-441
-557
+271
+484
+443
+517
 funder-resources
 funder-resources
 0
@@ -808,6 +808,24 @@ funder-resources
 1
 NIL
 HORIZONTAL
+
+PLOT
+840
+535
+1098
+686
+SD of utility
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot standard-deviation [individual-utility] of teams"
 
 @#$#@#$#@
 ## WHAT IS IT?
