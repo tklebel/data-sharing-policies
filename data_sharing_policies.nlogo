@@ -102,7 +102,7 @@ to award-grants
     set resources resources + base-gain
   ]
 
-  ; if we mandate sharing, we need to remove non-eligible teams
+  ; declare teams eligible or not based on whether we mandate sharing
   let eligible-teams teams
   if mandate-sharing? [
     set eligible-teams teams with [shared-data?]
