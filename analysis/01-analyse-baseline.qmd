@@ -75,7 +75,8 @@ anticipated: higher incentives lead to higher sharing (but overall still low
 sharing, up to about 30% of groups sharing). If sharing is mandated, no
 incentives lead to the highest sharing percentage.
 
-Another issue that seems to be a coding error is observed when looking at the
-sum of resources: these are very low for "No mandate", although data is being
-shared. This is very unexpected (redistribution of resources should not depend
-on the mandate, only on sharing behaviour).
+Another issue that initially looked like a coding error is observed when looking
+at the sum of resources: these are very low for "No mandate", although data is
+being shared. This is very unexpected (redistribution of resources should not
+depend on the mandate, only on sharing behaviour). However, after inspecting the
+code in detail, I could not find any such error.
