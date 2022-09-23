@@ -203,10 +203,12 @@ to share-data
         ; enter dividends into pool
         set sharing-dividend-pool sharing-dividend-pool + r-to-self
 
+        ; calculate share for other individual teams
+        set r-to-others r-to-others / (n-teams - 1)
 
         ask other teams [
-          ; give all other teams something back. this is the pool that is split up
-          set resources resources + r-to-others / (n-teams - 1)
+          ; give all other teams something back.
+          set resources resources + r-to-others
         ]
       ]
     ]
