@@ -580,7 +580,7 @@ originator-benefit
 originator-benefit
 0
 .4
-0.36
+0.35
 .01
 1
 NIL
@@ -604,7 +604,7 @@ SWITCH
 487
 mandate-sharing?
 mandate-sharing?
-0
+1
 1
 -1000
 
@@ -617,7 +617,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.2
+1.0
 .01
 1
 NIL
@@ -657,7 +657,7 @@ b_norm
 b_norm
 0
 1
-0.51
+0.0
 0.01
 1
 NIL
@@ -1178,10 +1178,14 @@ NetLogo 6.2.2
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="baseline" repetitions="100" sequentialRunOrder="false" runMetricsEveryStep="true">
+  <experiment name="baseline" repetitions="30" sequentialRunOrder="false" runMetricsEveryStep="true">
     <setup>setup</setup>
     <go>go</go>
-    <metric>count turtles</metric>
+    <timeLimit steps="1500"/>
+    <metric>gini [resources] of teams</metric>
+    <metric>mean [effort] of teams</metric>
+    <metric>sum [resources] of teams</metric>
+    <metric>%-sharing</metric>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
@@ -1191,7 +1195,7 @@ NetLogo 6.2.2
     <enumeratedValueSet variable="b_norm">
       <value value="0"/>
     </enumeratedValueSet>
-    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="1"/>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.2" last="1"/>
     <enumeratedValueSet variable="application-penalty">
       <value value="20"/>
     </enumeratedValueSet>
