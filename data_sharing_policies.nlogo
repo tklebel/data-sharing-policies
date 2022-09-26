@@ -12,6 +12,7 @@ undirected-link-breed [ team-links team-link ]
 
 teams-own [
   resources
+  initial-resources-quantile
   resources-last-round
   proposal-strength
   effort
@@ -66,7 +67,17 @@ to setup
     set shared-data? false
   ]
 
+  ; assign teams to quantiles
+  let q25 calc-pct 25 [resources] of teams
+  let q50 calc-pct 50 [resources] of teams
+  let q75 calc-pct 75 [resources] of teams
 
+  ask teams [
+    if resources < q25 [set initial-resources-quantile "q1"] ;q[0-25)
+    if resources >= q25 and resources < q50 [set initial-resources-quantile "q2"] ;q[25-50)
+    if resources >= q50 and resources < q75 [set initial-resources-quantile "q3"] ;q[50-75)
+    if resources >= q75 [set initial-resources-quantile "q4"] ;q[75-100]
+  ]
 
   reset-ticks
 end
@@ -233,12 +244,13 @@ to update-indices
 end
 
 
+; reporters --------------------
 to-report max-resources
   report max [ resources ] of teams
 end
 
 to-report %-sharing
-  report 100 * count teams with [shared-data?] / n-teams
+  report data-sharing-within teams
 end
 
 
@@ -252,6 +264,28 @@ to-report gini [ samples ]
   let ratio sum biased-samples / sum samples
   let G (1 / n ) * (n + 1 - 2 * ratio)
   report G
+end
+
+; calculate quantiles
+; https://stackoverflow.com/a/54420235/3149349
+to-report calc-pct [ #pct #vals ]
+  let #listvals sort #vals
+  let #pct-position #pct / 100 * length #vals
+  ; find the ranks and values on either side of the desired percentile
+  let #low-rank floor #pct-position
+  let #low-val item #low-rank #listvals
+  let #high-rank ceiling #pct-position
+  let #high-val item #high-rank #listvals
+  ; interpolate
+  ifelse #high-rank = #low-rank
+  [ report #low-val ]
+  [ report #low-val + ((#pct-position - #low-rank) / (#high-rank - #low-rank)) * (#high-val - #low-val) ]
+end
+
+to-report data-sharing-within [agentset]
+  let n count agentset
+  let sharers count agentset with [shared-data?]
+  report 100 * sharers / n
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
