@@ -114,9 +114,12 @@ to generate-proposals
 end
 
 to award-grants
+  let baseline-pool 1
+  let funder-resources third-party-funding-ratio * baseline-pool
+
   ; base funding
   ask teams [
-    set resources resources + base-gain
+    set resources resources + baseline-pool / n-teams
   ]
 
   ; declare teams eligible or not based on whether we mandate sharing
@@ -787,21 +790,6 @@ PENS
 
 SLIDER
 270
-367
-442
-400
-base-gain
-base-gain
-0
-0.5
-0.01
-0.01
-1
-NIL
-HORIZONTAL
-
-SLIDER
-270
 407
 447
 440
@@ -828,21 +816,6 @@ funded-share
 1
 1
 %
-HORIZONTAL
-
-SLIDER
-271
-484
-443
-517
-funder-resources
-funder-resources
-0
-10
-3.0
-.1
-1
-NIL
 HORIZONTAL
 
 PLOT
@@ -872,6 +845,21 @@ effort-dist
 effort-dist
 "uniform" "left-skewed" "right-skewed"
 0
+
+SLIDER
+271
+369
+447
+402
+third-party-funding-ratio
+third-party-funding-ratio
+0
+5
+1.0
+.1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
