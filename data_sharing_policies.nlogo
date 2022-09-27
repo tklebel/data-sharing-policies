@@ -669,20 +669,20 @@ NIL
 HORIZONTAL
 
 CHOOSER
-342
-585
-480
-630
+412
+511
+550
+556
 network
 network
 "none" "random" "small-world"
 0
 
 SLIDER
-166
-573
-338
-606
+236
+499
+408
+532
 b_utility
 b_utility
 0
@@ -694,10 +694,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-165
-609
-337
-642
+235
+535
+407
+568
 b_norm
 b_norm
 0
