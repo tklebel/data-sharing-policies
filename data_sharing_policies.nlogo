@@ -170,6 +170,8 @@ to update-norms
     let n-neighbours count neighbours
     let n-neighbours-sharing count neighbours with [shared-data?]
     set descriptive-norm n-neighbours-sharing / n-neighbours - .5
+    ; rescale norm. this is to ensure it is on the same scale as the utility
+    set descriptive-norm descriptive-norm * 10
   ]
 end
 
@@ -637,15 +639,15 @@ redistribute-costs?
 -1000
 
 SLIDER
-29
-489
-201
-522
+33
+453
+205
+486
 sharing-incentive
 sharing-incentive
 0
 1
-1.0
+0.76
 .01
 1
 NIL
@@ -659,7 +661,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-0
+2
 
 SLIDER
 236
@@ -685,7 +687,7 @@ b_norm
 b_norm
 0
 1
-0.0
+0.32
 0.01
 1
 NIL
@@ -732,8 +734,8 @@ PLOT
 descriptive norms
 NIL
 NIL
--0.5
-0.5
+-5.0
+5.0
 0.0
 10.0
 true
@@ -795,7 +797,7 @@ funded-share
 funded-share
 1
 100
-15.0
+24.0
 1
 1
 %
