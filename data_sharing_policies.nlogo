@@ -122,15 +122,9 @@ to award-grants
     set resources resources + baseline-pool / n-teams
   ]
 
-  ; declare teams eligible or not based on whether we mandate sharing
-  let eligible-teams teams
-  if mandate-sharing? [
-    set eligible-teams teams with [shared-data?]
-  ]
-
   let n-grants n-teams * funded-share / 100
 
-  set rank-list sort-on [(- proposal-strength)] eligible-teams ; need to invert proposal-strength, so that higher values are on top of the list
+  set rank-list sort-on [(- proposal-strength)] teams ; need to invert proposal-strength, so that higher values are on top of the list
   set top-teams ifelse-value (length rank-list < n-grants) [rank-list] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
 
   ; decrease resources for all (since writing grants costs resources), and
@@ -639,17 +633,6 @@ SWITCH
 redistribute-costs?
 redistribute-costs?
 0
-1
--1000
-
-SWITCH
-32
-454
-187
-487
-mandate-sharing?
-mandate-sharing?
-1
 1
 -1000
 
