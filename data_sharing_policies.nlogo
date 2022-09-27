@@ -52,12 +52,12 @@ to setup
     set shape "circle"
     set color 65
     ; create resource distribution
-    if effort-dist = "uniform" [set resources random-float 1]
-    if effort-dist = "left-skewed" [
+    if resources-dist = "uniform" [set resources random-float 1]
+    if resources-dist = "left-skewed" [
       let x random-gamma 2 1
       set resources (x / (x + random-gamma 7 1))
     ]
-    if effort-dist = "right-skewed" [
+    if resources-dist = "right-skewed" [
       let x random-gamma 7 1
       set resources (x / (x + random-gamma 2 1))
     ]
@@ -571,7 +571,7 @@ initial-utility
 initial-utility
 -4
 4
-0.0
+-4.0
 .1
 1
 NIL
@@ -621,7 +621,7 @@ originator-benefit
 originator-benefit
 0
 .4
-0.35
+0.37
 .01
 1
 NIL
@@ -647,7 +647,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.76
+1.0
 .01
 1
 NIL
@@ -661,7 +661,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-2
+1
 
 SLIDER
 236
@@ -687,7 +687,7 @@ b_norm
 b_norm
 0
 1
-0.32
+0.6
 0.01
 1
 NIL
@@ -720,7 +720,7 @@ initial-norm
 initial-norm
 -.5
 .5
-0.0
+-0.5
 .1
 1
 NIL
@@ -826,8 +826,8 @@ CHOOSER
 137
 175
 182
-effort-dist
-effort-dist
+resources-dist
+resources-dist
 "uniform" "left-skewed" "right-skewed"
 0
 
@@ -840,7 +840,7 @@ third-party-funding-ratio
 third-party-funding-ratio
 0
 5
-1.0
+3.0
 .1
 1
 NIL
