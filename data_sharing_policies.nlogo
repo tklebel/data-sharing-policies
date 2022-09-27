@@ -101,8 +101,14 @@ to go
 end
 
 to generate-proposals
+  ; normalise resources. this is necessary so that effort and resources are on the same scale
+  ; find max resources
+  let m-resources max-resources
+  let min-resources min [resources] of teams
   ask teams [
-    let mu ( 1 - sharing-incentive ) * resources + inv_effort * sharing-incentive
+    ; https://stats.stackexchange.com/a/70807/42950
+    let norm-resources (resources - min-resources) / (m-resources - min-resources)
+    let mu ( 1 - sharing-incentive ) * norm-resources + inv_effort * sharing-incentive
     set proposal-strength random-normal mu proposal-sigma
   ]
 end
