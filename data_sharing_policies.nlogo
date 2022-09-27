@@ -185,15 +185,17 @@ to share-data
 
   if sharing-costs? [
     ask teams with [shared-data?] [
-      ; resources are redistributed as a consequence of data sharing
-      ; the size depends on effort, but with a dampener, so only ever half of resources can get redistributed
-      let r-to-redistribute resources * .5 * inv_effort ; map the effort back onto [0, 1] so it can serve as a multiplier
 
       ifelse not redistribute-costs? [
         ; control case for when resources are not redistributed, but simply subtracted from the team
-        set resources resources - r-to-redistribute
+        set resources resources * .95 ; simply subtract 5% of resources for a simple implementation of costs
         if resources < 0 [ set resources 0 ]
       ] [
+        ; resources are redistributed as a consequence of data sharing
+        ; the size depends on effort, but with a dampener, so only ever half of resources can get redistributed
+        let r-to-redistribute resources * .5 * inv_effort ; map the effort back onto [0, 1] so it can serve as a multiplier
+
+
         ; if we redistribute costs, we are here
         ; we still need to subtract the resources from each team
         set resources resources - r-to-redistribute
