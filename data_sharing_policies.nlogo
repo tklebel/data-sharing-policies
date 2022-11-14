@@ -14,6 +14,7 @@ teams-own [
   resources
   initial-resources-quantile
   resources-last-round
+  total-funding ; record how much funding each group has accrued over time
   proposal-strength
   effort
   inv_effort ; the inv_logit of the effort (mapping it back onto [0, 1]
@@ -132,7 +133,10 @@ to award-grants
   ask teams [ set resources resources * (1 - application-penalty-perc) ]
   ; add further one's for some (when receiving funding)
   let funding-per-team funder-resources / (funded-share / 100 *  n-teams)
-  foreach top-teams [x -> ask x [ set resources resources + funding-per-team ] ]
+  foreach top-teams [x -> ask x [
+    set resources resources + funding-per-team
+    set total-funding total-funding + funding-per-team
+  ] ]
 end
 
 
@@ -623,7 +627,7 @@ originator-benefit
 originator-benefit
 0
 .4
-0.37
+0.1
 .01
 1
 NIL
@@ -636,7 +640,7 @@ SWITCH
 411
 redistribute-costs?
 redistribute-costs?
-0
+1
 1
 -1000
 
@@ -649,7 +653,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-1.0
+0.27
 .01
 1
 NIL
@@ -689,7 +693,7 @@ b_norm
 b_norm
 0
 1
-0.6
+1.0
 0.01
 1
 NIL
@@ -722,7 +726,7 @@ initial-norm
 initial-norm
 -.5
 .5
--0.5
+0.0
 .1
 1
 NIL
@@ -799,7 +803,7 @@ funded-share
 funded-share
 1
 100
-24.0
+15.0
 1
 1
 %
@@ -842,7 +846,7 @@ third-party-funding-ratio
 third-party-funding-ratio
 0
 5
-3.0
+2.0
 .1
 1
 NIL
