@@ -298,6 +298,10 @@ to-report data-sharing-within [agentset]
   let sharers count agentset with [shared-data?]
   report 100 * sharers / n
 end
+
+to-report mean-funding-within [agentset]
+  report mean [ total-funding ] of agentset
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 270
@@ -653,7 +657,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.27
+0.2
 .01
 1
 NIL
@@ -667,7 +671,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-1
+0
 
 SLIDER
 236
@@ -835,7 +839,7 @@ CHOOSER
 resources-dist
 resources-dist
 "uniform" "left-skewed" "right-skewed"
-0
+2
 
 SLIDER
 271
@@ -851,6 +855,27 @@ third-party-funding-ratio
 1
 NIL
 HORIZONTAL
+
+PLOT
+1102
+355
+1406
+533
+Total-funding
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+true
+"" ""
+PENS
+"q1" 1.0 0 -2674135 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q1\"]"
+"q2" 1.0 0 -14439633 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q2\"]"
+"q3" 1.0 0 -14070903 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q3\"]"
+"q4" 1.0 0 -7858858 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q4\"]"
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1199,26 +1224,33 @@ NetLogo 6.2.2
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="baseline" repetitions="30" sequentialRunOrder="false" runMetricsEveryStep="true">
+  <experiment name="baseline" repetitions="50" sequentialRunOrder="false" runMetricsEveryStep="true">
     <setup>setup</setup>
     <go>go</go>
-    <timeLimit steps="1500"/>
+    <timeLimit steps="3000"/>
     <metric>gini [resources] of teams</metric>
     <metric>mean [effort] of teams</metric>
-    <metric>sum [resources] of teams</metric>
     <metric>%-sharing</metric>
+    <metric>mean-funding-within teams with [initial-resources-quantile = "q1"]</metric>
+    <metric>mean-funding-within teams with [initial-resources-quantile = "q2"]</metric>
+    <metric>mean-funding-within teams with [initial-resources-quantile = "q3"]</metric>
+    <metric>mean-funding-within teams with [initial-resources-quantile = "q4"]</metric>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="base-gain">
-      <value value="0.01"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="b_norm">
-      <value value="0"/>
+      <value value="1"/>
     </enumeratedValueSet>
-    <steppedValueSet variable="sharing-incentive" first="0" step="0.2" last="1"/>
+    <enumeratedValueSet variable="sharing-incentive">
+      <value value="0.25"/>
+    </enumeratedValueSet>
     <enumeratedValueSet variable="application-penalty">
       <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+      <value value="&quot;right-skewed&quot;"/>
+      <value value="&quot;left-skewed&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="sharing-costs?">
       <value value="true"/>
@@ -1229,13 +1261,11 @@ NetLogo 6.2.2
     <enumeratedValueSet variable="n-teams">
       <value value="100"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="mandate-sharing?">
-      <value value="true"/>
-      <value value="false"/>
+    <enumeratedValueSet variable="originator-benefit">
+      <value value="0.1"/>
     </enumeratedValueSet>
-    <steppedValueSet variable="originator-benefit" first="0" step="0.05" last="0.35"/>
-    <enumeratedValueSet variable="effort-dist">
-      <value value="&quot;uniform&quot;"/>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="utility-change">
       <value value="0.03"/>
@@ -1245,21 +1275,25 @@ NetLogo 6.2.2
     </enumeratedValueSet>
     <enumeratedValueSet variable="network">
       <value value="&quot;none&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="funder-resources">
-      <value value="3"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;small-world&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="funded-share">
-      <value value="15"/>
+      <value value="10"/>
+      <value value="20"/>
+      <value value="30"/>
+      <value value="50"/>
+      <value value="75"/>
+      <value value="85"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="redistribute-costs?">
-      <value value="true"/>
+      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="data-sharing?">
       <value value="true"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="initial-utility">
-      <value value="0"/>
+      <value value="-4"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
