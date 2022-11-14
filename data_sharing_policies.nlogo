@@ -300,7 +300,7 @@ to-report data-sharing-within [agentset]
 end
 
 to-report mean-funding-within [agentset]
-  report mean [ total-funding ] of agentset
+  report precision mean [ total-funding ] of agentset 2
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -657,7 +657,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.2
+0.25
 .01
 1
 NIL
@@ -671,7 +671,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-0
+2
 
 SLIDER
 236
@@ -807,7 +807,7 @@ funded-share
 funded-share
 1
 100
-15.0
+85.0
 1
 1
 %
@@ -839,7 +839,7 @@ CHOOSER
 resources-dist
 resources-dist
 "uniform" "left-skewed" "right-skewed"
-2
+1
 
 SLIDER
 271
