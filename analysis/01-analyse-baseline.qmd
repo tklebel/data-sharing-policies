@@ -75,7 +75,7 @@ particularly interesting when doing this baseline aspect.
 Below we visualise variability in the runs.
 ```{r}
 #| label: variability
-
+#| fig-cap: Variability in % of groups sharing data with no network
 
 no_network %>% 
   # filter(funded_share == 50) %>% 
@@ -97,9 +97,11 @@ group_success <- no_network %>%
   summarise(across(contains("mean_funds"), .fns = mean))
 ```
 
-```{r, fig.width=10, fig.height=10}
-#|label: resources-by-quantile
-#|fig-cap: Mean resources by initial resource quantile with no network
+```{r}
+#| label: resources-by-quantile
+#| fig-cap: Mean resources by initial resource quantile with no network
+#| fig-width: 10
+#| fig-height: 10
 
 
 pdata <- group_success %>% 
@@ -121,8 +123,8 @@ Below we provide the same for a random network, and for a small network.
 
 
 ```{r, fig.width=10, fig.height=10}
-#|label: resources-by-quantile-random-network
-#|fig-cap: Mean resources by initial resource quantile with random network
+#| label: resources-by-quantile-random-network
+#| fig-cap: Mean resources by initial resource quantile with random network
 
 group_success <- df %>% 
   filter(network == "random") %>% 
@@ -141,8 +143,8 @@ pdata %>%
 ```
 
 ```{r, fig.width=10, fig.height=10}
-#|label: resources-by-quantile-small-world-network
-#|fig-cap: Mean resources by initial resource quantile with small-world network
+#| label: resources-by-quantile-small-world-network
+#| fig-cap: Mean resources by initial resource quantile with small-world network
 
 group_success <- df %>% 
   filter(network == "small-world") %>% 
