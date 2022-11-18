@@ -1,82 +1,84 @@
 ---
 title: "Baseline analysis"
-format: html
-editor: visual
-execute: 
+format: 
+  html:
+    code-fold: true
+execute:
   keep-md: true
 ---
 
 ```{r, echo=FALSE, message=FALSE}
+library(patchwork)
+library(tidyverse)
+library(targets)
 theme_set(theme_bw())
 ```
 
 ## Read data
 
 ```{r}
-df <- tar_read(baseline)
-df <- rename(df, percentage_sharing = ..sharing)
+df <- tar_read(baseline_selection)
 ```
 
-## Analyse parameters
 
-Parameters which are varied are:
+## No network & uniform data
+```{r, message=FALSE}
+no_network <- df %>% 
+  filter(network == "none", init_dist == "uniform")
 
--   sharing-incentive
--   mandate-sharing?
--   originator benefit
 
-The rest is not changed at all for now.
+pdata <- no_network %>% 
+  group_by(step, funded_share) %>% 
+  summarise(mean_gini = mean(resources_gini),
+            mean_sharing = mean(perc_sharing))
 
-Outcome variables are:
-
--   gini of resources
--   mean effort of resources
--   total sum of resources
--   \% of teams sharing
-
-```{r}
-outcomes <- c("gini..resources..of.teams", "mean..effort..of.teams",
-         "sum..resources..of.teams", "percentage_sharing")
-
-df_small <- df %>% 
-  select(.run.number., .step., sharing.incentive, mandate.sharing., 
-         originator.benefit, all_of(outcomes))
-```
-
-### Vary sharing incentive
-
-Here we hold originator benefit constant at .1, and contrast sharing mandates
-(sharing mandate is either )
-
-```{r}
-incentive_outcomes <- df_small %>% 
-  filter(originator.benefit == .1) %>% 
-  group_by(sharing.incentive, .step., mandate.sharing.) %>% 
-  summarise(across(all_of(outcomes), mean))
-```
-
-```{r incentives-mandates, fig.width=8, fig.height=8}
-incentive_outcomes %>% 
-  pivot_longer(-c(sharing.incentive, .step., mandate.sharing.),
-               names_to = "outcome") %>% 
-  mutate(mandate.sharing. = ifelse(mandate.sharing., 
-                                   "Sharing mandate", "No mandate")) %>% 
-  ggplot(aes(.step., value, colour = as.factor(sharing.incentive))) +
+p1 <- pdata %>%  
+  ggplot(aes(step, mean_gini, colour = as.factor(funded_share))) +
   geom_line() +
-  facet_grid(rows = vars(outcome),
-             cols = vars(mandate.sharing.), scales = "free_y") +
-  labs(colour = "Sharing incentive") +
-  theme(legend.position = "top") +
-  guides(colour = guide_legend(nrow = 1))
+    labs(colour = "% of groups receiving funding",
+       y = "Gini of resources")
+
+p2 <- pdata %>%  
+  ggplot(aes(step, mean_sharing, colour = as.factor(funded_share))) +
+  geom_line() +
+  labs(colour = "% of groups receiving funding",
+       y = "% of groups sharing data") 
 ```
 
-This is highly peculiar: If sharing is not mandated, incentives work as
-anticipated: higher incentives lead to higher sharing (but overall still low
-sharing, up to about 30% of groups sharing). If sharing is mandated, no
-incentives lead to the highest sharing percentage.
+```{r}
+#| label: fig-vary-share-of-funded-teams
+#| fig-cap: Gini index and % of groups sharing data dependnt on grant size
+#| fig-height: 6
+#| fig-width: 9
+p1 / p2 +
+  plot_layout(guides = "collect") & theme(legend.position = "top")
+```
 
-Another issue that initially looked like a coding error is observed when looking
-at the sum of resources: these are very low for "No mandate", although data is
-being shared. This is very unexpected (redistribution of resources should not
-depend on the mandate, only on sharing behaviour). However, after inspecting the
-code in detail, I could not find any such error.
+The above is very interesting: we are not changing incentives, however sharing 
+rate still varies widely. This is a consequence of how exposed agents are to
+the funding agency. If only few are funded, not many come into contact. However,
+if almost everyone is funded, the policy seems to work only very slowly, because
+there is no advantage in sharing or not (because anyways almost everyone is
+funded). It is also interesting that sharing initially rises, but then drops 
+again (for low values of funded share). 
+
+The gini is in some sense a direct effect of selectivity of funding and thus not
+particularly interesting when doing this baseline aspect.
+
+
+Below we visualise variability in the runs.
+```{r}
+#| label: variability
+
+
+no_network %>% 
+  # filter(funded_share == 50) %>% 
+  ggplot(aes(step, perc_sharing, group = run_number,
+             colour = as.factor(funded_share))) +
+  geom_line(alpha = .2) +
+  theme(legend.position = "top") +
+  labs(colour = "% of groups receiving funding",
+       y = "% of groups sharing data") +
+  guides(colour = guide_legend(override.aes = list(alpha = 1)))
+```
+
