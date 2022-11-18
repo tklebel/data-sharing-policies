@@ -11,23 +11,29 @@ execute:
 library(patchwork)
 library(tidyverse)
 library(targets)
+
 theme_set(theme_bw())
+
+options(dplyr.summarise.inform = FALSE)
 ```
 
-## Read data
+# Read data
 
 ```{r}
 df <- tar_read(baseline_selection)
 ```
 
 
-## No network & uniform data
-```{r, message=FALSE}
+# Effect of grant size
+```{r}
 no_network <- df %>% 
-  filter(network == "none", init_dist == "uniform")
+  filter(network == "none")
+  
+no_network_unif_dist <- no_network %>% 
+  filter(init_dist == "uniform")
 
 
-pdata <- no_network %>% 
+pdata <- no_network_unif_dist %>% 
   group_by(step, funded_share) %>% 
   summarise(mean_gini = mean(resources_gini),
             mean_sharing = mean(perc_sharing))
@@ -82,3 +88,80 @@ no_network %>%
   guides(colour = guide_legend(override.aes = list(alpha = 1)))
 ```
 
+## Comparing network effects
+
+## Effect on success of different groups
+```{r}
+group_success <- no_network %>% 
+  group_by(step, funded_share, init_dist) %>% 
+  summarise(across(contains("mean_funds"), .fns = mean))
+```
+
+```{r, fig.width=10, fig.height=10}
+#|label: resources-by-quantile
+#|fig-cap: Mean resources by initial resource quantile with no network
+
+
+pdata <- group_success %>% 
+  pivot_longer(contains("mean_funds"), names_to = "quantile",
+               names_pattern = ".*_(q\\d)")
+  
+
+pdata %>% 
+  ggplot(aes(step, value, colour = quantile)) +
+  geom_line() +
+  facet_grid(rows = vars(funded_share),
+             cols = vars(init_dist))
+```
+
+There is no difference in how successful groups are based on their initial
+quantile, when there are not networks.
+
+Below we provide the same for a random network, and for a small network.
+
+
+```{r, fig.width=10, fig.height=10}
+#|label: resources-by-quantile-random-network
+#|fig-cap: Mean resources by initial resource quantile with random network
+
+group_success <- df %>% 
+  filter(network == "random") %>% 
+  group_by(step, funded_share, init_dist) %>% 
+  summarise(across(contains("mean_funds"), .fns = mean))
+
+pdata <- group_success %>% 
+  pivot_longer(contains("mean_funds"), names_to = "quantile",
+               names_pattern = ".*_(q\\d)")
+
+pdata %>% 
+  ggplot(aes(step, value, colour = quantile)) +
+  geom_line() +
+  facet_grid(rows = vars(funded_share),
+             cols = vars(init_dist))
+```
+
+```{r, fig.width=10, fig.height=10}
+#|label: resources-by-quantile-small-world-network
+#|fig-cap: Mean resources by initial resource quantile with small-world network
+
+group_success <- df %>% 
+  filter(network == "small-world") %>% 
+  group_by(step, funded_share, init_dist) %>% 
+  summarise(across(contains("mean_funds"), .fns = mean))
+
+pdata <- group_success %>% 
+  pivot_longer(contains("mean_funds"), names_to = "quantile",
+               names_pattern = ".*_(q\\d)")
+
+pdata %>% 
+  ggplot(aes(step, value, colour = quantile)) +
+  geom_line() +
+  facet_grid(rows = vars(funded_share),
+             cols = vars(init_dist))
+```
+
+
+In both cases there are slight differences, but I assume these are just random
+variation. Maybe the methodology of grouping teams based on their initial 
+resources into four quartiles is not very useful - these are large groups that
+hide more fine-grained processes.
