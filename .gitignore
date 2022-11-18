@@ -7,3 +7,7 @@ analysis/_targets/
 
 analysis/*files/*/*
 !analysis/*files/*/*png
+
+analysis/zzz.R
+outputs/*
+sample models/*
