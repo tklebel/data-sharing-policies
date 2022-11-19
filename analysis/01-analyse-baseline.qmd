@@ -15,17 +15,17 @@ library(targets)
 theme_set(theme_bw())
 
 options(dplyr.summarise.inform = FALSE)
-```
 
-# Read data
-
-```{r}
 df <- tar_read(baseline_selection)
 ```
 
 
 # Effect of grant size
 ```{r}
+#| label: fig-vary-share-of-funded-teams
+#| fig-cap: Gini index and % of groups sharing data dependnt on grant size
+#| fig-height: 6
+#| fig-width: 9
 no_network <- df %>% 
   filter(network == "none")
   
@@ -49,13 +49,7 @@ p2 <- pdata %>%
   geom_line() +
   labs(colour = "% of groups receiving funding",
        y = "% of groups sharing data") 
-```
 
-```{r}
-#| label: fig-vary-share-of-funded-teams
-#| fig-cap: Gini index and % of groups sharing data dependnt on grant size
-#| fig-height: 6
-#| fig-width: 9
 p1 / p2 +
   plot_layout(guides = "collect") & theme(legend.position = "top")
 ```
@@ -68,11 +62,11 @@ there is no advantage in sharing or not (because anyways almost everyone is
 funded). It is also interesting that sharing initially rises, but then drops 
 again (for low values of funded share). 
 
-The gini is in some sense a direct effect of selectivity of funding and thus not
+The Gini is in some sense a direct effect of selectivity of funding and thus not
 particularly interesting when doing this baseline aspect.
 
 
-Below we visualise variability in the runs.
+@fig-variability visualises variability in the runs.
 ```{r}
 #| label: fig-variability
 #| fig-cap: Variability in % of groups sharing data with no network
@@ -166,9 +160,9 @@ pdata %>%
 ```
 
 There is no difference in how successful groups are based on their initial
-quantile, when there are not networks.
-
-Below we provide the same for a random network, and for a small network.
+quantile, when there are not networks. Below we provide the same for a 
+random network (@fig-resources-by-quantile-random-network), and for a 
+small-world network (@fig-resources-by-quantile-small-world-network).
 
 
 ```{r, fig.width=10, fig.height=10}
