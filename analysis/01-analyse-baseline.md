@@ -13,17 +13,6 @@ execute:
 :::
 
 
-# Read data
-
-
-::: {.cell}
-
-```{.r .cell-code}
-df <- tar_read(baseline_selection)
-```
-:::
-
-
 
 # Effect of grant size
 
@@ -53,12 +42,7 @@ p2 <- pdata %>%
   geom_line() +
   labs(colour = "% of groups receiving funding",
        y = "% of groups sharing data") 
-```
-:::
 
-::: {.cell}
-
-```{.r .cell-code}
 p1 / p2 +
   plot_layout(guides = "collect") & theme(legend.position = "top")
 ```
@@ -77,11 +61,11 @@ there is no advantage in sharing or not (because anyways almost everyone is
 funded). It is also interesting that sharing initially rises, but then drops 
 again (for low values of funded share). 
 
-The gini is in some sense a direct effect of selectivity of funding and thus not
+The Gini is in some sense a direct effect of selectivity of funding and thus not
 particularly interesting when doing this baseline aspect.
 
 
-Below we visualise variability in the runs.
+@fig-variability visualises variability in the runs.
 
 ::: {.cell}
 
@@ -139,12 +123,22 @@ p_sharing + p_gini +
 ```
 
 ::: {.cell-output-display}
-![Effect of networks on (A) rate of sharing and (B) Gini coefficient. The rows represent the varying rate of funded teams in %.](01-analyse-baseline_files/figure-html/fig-network-effect-1.png){#fig-network-effect width=960}
+![Effect of networks on (A) rate of sharing and (B) Gini coefficient. The rows represent the varying rate of funded teams in %. Uniform starting distribution.](01-analyse-baseline_files/figure-html/fig-network-effect-1.png){#fig-network-effect width=960}
 :::
 :::
 
 
+The red lines in @fig-variability correspond to @fig-vary-share-of-funded-teams.
+We can observe that the Gini is not substantially affected by different network
+structures, while the share of teams sharing data is strongly affected by the
+presence of network effects, but only weakly by the type of network.
 
+Overall, network effects lead to a lower share of teams that share data, 
+presumably because we start with no teams sharing data, and therefore the 
+descriptive norms act as a dampener. However, for larger grants (and a lower
+share of teams that is funded each round), the share of groups sharing data
+swings widely between two extreme points, before settling on a narrower 
+equilibrium state.
 
 ## Effect on success of different groups
 
@@ -179,9 +173,9 @@ pdata %>%
 
 
 There is no difference in how successful groups are based on their initial
-quantile, when there are not networks.
-
-Below we provide the same for a random network, and for a small network.
+quantile, when there are not networks. Below we provide the same for a 
+random network (@fig-resources-by-quantile-random-network), and for a 
+small-world network (@fig-resources-by-quantile-small-world-network).
 
 
 
