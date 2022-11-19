@@ -1296,6 +1296,72 @@ NetLogo 6.2.2
       <value value="-4"/>
     </enumeratedValueSet>
   </experiment>
+  <experiment name="vary_incentives" repetitions="50" sequentialRunOrder="false" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>gini [resources] of teams</metric>
+    <metric>mean [effort] of teams</metric>
+    <metric>%-sharing</metric>
+    <metric>mean-funding-within teams with [initial-resources-quantile = "q1"]</metric>
+    <metric>mean-funding-within teams with [initial-resources-quantile = "q2"]</metric>
+    <metric>mean-funding-within teams with [initial-resources-quantile = "q3"]</metric>
+    <metric>mean-funding-within teams with [initial-resources-quantile = "q4"]</metric>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_norm">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.2" last="1"/>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sharing-costs?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="originator-benefit">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_utility">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;small-world&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="funded-share">
+      <value value="10"/>
+      <value value="25"/>
+      <value value="50"/>
+      <value value="80"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="redistribute-costs?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-utility">
+      <value value="-4"/>
+    </enumeratedValueSet>
+  </experiment>
 </experiments>
 @#$#@#$#@
 @#$#@#$#@
