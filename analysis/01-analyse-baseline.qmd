@@ -74,7 +74,7 @@ particularly interesting when doing this baseline aspect.
 
 Below we visualise variability in the runs.
 ```{r}
-#| label: variability
+#| label: fig-variability
 #| fig-cap: Variability in % of groups sharing data with no network
 
 no_network %>% 
@@ -90,7 +90,7 @@ no_network %>%
 
 ## Comparing network effects
 ```{r, fig.width=10, fig.height=10}
-#| label: network-effect
+#| label: fig-network-effect
 #| fig-cap: Effect of networks on (A) rate of sharing and (B) Gini coefficient. The rows represent the varying rate of funded teams in %.
 
 
@@ -135,7 +135,7 @@ group_success <- no_network %>%
 ```
 
 ```{r}
-#| label: resources-by-quantile
+#| label: fig-resources-by-quantile
 #| fig-cap: Mean resources by initial resource quantile with no network
 #| fig-width: 10
 #| fig-height: 10
@@ -160,7 +160,7 @@ Below we provide the same for a random network, and for a small network.
 
 
 ```{r, fig.width=10, fig.height=10}
-#| label: resources-by-quantile-random-network
+#| label: fig-resources-by-quantile-random-network
 #| fig-cap: Mean resources by initial resource quantile with random network
 
 group_success <- df %>% 
@@ -180,7 +180,7 @@ pdata %>%
 ```
 
 ```{r, fig.width=10, fig.height=10}
-#| label: resources-by-quantile-small-world-network
+#| label: fig-resources-by-quantile-small-world-network
 #| fig-cap: Mean resources by initial resource quantile with small-world network
 
 group_success <- df %>% 
