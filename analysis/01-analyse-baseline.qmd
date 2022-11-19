@@ -91,7 +91,9 @@ no_network %>%
 ## Comparing network effects
 ```{r, fig.width=10, fig.height=10}
 #| label: fig-network-effect
-#| fig-cap: Effect of networks on (A) rate of sharing and (B) Gini coefficient. The rows represent the varying rate of funded teams in %.
+#| fig-cap: "Effect of networks on (A) rate of sharing and (B) Gini coefficient. 
+#|           The rows represent the varying rate of funded teams in %. Uniform 
+#|           starting distribution."
 
 
 uniform <- df %>% 
