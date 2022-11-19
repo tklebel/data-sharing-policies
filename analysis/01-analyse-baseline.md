@@ -98,7 +98,7 @@ no_network %>%
 ```
 
 ::: {.cell-output-display}
-![Variability in % of groups sharing data with no network](01-analyse-baseline_files/figure-html/variability-1.png){width=672}
+![Variability in % of groups sharing data with no network](01-analyse-baseline_files/figure-html/fig-variability-1.png){#fig-variability width=672}
 :::
 :::
 
@@ -139,7 +139,7 @@ p_sharing + p_gini +
 ```
 
 ::: {.cell-output-display}
-![Effect of networks on (A) rate of sharing and (B) Gini coefficient. The rows represent the varying rate of funded teams in %.](01-analyse-baseline_files/figure-html/network-effect-1.png){width=960}
+![Effect of networks on (A) rate of sharing and (B) Gini coefficient. The rows represent the varying rate of funded teams in %.](01-analyse-baseline_files/figure-html/fig-network-effect-1.png){#fig-network-effect width=960}
 :::
 :::
 
@@ -173,7 +173,7 @@ pdata %>%
 ```
 
 ::: {.cell-output-display}
-![Mean resources by initial resource quantile with no network](01-analyse-baseline_files/figure-html/resources-by-quantile-1.png){width=960}
+![Mean resources by initial resource quantile with no network](01-analyse-baseline_files/figure-html/fig-resources-by-quantile-1.png){#fig-resources-by-quantile width=960}
 :::
 :::
 
@@ -205,7 +205,7 @@ pdata %>%
 ```
 
 ::: {.cell-output-display}
-![Mean resources by initial resource quantile with random network](01-analyse-baseline_files/figure-html/resources-by-quantile-random-network-1.png){width=960}
+![Mean resources by initial resource quantile with random network](01-analyse-baseline_files/figure-html/fig-resources-by-quantile-random-network-1.png){#fig-resources-by-quantile-random-network width=960}
 :::
 :::
 
@@ -229,7 +229,7 @@ pdata %>%
 ```
 
 ::: {.cell-output-display}
-![Mean resources by initial resource quantile with small-world network](01-analyse-baseline_files/figure-html/resources-by-quantile-small-world-network-1.png){width=960}
+![Mean resources by initial resource quantile with small-world network](01-analyse-baseline_files/figure-html/fig-resources-by-quantile-small-world-network-1.png){#fig-resources-by-quantile-small-world-network width=960}
 :::
 :::
 
