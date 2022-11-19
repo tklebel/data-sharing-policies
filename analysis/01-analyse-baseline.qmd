@@ -125,7 +125,17 @@ p_sharing + p_gini +
 
 ```
 
+The red lines in @fig-variability correspond to @fig-vary-share-of-funded-teams.
+We can observe that the Gini is not substantially affected by different network
+structures, while the share of teams sharing data is strongly affected by the
+presence of network effects, but only weakly by the type of network.
 
+Overall, network effects lead to a lower share of teams that share data, 
+presumably because we start with no teams sharing data, and therefore the 
+descriptive norms act as a dampener. However, for larger grants (and a lower
+share of teams that is funded each round), the share of groups sharing data
+swings widely between two extreme points, before settling on a narrower 
+equilibrium state.
 
 ## Effect on success of different groups
 ```{r}
