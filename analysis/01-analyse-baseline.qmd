@@ -89,6 +89,43 @@ no_network %>%
 ```
 
 ## Comparing network effects
+```{r, fig.width=10, fig.height=10}
+#| label: network-effect
+#| fig-cap: Effect of networks on (A) rate of sharing and (B) Gini coefficient. The rows represent the varying rate of funded teams in %.
+
+
+uniform <- df %>% 
+  filter(init_dist == "uniform")
+
+pdata <- uniform %>% 
+  select(run_number, network, funded_share, step, perc_sharing, resources_gini) %>% 
+  group_by(network, funded_share, step) %>% 
+  summarise(mean_gini = mean(resources_gini),
+            mean_sharing = mean(perc_sharing)) %>% 
+  pivot_longer(c(mean_gini, mean_sharing))
+
+p_gini <- pdata %>% 
+  filter(name == "mean_gini") %>% 
+  ggplot(aes(step, value, colour = network)) +
+  geom_line() +
+  facet_wrap(vars(funded_share), ncol = 1) +
+  labs(y = "Mean Gini")
+
+p_sharing <- pdata %>% 
+  filter(name == "mean_sharing") %>% 
+  ggplot(aes(step, value, colour = network)) +
+  geom_line() +
+  facet_wrap(vars(funded_share), ncol = 1) +
+  labs(y = "Mean % of teams sharing data")
+
+p_sharing + p_gini +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
+
+```
+
+
 
 ## Effect on success of different groups
 ```{r}
