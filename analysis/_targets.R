@@ -23,5 +23,22 @@ list(
     select_baseline(baseline),
     format = "feather"
   ),
-  tarchetypes::tar_quarto(baseline_report, "01-analyse-baseline.qmd")
+  tarchetypes::tar_quarto(baseline_report, "01-analyse-baseline.qmd"),
+  # funding intervention -----------
+  tar_target(
+    intervention_file,
+    "../outputs/data_sharing_policies vary_incentives-table.csv",
+    format = "file"
+  ),
+  tar_target(
+    intervention,
+    read_experiments(intervention_file),
+    format = "feather"
+  ),
+  tar_target(
+    intervention_selection,
+    select_intervention(intervention),
+    format = "feather"
+  ),
+  tarchetypes::tar_quarto(funding_intervention, "02-analyse-funding-intervention.qmd")
 )
