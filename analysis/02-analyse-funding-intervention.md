@@ -1,0 +1,70 @@
+---
+title: "Analyse funding intervention"
+format: 
+  html:
+    code-fold: true
+execute:
+  keep-md: true
+---
+
+
+::: {.cell}
+
+:::
+
+
+# Effect of sharing incentive
+There are multiple parameters varied in this experiment. For now we compare
+Gini and share of sharers for low and medium funded share, holding network type
+constant.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+no_network <- df %>% 
+  filter(network == "none", funded_share == 25)
+
+pdata <- no_network %>% 
+  group_by(step, sharing_incentive) %>% 
+  summarise(mean_gini = mean(resources_gini),
+            mean_sharing = mean(perc_sharing))
+
+p1 <- pdata %>%  
+  ggplot(aes(step, mean_gini, colour = as.factor(sharing_incentive))) +
+  geom_line() +
+    labs(colour = "Incentive for sharing data",
+       y = "Gini of resources")
+
+p2 <- pdata %>%  
+  ggplot(aes(step, mean_sharing, colour = as.factor(sharing_incentive))) +
+  geom_line() +
+  labs(colour = "Incentive for sharing data",
+       y = "% of groups sharing data") 
+
+p1 / p2 +
+  plot_layout(guides = "collect") & theme(legend.position = "top")
+```
+
+::: {.cell-output-display}
+![Gini index and % of groups sharing data dependant on funding incentive. The share of teams being funded is fixed at 25%.](02-analyse-funding-intervention_files/figure-html/fig-vary-sharing-incentive-1.png){#fig-vary-sharing-incentive width=864}
+:::
+:::
+
+
+This is very interesting. The incentive for sharing data has a substantial 
+influence on whether agents share data or not. With no incentive, only about 25%
+of groups share data (which is still high? They "should not" share data, given
+that it is costly?). However, once incentives are higher than 0.2, differences
+are not strong any more in how many groups share (between 62 and 75% of teams).
+
+However, there is a substanial effect on the Gini. Stronger incentives lead to
+more equitable resource distributions. Why is that? Presumably there is more 
+mixing: some groups are successful with, and some without sharing data, and this
+changes. When there is no incentive, than there is probably more path dependency
+in funding.
+
+The next aspect to vary is the share of funded teams, and to see whether there
+is any kind of interaction. After this we should investigate the effect of 
+networks.
+
