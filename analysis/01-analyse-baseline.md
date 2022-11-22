@@ -3,6 +3,7 @@ title: "Baseline analysis"
 format: 
   html:
     code-fold: true
+  pdf: default
 execute:
   keep-md: true
 ---
@@ -14,7 +15,9 @@ execute:
 
 
 
+
 # Effect of grant size
+
 
 ::: {.cell}
 
@@ -48,9 +51,10 @@ p1 / p2 +
 ```
 
 ::: {.cell-output-display}
-![Gini index and % of groups sharing data dependnt on grant size](01-analyse-baseline_files/figure-html/fig-vary-share-of-funded-teams-1.png){#fig-vary-share-of-funded-teams width=864}
+![Gini index and % of groups sharing data dependnt on grant size](01-analyse-baseline_files/figure-pdf/fig-vary-share-of-funded-teams-1.pdf){#fig-vary-share-of-funded-teams fig-pos='H'}
 :::
 :::
+
 
 
 The above is very interesting: we are not changing incentives, however sharing 
@@ -67,6 +71,7 @@ particularly interesting when doing this baseline aspect.
 
 @fig-variability visualises variability in the runs.
 
+
 ::: {.cell}
 
 ```{.r .cell-code}
@@ -82,12 +87,14 @@ no_network %>%
 ```
 
 ::: {.cell-output-display}
-![Variability in % of groups sharing data with no network](01-analyse-baseline_files/figure-html/fig-variability-1.png){#fig-variability width=672}
+![Variability in % of groups sharing data with no network](01-analyse-baseline_files/figure-pdf/fig-variability-1.pdf){#fig-variability fig-pos='H'}
 :::
 :::
+
 
 
 ## Comparing network effects
+
 
 ::: {.cell}
 
@@ -123,9 +130,10 @@ p_sharing + p_gini +
 ```
 
 ::: {.cell-output-display}
-![Effect of networks on (A) rate of sharing and (B) Gini coefficient. The rows represent the varying rate of funded teams in %. Uniform starting distribution.](01-analyse-baseline_files/figure-html/fig-network-effect-1.png){#fig-network-effect width=960}
+![Effect of networks on (A) rate of sharing and (B) Gini coefficient. The rows represent the varying rate of funded teams in %. Uniform starting distribution.](01-analyse-baseline_files/figure-pdf/fig-network-effect-1.pdf){#fig-network-effect fig-pos='H'}
 :::
 :::
+
 
 
 The red lines in @fig-variability correspond to @fig-vary-share-of-funded-teams.
@@ -141,6 +149,7 @@ swings widely between two extreme points, before settling on a narrower
 equilibrium state.
 
 ## Effect on success of different groups
+
 
 ::: {.cell}
 
@@ -167,15 +176,17 @@ pdata %>%
 ```
 
 ::: {.cell-output-display}
-![Mean resources by initial resource quantile with no network](01-analyse-baseline_files/figure-html/fig-resources-by-quantile-1.png){#fig-resources-by-quantile width=960}
+![Mean resources by initial resource quantile with no network](01-analyse-baseline_files/figure-pdf/fig-resources-by-quantile-1.pdf){#fig-resources-by-quantile fig-pos='H'}
 :::
 :::
+
 
 
 There is no difference in how successful groups are based on their initial
 quantile, when there are not networks. Below we provide the same for a 
 random network (@fig-resources-by-quantile-random-network), and for a 
 small-world network (@fig-resources-by-quantile-small-world-network).
+
 
 
 
@@ -199,7 +210,7 @@ pdata %>%
 ```
 
 ::: {.cell-output-display}
-![Mean resources by initial resource quantile with random network](01-analyse-baseline_files/figure-html/fig-resources-by-quantile-random-network-1.png){#fig-resources-by-quantile-random-network width=960}
+![Mean resources by initial resource quantile with random network](01-analyse-baseline_files/figure-pdf/fig-resources-by-quantile-random-network-1.pdf){#fig-resources-by-quantile-random-network fig-pos='H'}
 :::
 :::
 
@@ -223,9 +234,10 @@ pdata %>%
 ```
 
 ::: {.cell-output-display}
-![Mean resources by initial resource quantile with small-world network](01-analyse-baseline_files/figure-html/fig-resources-by-quantile-small-world-network-1.png){#fig-resources-by-quantile-small-world-network width=960}
+![Mean resources by initial resource quantile with small-world network](01-analyse-baseline_files/figure-pdf/fig-resources-by-quantile-small-world-network-1.pdf){#fig-resources-by-quantile-small-world-network fig-pos='H'}
 :::
 :::
+
 
 
 

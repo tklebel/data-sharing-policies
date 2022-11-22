@@ -3,6 +3,7 @@ title: "Baseline analysis"
 format: 
   html:
     code-fold: true
+  pdf: default
 execute:
   keep-md: true
 ---
