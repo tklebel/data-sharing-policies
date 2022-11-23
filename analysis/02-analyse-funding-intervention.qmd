@@ -66,7 +66,43 @@ mixing: some groups are successful with, and some without sharing data, and this
 changes. When there is no incentive, than there is probably more path dependency
 in funding.
 
-The next aspect to vary is the share of funded teams, and to see whether there
-is any kind of interaction. After this we should investigate the effect of 
-networks.
+# Interact funded share and funding incentive
+```{r, fig.width=10, fig.height=10}
+#| label: fig-incentive-funded-share
+#| fig-cap: "Effect of funding incentive on (A) rate of sharing and (B) Gini
+#|           coefficient. 
+#|           The rows represent the varying rate of funded teams in %. Uniform 
+#|           starting distribution."
+no_network <- df %>% 
+  filter(network == "none")
 
+pdata <- no_network %>% 
+  select(run_number, sharing_incentive, funded_share, step, perc_sharing, 
+         resources_gini) %>% 
+  group_by(sharing_incentive, funded_share, step) %>% 
+  summarise(mean_gini = mean(resources_gini),
+            mean_sharing = mean(perc_sharing)) %>% 
+  pivot_longer(c(mean_gini, mean_sharing)) %>% 
+  mutate(sharing_incentive = as.factor(sharing_incentive))
+
+p_gini <- pdata %>% 
+  filter(name == "mean_gini") %>% 
+  ggplot(aes(step, value, colour = sharing_incentive)) +
+  geom_line() +
+  facet_wrap(vars(funded_share), ncol = 1) +
+  labs(y = "Mean Gini")
+
+p_sharing <- pdata %>% 
+  filter(name == "mean_sharing") %>% 
+  ggplot(aes(step, value, colour = sharing_incentive)) +
+  geom_line() +
+  facet_wrap(vars(funded_share), ncol = 1) +
+  labs(y = "Mean % of teams sharing data")
+
+p_sharing + p_gini +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
+```
+
+# Network effects
