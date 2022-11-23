@@ -105,4 +105,31 @@ p_sharing + p_gini +
   theme(legend.position = "top")
 ```
 
+The results are fascinating. First, a high incentive for sharing, as implemented
+in our model, does not seem either (a) necessary nor (b) the best strategy to
+achieve high sharing.
+
+Considering the case of 10% teams funded each round: Sharing uptake is equally 
+quick regardless of incentive. Sharing has a higher equilibrium the higher the
+sharing incentive is. Equity is higher (lower Gini) for higher sharing 
+incentives. The same is true for the case of 25% funded teams, however the share
+of teams sharing data is higher. This is likely a result of more teams coming 
+into contact with the funder. Interestingly, although the rate of teams sharing
+data under no incentive is similar across both cases, equity is higher for the
+case of 25% funded teams. (Ok, this is trivial -> more teams are receiving 
+funding -> more equality).
+
+However, once we consider the case of 50% of teams being funded each round,
+dynamics change substantially. Gini is lower, in line with more teams being
+funded. Higher incentives still lead to higher rates of sharing over the long
+term. The rate of uptake however is very different and much slower for higher
+sharing incentives. When taken to its extreme (80% of teams funded each round),
+uptake of sharing is so slow it does not really happen within the 3000
+iterations.
+
+One open question to investigate is why equity is higher for higher sharing
+incentives. This might be because there might be more randomness in how 
+proposals are evaluated. But this needs to be checked in greater detail, i.e., 
+how this edge case works in the nitty-gritty details.
+
 # Network effects
