@@ -133,3 +133,87 @@ proposals are evaluated. But this needs to be checked in greater detail, i.e.,
 how this edge case works in the nitty-gritty details.
 
 # Network effects
+Investigate network effects for cases of 10% and 50% funded teams.
+
+```{r, fig.width=10, fig.height=10}
+#| label: fig-incentive-network-10perc
+#| fig-cap: "Effect of funding incentive on (A) rate of sharing and (B) Gini
+#|           coefficient. 
+#|           The rows represent the network configurations. Uniform 
+#|           starting distribution. 10% funded teams."
+
+pdata <- df %>% 
+  filter(funded_share %in% c(10, 50)) %>% 
+  select(run_number, sharing_incentive, funded_share, step, perc_sharing, 
+         resources_gini, network) %>% 
+  group_by(sharing_incentive, funded_share, network, step) %>% 
+  summarise(mean_gini = mean(resources_gini),
+            mean_sharing = mean(perc_sharing)) %>% 
+  pivot_longer(c(mean_gini, mean_sharing)) %>% 
+  mutate(sharing_incentive = as.factor(sharing_incentive))
+
+p_gini <- pdata %>% 
+  filter(name == "mean_gini", funded_share == 10) %>% 
+  ggplot(aes(step, value, colour = sharing_incentive)) +
+  geom_line() +
+  facet_wrap(vars(network), ncol = 1) +
+  labs(y = "Mean Gini")
+
+p_sharing <- pdata %>% 
+  filter(name == "mean_sharing", funded_share == 10) %>% 
+  ggplot(aes(step, value, colour = sharing_incentive)) +
+  geom_line() +
+  facet_wrap(vars(network), ncol = 1) +
+  labs(y = "Mean % of teams sharing data")
+
+p_sharing + p_gini +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
+```
+
+```{r, fig.width=10, fig.height=10}
+#| label: fig-incentive-network-50perc
+#| fig-cap: "Effect of funding incentive on (A) rate of sharing and (B) Gini
+#|           coefficient. 
+#|           The rows represent the network configurations. Uniform 
+#|           starting distribution. 50% funded teams."
+
+p_gini <- pdata %>% 
+  filter(name == "mean_gini", funded_share == 50) %>% 
+  ggplot(aes(step, value, colour = sharing_incentive)) +
+  geom_line() +
+  facet_wrap(vars(network), ncol = 1) +
+  labs(y = "Mean Gini")
+
+p_sharing <- pdata %>% 
+  filter(name == "mean_sharing", funded_share == 50) %>% 
+  ggplot(aes(step, value, colour = sharing_incentive)) +
+  geom_line() +
+  facet_wrap(vars(network), ncol = 1) +
+  labs(y = "Mean % of teams sharing data")
+
+p_sharing + p_gini +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
+```
+
+
+In a general sense, the presence of networks leads to lower sharing rates in the
+long run. For the case of 10% funded teams, there is a strong pendulum at first,
+with sharing going up and down. In the long run, all sharing incentives lead to
+relatively low sharing rates (below 30%). Might it be that the network effect
+trumps the utility assessment that each team does? If I implemented it 
+correctly, network and utility effect should be equally strong. 
+
+For the case of 50% funded teams, sharing uptake is much slower. This is likely
+driven to some extent because sharing is at 0 when starting the simulation. This
+is on purpose and represents a realistic scenario.
+
+# Uptake across quartiles
+
+# Open questions
+
+- Why is a higher sharing incentive leading to lower Gini? 
+
