@@ -657,7 +657,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.4
+0.25
 .01
 1
 NIL
@@ -671,7 +671,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-0
+2
 
 SLIDER
 236
@@ -807,7 +807,7 @@ funded-share
 funded-share
 1
 100
-20.0
+85.0
 1
 1
 %
@@ -1303,6 +1303,7 @@ NetLogo 6.2.2
     <go>go</go>
     <timeLimit steps="3000"/>
     <metric>gini [resources] of teams</metric>
+    <metric>gini [total-funding] of teams</metric>
     <metric>mean [effort] of teams</metric>
     <metric>%-sharing</metric>
     <metric>mean-funding-within teams with [initial-resources-quantile = "q1"]</metric>
@@ -1327,6 +1328,7 @@ NetLogo 6.2.2
     </enumeratedValueSet>
     <enumeratedValueSet variable="proposal-sigma">
       <value value="0.25"/>
+      <value value="0.15"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="n-teams">
       <value value="100"/>
