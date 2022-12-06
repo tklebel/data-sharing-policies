@@ -132,7 +132,7 @@ to award-grants
   let application-penalty-perc application-penalty / 100 ; convert back to percentage
   ask teams [ set resources resources * (1 - application-penalty-perc) ]
   ; add further one's for some (when receiving funding)
-  let funding-per-team funder-resources / (funded-share / 100 *  n-teams)
+  let funding-per-team funder-resources / n-grants
   foreach top-teams [x -> ask x [
     set resources resources + funding-per-team
     set total-funding total-funding + funding-per-team
