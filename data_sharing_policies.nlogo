@@ -657,7 +657,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.25
+0.24
 .01
 1
 NIL
@@ -671,7 +671,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-2
+0
 
 SLIDER
 236
@@ -807,7 +807,7 @@ funded-share
 funded-share
 1
 100
-85.0
+41.0
 1
 1
 %
@@ -839,7 +839,7 @@ CHOOSER
 resources-dist
 resources-dist
 "uniform" "left-skewed" "right-skewed"
-1
+0
 
 SLIDER
 271
@@ -1236,6 +1236,10 @@ NetLogo 6.2.2
     <metric>mean-funding-within teams with [initial-resources-quantile = "q2"]</metric>
     <metric>mean-funding-within teams with [initial-resources-quantile = "q3"]</metric>
     <metric>mean-funding-within teams with [initial-resources-quantile = "q4"]</metric>
+    <metric>data-sharing-within teams with [initial-resources-quantile = "q1"]</metric>
+    <metric>data-sharing-within teams with [initial-resources-quantile = "q2"]</metric>
+    <metric>data-sharing-within teams with [initial-resources-quantile = "q3"]</metric>
+    <metric>data-sharing-within teams with [initial-resources-quantile = "q4"]</metric>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
@@ -1243,7 +1247,7 @@ NetLogo 6.2.2
       <value value="1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="sharing-incentive">
-      <value value="0.25"/>
+      <value value="0"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="application-penalty">
       <value value="20"/>
