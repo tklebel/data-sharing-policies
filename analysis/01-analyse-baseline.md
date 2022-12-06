@@ -32,23 +32,37 @@ no_network_unif_dist <- no_network %>%
 pdata <- no_network_unif_dist %>% 
   group_by(step, funded_share) %>% 
   summarise(mean_gini = mean(resources_gini),
-            mean_sharing = mean(perc_sharing))
+            mean_cumulative_gini = mean(total_funding_gini),
+            mean_sharing = mean(perc_sharing)) %>% 
+  collect()
 
 p1 <- pdata %>%  
   ggplot(aes(step, mean_gini, colour = as.factor(funded_share))) +
   geom_line() +
     labs(colour = "% of groups receiving funding",
-       y = "Gini of resources")
+       y = "Gini of current resources")
 
 p2 <- pdata %>%  
+  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(funded_share))) +
+  geom_line() +
+    labs(colour = "% of groups receiving funding",
+       y = "Gini of total resources")
+
+p3 <- pdata %>%  
   ggplot(aes(step, mean_sharing, colour = as.factor(funded_share))) +
   geom_line() +
   labs(colour = "% of groups receiving funding",
        y = "% of groups sharing data") 
 
-p1 / p2 +
+p1 / p2 / p3 +
   plot_layout(guides = "collect") & theme(legend.position = "top")
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Removed 6 rows containing missing values (`geom_line()`).
+```
+:::
 
 ::: {.cell-output-display}
 ![Gini index and % of groups sharing data dependnt on grant size](01-analyse-baseline_files/figure-pdf/fig-vary-share-of-funded-teams-1.pdf){#fig-vary-share-of-funded-teams fig-pos='H'}
@@ -85,10 +99,6 @@ no_network %>%
        y = "% of groups sharing data") +
   guides(colour = guide_legend(override.aes = list(alpha = 1)))
 ```
-
-::: {.cell-output-display}
-![Variability in % of groups sharing data with no network](01-analyse-baseline_files/figure-pdf/fig-variability-1.pdf){#fig-variability fig-pos='H'}
-:::
 :::
 
 
@@ -103,11 +113,14 @@ uniform <- df %>%
   filter(init_dist == "uniform")
 
 pdata <- uniform %>% 
-  select(run_number, network, funded_share, step, perc_sharing, resources_gini) %>% 
+  select(run_number, network, funded_share, step, perc_sharing, resources_gini,
+         total_funding_gini) %>% 
   group_by(network, funded_share, step) %>% 
   summarise(mean_gini = mean(resources_gini),
+            mean_cumulative_gini = mean(total_funding_gini),
             mean_sharing = mean(perc_sharing)) %>% 
-  pivot_longer(c(mean_gini, mean_sharing))
+  collect() %>% 
+  pivot_longer(c(mean_gini, mean_sharing, mean_cumulative_gini))
 
 p_gini <- pdata %>% 
   filter(name == "mean_gini") %>% 
@@ -156,7 +169,8 @@ equilibrium state.
 ```{.r .cell-code}
 group_success <- no_network %>% 
   group_by(step, funded_share, init_dist) %>% 
-  summarise(across(contains("mean_funds"), .fns = mean))
+  summarise(across(contains("mean_funds"), .fns = mean)) %>% 
+  collect()
 ```
 :::
 
@@ -196,7 +210,8 @@ small-world network (@fig-resources-by-quantile-small-world-network).
 group_success <- df %>% 
   filter(network == "random") %>% 
   group_by(step, funded_share, init_dist) %>% 
-  summarise(across(contains("mean_funds"), .fns = mean))
+  summarise(across(contains("mean_funds"), .fns = mean)) %>% 
+  collect()
 
 pdata <- group_success %>% 
   pivot_longer(contains("mean_funds"), names_to = "quantile",
@@ -220,7 +235,8 @@ pdata %>%
 group_success <- df %>% 
   filter(network == "small-world") %>% 
   group_by(step, funded_share, init_dist) %>% 
-  summarise(across(contains("mean_funds"), .fns = mean))
+  summarise(across(contains("mean_funds"), .fns = mean)) %>% 
+  collect()
 
 pdata <- group_success %>% 
   pivot_longer(contains("mean_funds"), names_to = "quantile",
