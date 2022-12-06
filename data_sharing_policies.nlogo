@@ -123,7 +123,7 @@ to award-grants
     set resources resources + baseline-pool / n-teams
   ]
 
-  let n-grants n-teams * funded-share / 100
+  let n-grants precision (n-teams * funded-share / 100) 0
 
   set rank-list sort-on [(- proposal-strength)] teams ; need to invert proposal-strength, so that higher values are on top of the list
   set top-teams ifelse-value (length rank-list < n-grants) [rank-list] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
