@@ -10,18 +10,8 @@ list(
   # baseline file -----------
   tar_target(
     baseline_file,
-    "../outputs/data_sharing_policies baseline-table-3.csv",
+    "../outputs/data_sharing_policies baseline-table.csv",
     format = "file"
-  ),
-  tar_target(
-    baseline,
-    read_experiments(baseline_file),
-    format = "feather"
-  ),
-  tar_target(
-    baseline_selection,
-    select_baseline(baseline),
-    format = "feather"
   ),
   tarchetypes::tar_quarto(baseline_report, "01-analyse-baseline.qmd"),
   # funding intervention -----------
