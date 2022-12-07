@@ -13,6 +13,74 @@ execute:
 :::
 
 
+# Effect of funder selectivity
+
+::: {.cell}
+
+```{.r .cell-code}
+no_network <- df %>% 
+  filter(network == "none")
+  
+no_network_unif_dist <- no_network %>% 
+  filter(init_dist == "uniform")
+
+
+pdata <- no_network_unif_dist %>% 
+  filter(sharing_incentive == .4) %>% 
+  group_by(step, funded_share) %>% 
+  summarise(mean_gini = mean(resources_gini),
+            mean_cumulative_gini = mean(total_funding_gini),
+            mean_sharing = mean(perc_sharing)) %>% 
+  collect()
+
+p1 <- pdata %>%  
+  ggplot(aes(step, mean_gini, colour = as.factor(funded_share))) +
+  geom_line() +
+    labs(colour = "% of groups receiving funding",
+       y = "Gini of current resources")
+
+p2 <- pdata %>%  
+  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(funded_share))) +
+  geom_line() +
+    labs(colour = "% of groups receiving funding",
+       y = "Gini of total resources")
+
+p3 <- pdata %>%  
+  ggplot(aes(step, mean_sharing, colour = as.factor(funded_share))) +
+  geom_line() +
+  labs(colour = "% of groups receiving funding",
+       y = "% of groups sharing data") 
+
+p1 / p2 / p3 +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Removed 4 rows containing missing values (`geom_line()`).
+```
+:::
+
+::: {.cell-output-display}
+![Gini index and % of groups sharing data dependent on grant size. Funding incentive is fixed at 0.4.](02-analyse-funding-intervention_files/figure-html/fig-vary-share-of-funded-teams-1.png){#fig-vary-share-of-funded-teams width=576}
+:::
+:::
+
+The above is very interesting: we are not changing incentives, however sharing 
+rate still varies widely. This is a consequence of how exposed agents are to
+the funding agency. If only few are funded, not many come into contact. However,
+if almost everyone is funded, the policy seems to work only very slowly, because
+there is no advantage in sharing or not (because anyways almost everyone is
+funded). It is also interesting that sharing initially rises, but then drops 
+again (for low values of funded share). 
+
+The Gini is a direct effect of selectivity of funding, as in the baseline 
+scenario. The Gini of total resources initially falls, than rises, then falls 
+again. 
+
+> I'm not sure why this is the case or what it tells us.
+
 # Effect of sharing incentive
 There are multiple parameters varied in this experiment. For now we compare
 Gini and share of sharers for low and medium funded share, holding network type
@@ -28,26 +96,41 @@ no_network <- df %>%
 pdata <- no_network %>% 
   group_by(step, sharing_incentive) %>% 
   summarise(mean_gini = mean(resources_gini),
-            mean_sharing = mean(perc_sharing))
+            mean_cumulative_gini = mean(total_funding_gini),
+            mean_sharing = mean(perc_sharing)) %>% 
+  collect()
 
 p1 <- pdata %>%  
   ggplot(aes(step, mean_gini, colour = as.factor(sharing_incentive))) +
   geom_line() +
-    labs(colour = "Incentive for sharing data",
-       y = "Gini of resources")
+  labs(colour = "Incentive for sharing data",
+       y = "Gini of current resources")
 
 p2 <- pdata %>%  
+  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(sharing_incentive))) +
+  geom_line() +
+  labs(colour = "Incentive for sharing data",
+       y = "Gini of total resources")
+
+p3 <- pdata %>%  
   ggplot(aes(step, mean_sharing, colour = as.factor(sharing_incentive))) +
   geom_line() +
   labs(colour = "Incentive for sharing data",
        y = "% of groups sharing data") 
 
-p1 / p2 +
-  plot_layout(guides = "collect") & theme(legend.position = "top")
+p1 / p2 / p3 +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
 
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Removed 6 rows containing missing values (`geom_line()`).
+```
+:::
+
 ::: {.cell-output-display}
-![Gini index and % of groups sharing data dependant on funding incentive. The share of teams being funded is fixed at 25%.](02-analyse-funding-intervention_files/figure-html/fig-vary-sharing-incentive-1.png){#fig-vary-sharing-incentive width=864}
+![Gini index and % of groups sharing data dependant on funding incentive. The share of teams being funded is fixed at 25%.](02-analyse-funding-intervention_files/figure-html/fig-vary-sharing-incentive-1.png){#fig-vary-sharing-incentive width=576}
 :::
 :::
 
@@ -55,14 +138,32 @@ p1 / p2 +
 This is very interesting. The incentive for sharing data has a substantial 
 influence on whether agents share data or not. With no incentive, only about 25%
 of groups share data (which is still high? They "should not" share data, given
-that it is costly?). However, once incentives are higher than 0.2, differences
-are not strong any more in how many groups share (between 62 and 75% of teams).
+that it is costly?). With moderate incentives (0.2 and 0.4) sharing is higher 
+(up to about 50%). Strinkingly, between those two cases there is not much 
+difference in terms of % of teams sharing, and the Gini of total resources in
+the long run. In the short run, higher incentives lead to higher sharing and 
+lower inequality, but this aligns later on.
 
-However, there is a substanial effect on the Gini. Stronger incentives lead to
-more equitable resource distributions. Why is that? Presumably there is more 
+For even higher settings of incentives, sharing reaches high levels, up to 75%,
+with much lower inequality in total resources.
+
+I now assume that the 25%/75% border is just a result of how the study was set 
+up in terms of agent behaviour.
+
+One key question is why stronger incentives to share data lead to
+more equitable resource distributions. Presumably there is more 
 mixing: some groups are successful with, and some without sharing data, and this
-changes. When there is no incentive, than there is probably more path dependency
+changes. When there is no incentive, there is more path dependency
 in funding.
+
+The overall setup is still not representative of what I would perceive as "true"
+agent behaviour: If there was an incentive, agents would know it and potentially
+adapt. From ON-MERRIT and the literature, we assume this is easier for 
+high-resource actors. This type of interaction is precluded from our model.
+
+Here, data sharing is more an alternative strategy to success: if sharing is 
+rewarded, teams with lower resources (= prestige and publication track record)
+have equal chances of getting funding simply by starting to share data.
 
 # Interact funded share and funding incentive
 
@@ -74,11 +175,13 @@ no_network <- df %>%
 
 pdata <- no_network %>% 
   select(run_number, sharing_incentive, funded_share, step, perc_sharing, 
-         resources_gini) %>% 
+         resources_gini, total_funding_gini) %>% 
   group_by(sharing_incentive, funded_share, step) %>% 
   summarise(mean_gini = mean(resources_gini),
+            mean_cumulative_gini = mean(total_funding_gini),
             mean_sharing = mean(perc_sharing)) %>% 
-  pivot_longer(c(mean_gini, mean_sharing)) %>% 
+  collect() %>% 
+  pivot_longer(c(mean_gini, mean_cumulative_gini, mean_sharing)) %>% 
   mutate(sharing_incentive = as.factor(sharing_incentive))
 
 p_gini <- pdata %>% 
@@ -86,7 +189,14 @@ p_gini <- pdata %>%
   ggplot(aes(step, value, colour = sharing_incentive)) +
   geom_line() +
   facet_wrap(vars(funded_share), ncol = 1) +
-  labs(y = "Mean Gini")
+  labs(y = "Mean Gini of current resources")
+
+p_gini_total <- pdata %>% 
+  filter(name == "mean_cumulative_gini") %>% 
+  ggplot(aes(step, value, colour = sharing_incentive)) +
+  geom_line() +
+  facet_wrap(vars(funded_share), ncol = 1) +
+  labs(y = "Mean Gini of total resources")
 
 p_sharing <- pdata %>% 
   filter(name == "mean_sharing") %>% 
@@ -95,14 +205,20 @@ p_sharing <- pdata %>%
   facet_wrap(vars(funded_share), ncol = 1) +
   labs(y = "Mean % of teams sharing data")
 
-p_sharing + p_gini +
+p_sharing + p_gini + p_gini_total +
   plot_layout(guides = "collect") +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "top")
 ```
 
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Removed 6 rows containing missing values (`geom_line()`).
+```
+:::
+
 ::: {.cell-output-display}
-![Effect of funding incentive on (A) rate of sharing and (B) Gini coefficient. The rows represent the varying rate of funded teams in %. Uniform starting distribution.](02-analyse-funding-intervention_files/figure-html/fig-incentive-funded-share-1.png){#fig-incentive-funded-share width=960}
+![Effect of funding incentive on (A) rate of sharing, (B) Gini of current resources and (C) Gini of total resources. The rows represent the varying rate of funded teams in %. Uniform starting distribution.](02-analyse-funding-intervention_files/figure-html/fig-incentive-funded-share-1.png){#fig-incentive-funded-share width=1152}
 :::
 :::
 
@@ -116,18 +232,14 @@ quick regardless of incentive. Sharing has a higher equilibrium the higher the
 sharing incentive is. Equity is higher (lower Gini) for higher sharing 
 incentives. The same is true for the case of 25% funded teams, however the share
 of teams sharing data is higher. This is likely a result of more teams coming 
-into contact with the funder. Interestingly, although the rate of teams sharing
-data under no incentive is similar across both cases, equity is higher for the
-case of 25% funded teams. (Ok, this is trivial -> more teams are receiving 
-funding -> more equality).
+into contact with the funder. 
 
 However, once we consider the case of 50% of teams being funded each round,
 dynamics change substantially. Gini is lower, in line with more teams being
 funded. Higher incentives still lead to higher rates of sharing over the long
 term. The rate of uptake however is very different and much slower for higher
 sharing incentives. When taken to its extreme (80% of teams funded each round),
-uptake of sharing is so slow it does not really happen within the 3000
-iterations.
+there is no uptake of data sharing for high incentive settings (above 0.5).
 
 One open question to investigate is why equity is higher for higher sharing
 incentives. This might be because there might be more randomness in how 
@@ -144,11 +256,13 @@ Investigate network effects for cases of 10% and 50% funded teams.
 pdata <- df %>% 
   filter(funded_share %in% c(10, 50)) %>% 
   select(run_number, sharing_incentive, funded_share, step, perc_sharing, 
-         resources_gini, network) %>% 
+         resources_gini, network, total_funding_gini) %>% 
   group_by(sharing_incentive, funded_share, network, step) %>% 
   summarise(mean_gini = mean(resources_gini),
+            mean_cumulative_gini = mean(total_funding_gini),
             mean_sharing = mean(perc_sharing)) %>% 
-  pivot_longer(c(mean_gini, mean_sharing)) %>% 
+  collect() %>% 
+  pivot_longer(c(mean_gini, mean_cumulative_gini, mean_sharing)) %>% 
   mutate(sharing_incentive = as.factor(sharing_incentive))
 
 p_gini <- pdata %>% 
@@ -156,7 +270,14 @@ p_gini <- pdata %>%
   ggplot(aes(step, value, colour = sharing_incentive)) +
   geom_line() +
   facet_wrap(vars(network), ncol = 1) +
-  labs(y = "Mean Gini")
+  labs(y = "Mean Gini of current resources")
+
+p_gini_total <- pdata %>% 
+  filter(name == "mean_cumulative_gini", funded_share == 10) %>% 
+  ggplot(aes(step, value, colour = sharing_incentive)) +
+  geom_line() +
+  facet_wrap(vars(network), ncol = 1) +
+  labs(y = "Mean Gini of total resources")
 
 p_sharing <- pdata %>% 
   filter(name == "mean_sharing", funded_share == 10) %>% 
@@ -165,14 +286,20 @@ p_sharing <- pdata %>%
   facet_wrap(vars(network), ncol = 1) +
   labs(y = "Mean % of teams sharing data")
 
-p_sharing + p_gini +
+p_sharing + p_gini + p_gini_total +
   plot_layout(guides = "collect") +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "top")
 ```
 
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Removed 6 rows containing missing values (`geom_line()`).
+```
+:::
+
 ::: {.cell-output-display}
-![Effect of funding incentive on (A) rate of sharing and (B) Gini coefficient. The rows represent the network configurations. Uniform starting distribution. 10% funded teams.](02-analyse-funding-intervention_files/figure-html/fig-incentive-network-10perc-1.png){#fig-incentive-network-10perc width=960}
+![Effect of funding incentive on (A) rate of sharing and (B) Gini coefficient. The rows represent the network configurations. Uniform starting distribution. 10% funded teams.](02-analyse-funding-intervention_files/figure-html/fig-incentive-network-10perc-1.png){#fig-incentive-network-10perc width=1152}
 :::
 :::
 
@@ -184,7 +311,14 @@ p_gini <- pdata %>%
   ggplot(aes(step, value, colour = sharing_incentive)) +
   geom_line() +
   facet_wrap(vars(network), ncol = 1) +
-  labs(y = "Mean Gini")
+  labs(y = "Mean Gini of current resources")
+
+p_gini_total <- pdata %>% 
+  filter(name == "mean_cumulative_gini", funded_share == 50) %>% 
+  ggplot(aes(step, value, colour = sharing_incentive)) +
+  geom_line() +
+  facet_wrap(vars(network), ncol = 1) +
+  labs(y = "Mean Gini of total resources")
 
 p_sharing <- pdata %>% 
   filter(name == "mean_sharing", funded_share == 50) %>% 
@@ -193,33 +327,41 @@ p_sharing <- pdata %>%
   facet_wrap(vars(network), ncol = 1) +
   labs(y = "Mean % of teams sharing data")
 
-p_sharing + p_gini +
+p_sharing + p_gini + p_gini_total +
   plot_layout(guides = "collect") +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "top")
 ```
 
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Removed 6 rows containing missing values (`geom_line()`).
+```
+:::
+
 ::: {.cell-output-display}
-![Effect of funding incentive on (A) rate of sharing and (B) Gini coefficient. The rows represent the network configurations. Uniform starting distribution. 50% funded teams.](02-analyse-funding-intervention_files/figure-html/fig-incentive-network-50perc-1.png){#fig-incentive-network-50perc width=960}
+![Effect of funding incentive on (A) rate of sharing and (B) Gini coefficient. The rows represent the network configurations. Uniform starting distribution. 50% funded teams.](02-analyse-funding-intervention_files/figure-html/fig-incentive-network-50perc-1.png){#fig-incentive-network-50perc width=1152}
 :::
 :::
 
 
 
 In a general sense, the presence of networks leads to lower sharing rates in the
-long run. For the case of 10% funded teams, there is a strong pendulum at first,
+long run. For the case of 10% funded teams (@fig-incentive-network-10perc),
+there is a strong pendulum at first,
 with sharing going up and down. In the long run, all sharing incentives lead to
 relatively low sharing rates (below 30%). Might it be that the network effect
 trumps the utility assessment that each team does? If I implemented it 
 correctly, network and utility effect should be equally strong. 
 
-For the case of 50% funded teams, sharing uptake is much slower. This is likely
-driven to some extent because sharing is at 0 when starting the simulation. This
-is on purpose and represents a realistic scenario.
+For the case of 50% funded teams (@fig-incentive-network-50perc),
+data sharing is not taking place at all. 
+This is likely to some extent driven by the fact that data sharing is at 0 when 
+starting the simulation. I consider very low initial sharing rates to be a 
+a realistic scenario.
 
 # Uptake across quartiles
 
 # Open questions
 
 - Why is a higher sharing incentive leading to lower Gini? 
-
