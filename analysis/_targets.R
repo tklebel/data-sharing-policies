@@ -17,18 +17,8 @@ list(
   # funding intervention -----------
   tar_target(
     intervention_file,
-    "../outputs/data_sharing_policies vary_incentives-table.csv",
+    "../outputs/data_sharing_policies vary_incentives-table-3.csv",
     format = "file"
-  ),
-  tar_target(
-    intervention,
-    read_experiments(intervention_file),
-    format = "feather"
-  ),
-  tar_target(
-    intervention_selection,
-    select_intervention(intervention),
-    format = "feather"
   ),
   tarchetypes::tar_quarto(funding_intervention, "02-analyse-funding-intervention.qmd")
 )
