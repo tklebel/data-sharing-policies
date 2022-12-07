@@ -338,13 +338,15 @@ p_sharing + p_gini + p_gini_total +
 
 
 In a general sense, the presence of networks leads to lower sharing rates in the
-long run. For the case of 10% funded teams, there is a strong pendulum at first,
+long run. For the case of 10% funded teams (@fig-incentive-network-10perc),
+there is a strong pendulum at first,
 with sharing going up and down. In the long run, all sharing incentives lead to
 relatively low sharing rates (below 30%). Might it be that the network effect
 trumps the utility assessment that each team does? If I implemented it 
 correctly, network and utility effect should be equally strong. 
 
-For the case of 50% funded teams, data sharing is not taking place at all. 
+For the case of 50% funded teams (@fig-incentive-network-50perc),
+data sharing is not taking place at all. 
 This is likely to some extent driven by the fact that data sharing is at 0 when 
 starting the simulation. I consider very low initial sharing rates to be a 
 a realistic scenario.
