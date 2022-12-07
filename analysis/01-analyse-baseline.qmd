@@ -200,6 +200,17 @@ others (fourth quantile, "q4") acquire substantially more funding over the
 course of the simulation. This effect is much weaker for less selective funding
 regimes.
 
+The effect of the initial resource distribution is small, and as expected. 
+However, the terminology (coming from the peer review model) is wrong: what is
+termed a "left-skewed" distribution should be a distribution that has few low
+values and many high values (more high values than low values). This was the 
+wrong way until now and will be changed in later iterations of the simulation.
+
+In substantive terms: where the initial resource distribution had few actors
+with high resources (wrongly termed "left-skewed" here) leads to a more unequal
+distribution later on.
+
+
 Below we provide the same for a random
 network (@fig-resources-by-quantile-random-network), and for a small-world
 network (@fig-resources-by-quantile-small-world-network). Without having 
