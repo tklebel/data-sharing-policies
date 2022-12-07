@@ -173,7 +173,7 @@ group_success <- no_network %>%
   collect()
 ```
 
-```{r, fig.width=10, fig.height=10}
+```{r, fig.width=8, fig.height=8}
 #| label: fig-resources-by-quantile
 #| fig-cap: Mean total resources by initial resource quantile with no network. 
 #|          Higher quantiles (e.g., q4) had initially higher levels of funding.
@@ -207,7 +207,7 @@ compared them precisely, results look identical. (To establish this more
 formally, one could restructure the plots and directly compare the network vs.
 non-network part).
 
-```{r, fig.width=10, fig.height=10}
+```{r, fig.width=8, fig.height=8}
 #| label: fig-resources-by-quantile-random-network
 #| fig-cap: Mean resources by initial resource quantile with random network
 
@@ -231,7 +231,7 @@ pdata %>%
   theme(legend.position = "top")
 ```
 
-```{r, fig.width=10, fig.height=10}
+```{r, fig.width=8, fig.height=8}
 #| label: fig-resources-by-quantile-small-world-network
 #| fig-cap: Mean resources by initial resource quantile with small-world network
 
