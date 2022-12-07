@@ -54,11 +54,11 @@ to setup
     set color 65
     ; create resource distribution
     if resources-dist = "uniform" [set resources random-float 1]
-    if resources-dist = "left-skewed" [
+    if resources-dist = "right-skewed" [
       let x random-gamma 2 1
       set resources (x / (x + random-gamma 7 1))
     ]
-    if resources-dist = "right-skewed" [
+    if resources-dist = "left-skewed" [
       let x random-gamma 7 1
       set resources (x / (x + random-gamma 2 1))
     ]
@@ -657,7 +657,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.0
+0.6
 .01
 1
 NIL
@@ -671,7 +671,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-1
+2
 
 SLIDER
 236
@@ -807,7 +807,7 @@ funded-share
 funded-share
 1
 100
-85.0
+80.0
 1
 1
 %
@@ -839,7 +839,7 @@ CHOOSER
 resources-dist
 resources-dist
 "uniform" "left-skewed" "right-skewed"
-0
+1
 
 SLIDER
 271
