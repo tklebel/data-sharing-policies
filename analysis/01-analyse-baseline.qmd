@@ -34,7 +34,12 @@ setup_schema <- schema(
   `mean-funding-within teams with [initial-resources-quantile = "q1"]` = float64(), 
   `mean-funding-within teams with [initial-resources-quantile = "q2"]` = float64(), 
   `mean-funding-within teams with [initial-resources-quantile = "q3"]` = float64(), 
-  `mean-funding-within teams with [initial-resources-quantile = "q4"]` = float64())
+  `mean-funding-within teams with [initial-resources-quantile = "q4"]` = float64(),
+  `data-sharing-within teams with [initial-resources-quantile = "q1"]` = float64(), 
+  `data-sharing-within teams with [initial-resources-quantile = "q2"]` = float64(), 
+  `data-sharing-within teams with [initial-resources-quantile = "q3"]` = float64(), 
+  `data-sharing-within teams with [initial-resources-quantile = "q4"]` = float64()
+  )
 
 
 df_all <- open_dataset(tar_read(baseline_file),
@@ -50,11 +55,11 @@ df <- df %>%
   filter(proposal_sigma == .15)
 ```
 
-
 # Effect of grant size
+
 ```{r}
 #| label: fig-vary-share-of-funded-teams
-#| fig-cap: Gini index and % of groups sharing data dependnt on grant size
+#| fig-cap: Gini index and % of groups sharing data dependent on grant size
 #| fig-height: 9
 #| fig-width: 9
 no_network <- df %>% 
@@ -90,41 +95,30 @@ p3 <- pdata %>%
        y = "% of groups sharing data") 
 
 p1 / p2 / p3 +
-  plot_layout(guides = "collect") & theme(legend.position = "top")
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
 
-The above is very interesting: we are not changing incentives, however sharing 
-rate still varies widely. This is a consequence of how exposed agents are to
-the funding agency. If only few are funded, not many come into contact. However,
-if almost everyone is funded, the policy seems to work only very slowly, because
-there is no advantage in sharing or not (because anyways almost everyone is
-funded). It is also interesting that sharing initially rises, but then drops 
-again (for low values of funded share). 
+Both Gini indexes (Panels A and B of @fig-vary-share-of-funded-teams) are very
+stable after an initial adaptation, and reflect the general level of selectivity
+of research funding: low selectivity leads to low inequality of resources and
+vice versa.
 
-The Gini is in some sense a direct effect of selectivity of funding and thus not
-particularly interesting when doing this baseline aspect.
+The percentage of teams sharing data is also affected by the selectivity of
+funding: more selective funding leads to lower sharing. This is assuming no
+incentives at all and solely represents the agents' internal dynamics of
+assessing whether they are better or worse off in this round than the previous
+one.
 
+> Is this an expected finding?
 
-@fig-variability visualises variability in the runs.
-```{r, eval=FALSE}
-#| label: fig-variability
-#| fig-cap: Variability in % of groups sharing data with no network
-
-no_network %>% 
-  # filter(funded_share == 50) %>% 
-  ggplot(aes(step, perc_sharing, group = run_number,
-             colour = as.factor(funded_share))) +
-  geom_line(alpha = .2) +
-  theme(legend.position = "top") +
-  labs(colour = "% of groups receiving funding",
-       y = "% of groups sharing data") +
-  guides(colour = guide_legend(override.aes = list(alpha = 1)))
-```
 
 ## Comparing network effects
+
 ```{r, fig.width=10, fig.height=10}
 #| label: fig-network-effect
-#| fig-cap: "Effect of networks on (A) rate of sharing and (B) Gini coefficient. 
+#| fig-cap: "Effect of networks on (A) rate of sharing and (B) Gini coefficient 
+#|           of total resources. 
 #|           The rows represent the varying rate of funded teams in %. Uniform 
 #|           starting distribution."
 
@@ -143,11 +137,11 @@ pdata <- uniform %>%
   pivot_longer(c(mean_gini, mean_sharing, mean_cumulative_gini))
 
 p_gini <- pdata %>% 
-  filter(name == "mean_gini") %>% 
+  filter(name == "mean_cumulative_gini") %>% 
   ggplot(aes(step, value, colour = network)) +
   geom_line() +
   facet_wrap(vars(funded_share), ncol = 1) +
-  labs(y = "Mean Gini")
+  labs(y = "Mean Gini of total resources")
 
 p_sharing <- pdata %>% 
   filter(name == "mean_sharing") %>% 
@@ -164,18 +158,14 @@ p_sharing + p_gini +
 ```
 
 The red lines in @fig-variability correspond to @fig-vary-share-of-funded-teams.
-We can observe that the Gini is not substantially affected by different network
-structures, while the share of teams sharing data is strongly affected by the
-presence of network effects, but only weakly by the type of network.
-
-Overall, network effects lead to a lower share of teams that share data, 
-presumably because we start with no teams sharing data, and therefore the 
-descriptive norms act as a dampener. However, for larger grants (and a lower
-share of teams that is funded each round), the share of groups sharing data
-swings widely between two extreme points, before settling on a narrower 
-equilibrium state.
+It is clear that with network effects and without any incentives, data sharing
+does not occur. The Gini of total resources is therefore stable across different
+rates of funder selectivity. It slightly declines for the case of no networks, 
+given that data sharing seems to perturb the otherwise stable trajectory of 
+funding allocation.
 
 ## Effect on success of different groups
+
 ```{r}
 group_success <- no_network %>% 
   group_by(step, funded_share, init_dist) %>% 
@@ -183,30 +173,38 @@ group_success <- no_network %>%
   collect()
 ```
 
-```{r}
+```{r, fig.width=10, fig.height=10}
 #| label: fig-resources-by-quantile
-#| fig-cap: Mean resources by initial resource quantile with no network
-#| fig-width: 10
-#| fig-height: 10
+#| fig-cap: Mean total resources by initial resource quantile with no network. 
+#|          Higher quantiles (e.g., q4) had initially higher levels of funding.
 
 
 pdata <- group_success %>% 
   pivot_longer(contains("mean_funds"), names_to = "quantile",
                names_pattern = ".*_(q\\d)")
-  
 
 pdata %>% 
   ggplot(aes(step, value, colour = quantile)) +
   geom_line() +
   facet_grid(rows = vars(funded_share),
-             cols = vars(init_dist))
+             cols = vars(init_dist)) +
+  guides(colour = guide_legend(reverse = TRUE)) +
+  labs(y = "Total funding acquired", colour = "Initial resource quantile")
 ```
+With the current settings on randomness in the proposal generation
+(proposal-sigma = 0.15), the distribution of resources exhibits dynamics of 
+cumulative advantage under selective funding regimes. With only 10% of teams
+being receiving funding each round, teams that initially had more funding than
+others (fourth quantile, "q4") acquire substantially more funding over the
+course of the simulation. This effect is much weaker for less selective funding
+regimes.
 
-There is no difference in how successful groups are based on their initial
-quantile, when there are not networks. Below we provide the same for a 
-random network (@fig-resources-by-quantile-random-network), and for a 
-small-world network (@fig-resources-by-quantile-small-world-network).
-
+Below we provide the same for a random
+network (@fig-resources-by-quantile-random-network), and for a small-world
+network (@fig-resources-by-quantile-small-world-network). Without having 
+compared them precisely, results look identical. (To establish this more 
+formally, one could restructure the plots and directly compare the network vs.
+non-network part).
 
 ```{r, fig.width=10, fig.height=10}
 #| label: fig-resources-by-quantile-random-network
@@ -249,9 +247,3 @@ pdata %>%
   facet_grid(rows = vars(funded_share),
              cols = vars(init_dist))
 ```
-
-
-In both cases there are slight differences, but I assume these are just random
-variation. Maybe the methodology of grouping teams based on their initial 
-resources into four quartiles is not very useful - these are large groups that
-hide more fine-grained processes.
