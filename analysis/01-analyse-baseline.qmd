@@ -157,7 +157,7 @@ p_sharing + p_gini +
 
 ```
 
-The red lines in @fig-variability correspond to @fig-vary-share-of-funded-teams.
+The red lines in @fig-network-effect correspond to @fig-vary-share-of-funded-teams.
 It is clear that with network effects and without any incentives, data sharing
 does not occur. The Gini of total resources is therefore stable across different
 rates of funder selectivity. It slightly declines for the case of no networks, 
@@ -189,7 +189,8 @@ pdata %>%
   facet_grid(rows = vars(funded_share),
              cols = vars(init_dist)) +
   guides(colour = guide_legend(reverse = TRUE)) +
-  labs(y = "Total funding acquired", colour = "Initial resource quantile")
+  labs(y = "Total funding acquired", colour = "Initial resource quantile") +
+  theme(legend.position = "top")
 ```
 With the current settings on randomness in the proposal generation
 (proposal-sigma = 0.15), the distribution of resources exhibits dynamics of 
@@ -224,7 +225,10 @@ pdata %>%
   ggplot(aes(step, value, colour = quantile)) +
   geom_line() +
   facet_grid(rows = vars(funded_share),
-             cols = vars(init_dist))
+             cols = vars(init_dist)) +
+  guides(colour = guide_legend(reverse = TRUE)) +
+  labs(y = "Total funding acquired", colour = "Initial resource quantile") +
+  theme(legend.position = "top")
 ```
 
 ```{r, fig.width=10, fig.height=10}
@@ -245,5 +249,8 @@ pdata %>%
   ggplot(aes(step, value, colour = quantile)) +
   geom_line() +
   facet_grid(rows = vars(funded_share),
-             cols = vars(init_dist))
+             cols = vars(init_dist)) +
+  guides(colour = guide_legend(reverse = TRUE)) +
+  labs(y = "Total funding acquired", colour = "Initial resource quantile") +
+  theme(legend.position = "top")
 ```
