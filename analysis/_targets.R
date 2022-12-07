@@ -10,7 +10,7 @@ list(
   # baseline file -----------
   tar_target(
     baseline_file,
-    "../outputs/data_sharing_policies baseline-table.csv",
+    "../outputs/data_sharing_policies baseline-table-2.csv",
     format = "file"
   ),
   tarchetypes::tar_quarto(baseline_report, "01-analyse-baseline.qmd"),

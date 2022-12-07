@@ -16,6 +16,10 @@ select_baseline <- function(df) {
            mean_funds_q2 = `mean-funding-within teams with [initial-resources-quantile = "q2"]`,
            mean_funds_q3 = `mean-funding-within teams with [initial-resources-quantile = "q3"]`,
            mean_funds_q4 = `mean-funding-within teams with [initial-resources-quantile = "q4"]`,
+           data_sharing_q1 = `data-sharing-within teams with [initial-resources-quantile = "q1"]`,
+           data_sharing_q2 = `data-sharing-within teams with [initial-resources-quantile = "q2"]`,
+           data_sharing_q3 = `data-sharing-within teams with [initial-resources-quantile = "q3"]`,
+           data_sharing_q4 = `data-sharing-within teams with [initial-resources-quantile = "q4"]`,
     )
 }
 
