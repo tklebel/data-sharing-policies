@@ -657,7 +657,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.24
+0.0
 .01
 1
 NIL
@@ -671,7 +671,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-0
+1
 
 SLIDER
 236
@@ -807,7 +807,7 @@ funded-share
 funded-share
 1
 100
-41.0
+85.0
 1
 1
 %
@@ -1314,6 +1314,10 @@ NetLogo 6.2.2
     <metric>mean-funding-within teams with [initial-resources-quantile = "q2"]</metric>
     <metric>mean-funding-within teams with [initial-resources-quantile = "q3"]</metric>
     <metric>mean-funding-within teams with [initial-resources-quantile = "q4"]</metric>
+    <metric>data-sharing-within teams with [initial-resources-quantile = "q1"]</metric>
+    <metric>data-sharing-within teams with [initial-resources-quantile = "q2"]</metric>
+    <metric>data-sharing-within teams with [initial-resources-quantile = "q3"]</metric>
+    <metric>data-sharing-within teams with [initial-resources-quantile = "q4"]</metric>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
