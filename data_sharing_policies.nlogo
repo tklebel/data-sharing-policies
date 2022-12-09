@@ -29,22 +29,23 @@ to setup
   clear-all
 
   ask patches [set pcolor white]
+  ; radius for the circle
+  let radius 24
 
   ifelse network != "none" [
     if network = "random" [
-      nw:generate-random teams team-links n-teams 0.05 [
-        setxy random-xcor random-ycor
+      nw:generate-random teams team-links n-teams 0.02 [
+        fd radius
       ]
     ]
     if network = "small-world" [
-      nw:generate-small-world teams team-links 10 10 2 false [
-        ; TODO: here we would want the teams to move in some way that the small world network (clustering) becomes visible
-        setxy random-xcor random-ycor
+      nw:generate-watts-strogatz teams team-links n-teams 3 .2  [
+        fd radius
       ]
     ]
   ] [
     create-teams n-teams [
-      setxy random-xcor random-ycor
+      fd radius
     ]
   ]
 
@@ -170,8 +171,7 @@ end
 
 to update-norms
   ask teams [
-    let neighbours (other turtles) in-radius 1
-    ;let neighbours nw:turtles-in-radius 1
+    let neighbours link-neighbors
     let n-neighbours count neighbours
     let n-neighbours-sharing count neighbours with [shared-data?]
     ifelse n-neighbours = 0 [
@@ -315,26 +315,26 @@ to-report mean-funding-within [agentset]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-270
+257
 10
-514
-255
+502
+256
 -1
 -1
-7.152
+4.65
 1
 10
 1
 1
 1
 0
+0
+0
 1
-1
-1
--16
-16
--16
-16
+-25
+25
+-25
+25
 0
 0
 1
@@ -342,9 +342,9 @@ ticks
 30.0
 
 SLIDER
-32
+36
 100
-204
+208
 133
 proposal-sigma
 proposal-sigma
@@ -460,9 +460,9 @@ min [resources] of teams
 11
 
 SWITCH
-35
+39
 266
-167
+171
 299
 data-sharing?
 data-sharing?
@@ -471,9 +471,9 @@ data-sharing?
 -1000
 
 SLIDER
-35
+39
 62
-207
+211
 95
 n-teams
 n-teams
@@ -540,9 +540,9 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot gini [resources] of teams"
 
 SLIDER
-33
+37
 303
-205
+209
 336
 utility-change
 utility-change
@@ -555,9 +555,9 @@ NIL
 HORIZONTAL
 
 SWITCH
-32
+36
 342
-187
+191
 375
 sharing-costs?
 sharing-costs?
@@ -584,9 +584,9 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [effort] of teams"
 
 SLIDER
-36
+40
 187
-208
+212
 220
 initial-utility
 initial-utility
@@ -634,9 +634,9 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of teams"
 
 SLIDER
-32
+36
 414
-204
+208
 447
 originator-benefit
 originator-benefit
@@ -649,9 +649,9 @@ NIL
 HORIZONTAL
 
 SWITCH
-32
+36
 378
-189
+193
 411
 redistribute-costs?
 redistribute-costs?
@@ -660,15 +660,15 @@ redistribute-costs?
 -1000
 
 SLIDER
-33
+37
 453
-205
+209
 486
 sharing-incentive
 sharing-incentive
 0
 1
-0.6
+0.82
 .01
 1
 NIL
@@ -682,7 +682,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-0
+2
 
 SLIDER
 236
@@ -708,7 +708,7 @@ b_norm
 b_norm
 0
 1
-0.0
+1.0
 0.01
 1
 NIL
@@ -733,9 +733,9 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [individual-utility] of teams"
 
 SLIDER
-35
+39
 224
-207
+211
 257
 initial-norm
 initial-norm
@@ -818,7 +818,7 @@ funded-share
 funded-share
 1
 100
-31.0
+25.0
 1
 1
 %
@@ -843,9 +843,9 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot standard-deviation [individual-utility] of teams"
 
 CHOOSER
-37
+41
 137
-175
+179
 182
 resources-dist
 resources-dist
