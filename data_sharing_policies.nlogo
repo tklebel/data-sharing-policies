@@ -170,10 +170,15 @@ end
 
 to update-norms
   ask teams [
-    let neighbours nw:turtles-in-radius 1
+    let neighbours (other turtles) in-radius 1
+    ;let neighbours nw:turtles-in-radius 1
     let n-neighbours count neighbours
     let n-neighbours-sharing count neighbours with [shared-data?]
-    set descriptive-norm n-neighbours-sharing / n-neighbours - .5
+    ifelse n-neighbours = 0 [
+      set descriptive-norm -.5
+    ][
+      set descriptive-norm n-neighbours-sharing / n-neighbours - .5
+    ]
     ; rescale norm. this is to ensure it is on the same scale as the utility
     set descriptive-norm descriptive-norm * 10
   ]
@@ -182,7 +187,13 @@ end
 
 to share-data
   ask teams [
-    set effort b_utility * individual-utility + b_norm * descriptive-norm
+    ifelse network = "none" [
+      ; when there is no network, don't take descriptive norms into account
+      set effort b_utility * individual-utility
+    ][
+      set effort b_utility * individual-utility + b_norm * descriptive-norm
+    ]
+
     set inv_effort 1 / (1 + exp ( - effort ))
     set shared-data? random-float 1 > 1 - inv_effort
   ]
@@ -671,7 +682,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-2
+0
 
 SLIDER
 236
@@ -697,7 +708,7 @@ b_norm
 b_norm
 0
 1
-1.0
+0.0
 0.01
 1
 NIL
@@ -730,7 +741,7 @@ initial-norm
 initial-norm
 -.5
 .5
-0.0
+-0.5
 .1
 1
 NIL
@@ -807,7 +818,7 @@ funded-share
 funded-share
 1
 100
-80.0
+31.0
 1
 1
 %
@@ -839,7 +850,7 @@ CHOOSER
 resources-dist
 resources-dist
 "uniform" "left-skewed" "right-skewed"
-1
+0
 
 SLIDER
 271
