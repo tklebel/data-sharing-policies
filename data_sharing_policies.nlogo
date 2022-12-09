@@ -203,8 +203,11 @@ to share-data
     set shared-data? random-float 1 > 1 - inv_effort
   ]
 
-  ask teams with [shared-data?] [
-    set resources resources * (1 - sharing-costs / 100) ; reduce total resources by sharing costs
+  ask teams [
+    ; new implementation: costs of sharing data are not tied to having shared data.
+    ; instead, costs are related to the effort that goes into sharing.
+    ; costs can be up to 10% of base funding budget.
+    set resources resources - (1 / (n-teams * 10)) * inv_effort ; costs are up to 10% of base funding budget
   ]
 end
 
@@ -499,7 +502,7 @@ utility-change
 utility-change
 0
 .2
-0.03
+0.2
 .01
 1
 NIL
@@ -574,15 +577,15 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot sum [resources] of teams"
 
 SLIDER
-36
-387
-208
-420
+282
+378
+454
+411
 sharing-incentive
 sharing-incentive
 0
 1
-0.33
+0.6
 .01
 1
 NIL
@@ -596,7 +599,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-0
+1
 
 SLIDER
 236
@@ -709,30 +712,30 @@ PENS
 "default" 0.1 1 -16777216 true "" "histogram [individual-utility] of teams"
 
 SLIDER
-270
-407
-447
-440
+42
+382
+219
+415
 application-penalty
 application-penalty
 0
 50
-10.0
+5.0
 1
 1
 %
 HORIZONTAL
 
 SLIDER
-271
-445
-443
-478
+284
+420
+456
+453
 funded-share
 funded-share
 1
 100
-27.0
+50.0
 1
 1
 %
@@ -767,10 +770,10 @@ resources-dist
 0
 
 SLIDER
-271
-369
-447
-402
+43
+344
+219
+377
 third-party-funding-ratio
 third-party-funding-ratio
 0
@@ -801,21 +804,6 @@ PENS
 "q2" 1.0 0 -14439633 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q2\"]"
 "q3" 1.0 0 -14070903 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q3\"]"
 "q4" 1.0 0 -7858858 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q4\"]"
-
-SLIDER
-34
-343
-206
-376
-sharing-costs
-sharing-costs
-0
-10
-1.0
-1
-1
-%
-HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
