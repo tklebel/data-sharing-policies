@@ -21,6 +21,7 @@ teams-own [
   individual-utility
   descriptive-norm
   shared-data?
+  funded? ;whether they got funding in this round
   sharing-dividend-pool
 ]
 
@@ -116,6 +117,9 @@ to generate-proposals
 end
 
 to award-grants
+  ask teams [
+    set funded? false
+  ]
   let baseline-pool 1
   let funder-resources third-party-funding-ratio * baseline-pool
 
@@ -137,6 +141,7 @@ to award-grants
   foreach top-teams [x -> ask x [
     set resources resources + funding-per-team
     set total-funding total-funding + funding-per-team
+    set funded? true
   ] ]
 end
 
@@ -198,62 +203,8 @@ to share-data
     set shared-data? random-float 1 > 1 - inv_effort
   ]
 
-  if sharing-costs? [
-    ask teams with [shared-data?] [
-
-      ifelse not redistribute-costs? [
-        ; control case for when resources are not redistributed, but simply subtracted from the team
-        set resources resources * .95 ; simply subtract 5% of resources for a simple implementation of costs
-        if resources < 0 [ set resources 0 ]
-      ] [
-        ; resources are redistributed as a consequence of data sharing
-        ; the size depends on effort, but with a dampener, so only ever half of resources can get redistributed
-        let r-to-redistribute resources * .5 * inv_effort ; map the effort back onto [0, 1] so it can serve as a multiplier
-
-
-        ; if we redistribute costs, we are here
-        ; we still need to subtract the resources from each team
-        set resources resources - r-to-redistribute
-        if resources < 0 [ set resources 0 ]
-
-
-        ; not all of the costs are translated directly to others.
-        ; the combination with 'effort-multiplier' can be understood as indicating that with no effort, there is fewer resources
-        ; to be redistributed than went into generating the data. Above efforts of .4, there is some surplus starting.
-        ; in practical terms, this ratio prevents the total sum of resources from "running away" into exponential growth
-        let resource-transfer-ratio .8 ; this was not initially conceptualised in the gdoc
-
-        ; effort-multiplier: this sets to which degree invested effort creates a surplus for the community and/or the individual
-        ; together with the resource-transfer-ratio as a base, and with effort/2, this determines how much resources are redistributed
-        ; maybe this, in combination with values for 'originator-benefit' can be used to model different fields:
-        ; in some there would be a high "resource transfer", meaning a strong competition effect, while in others this might be low
-        let effort-multiplier .5 ; this is called "theta" in the gdoc
-        set r-to-redistribute r-to-redistribute * (resource-transfer-ratio + effort-multiplier * effort)
-
-        let r-to-self r-to-redistribute * originator-benefit
-        let r-to-others r-to-redistribute - r-to-self
-
-        ; enter dividends into pool
-        set sharing-dividend-pool sharing-dividend-pool + r-to-self
-
-        ; calculate share for other individual teams
-        set r-to-others r-to-others / (n-teams - 1)
-
-        ask other teams [
-          ; give all other teams something back.
-          set resources resources + r-to-others
-        ]
-      ]
-    ]
-
-    ask teams [
-      ; ask all teams to pay themselves dividends, if they have anything in the pool
-      let dividend-rate .3
-      set resources resources + sharing-dividend-pool * dividend-rate
-      ; update dividend pool (remove the dividends paid out)
-      set sharing-dividend-pool sharing-dividend-pool * (1 - dividend-rate)
-    ]
-
+  ask teams with [shared-data?] [
+    set resources resources * (1 - sharing-costs / 100) ; reduce total resources by sharing costs
   ]
 end
 
@@ -374,9 +325,9 @@ NIL
 1
 
 BUTTON
-38
+36
 18
-101
+99
 51
 NIL
 setup\n
@@ -554,17 +505,6 @@ utility-change
 NIL
 HORIZONTAL
 
-SWITCH
-36
-342
-191
-375
-sharing-costs?
-sharing-costs?
-0
-1
--1000
-
 PLOT
 807
 11
@@ -635,40 +575,14 @@ PENS
 
 SLIDER
 36
-414
+387
 208
-447
-originator-benefit
-originator-benefit
-0
-.4
-0.1
-.01
-1
-NIL
-HORIZONTAL
-
-SWITCH
-36
-378
-193
-411
-redistribute-costs?
-redistribute-costs?
-1
-1
--1000
-
-SLIDER
-37
-453
-209
-486
+420
 sharing-incentive
 sharing-incentive
 0
 1
-0.82
+0.33
 .01
 1
 NIL
@@ -682,7 +596,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-2
+0
 
 SLIDER
 236
@@ -803,7 +717,7 @@ application-penalty
 application-penalty
 0
 50
-20.0
+10.0
 1
 1
 %
@@ -818,7 +732,7 @@ funded-share
 funded-share
 1
 100
-25.0
+27.0
 1
 1
 %
@@ -887,6 +801,21 @@ PENS
 "q2" 1.0 0 -14439633 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q2\"]"
 "q3" 1.0 0 -14070903 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q3\"]"
 "q4" 1.0 0 -7858858 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q4\"]"
+
+SLIDER
+34
+343
+206
+376
+sharing-costs
+sharing-costs
+0
+10
+1.0
+1
+1
+%
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
