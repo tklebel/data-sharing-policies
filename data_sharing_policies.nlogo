@@ -504,7 +504,7 @@ utility-change
 utility-change
 0
 .2
-0.2
+0.1
 .01
 1
 NIL
@@ -537,7 +537,7 @@ max-initial-utility
 max-initial-utility
 -4
 4
-1.0
+4.0
 .1
 1
 NIL
@@ -587,7 +587,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.27
+0.46
 .01
 1
 NIL
@@ -601,7 +601,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-0
+1
 
 SLIDER
 236
@@ -737,7 +737,7 @@ funded-share
 funded-share
 1
 100
-27.0
+32.0
 1
 1
 %
@@ -1184,11 +1184,6 @@ NetLogo 6.2.2
     </enumeratedValueSet>
     <enumeratedValueSet variable="resources-dist">
       <value value="&quot;uniform&quot;"/>
-      <value value="&quot;right-skewed&quot;"/>
-      <value value="&quot;left-skewed&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="sharing-costs?">
-      <value value="true"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="proposal-sigma">
       <value value="0.25"/>
@@ -1196,9 +1191,6 @@ NetLogo 6.2.2
     </enumeratedValueSet>
     <enumeratedValueSet variable="n-teams">
       <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="originator-benefit">
-      <value value="0.1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="third-party-funding-ratio">
       <value value="2"/>
@@ -1216,21 +1208,15 @@ NetLogo 6.2.2
     </enumeratedValueSet>
     <enumeratedValueSet variable="funded-share">
       <value value="10"/>
-      <value value="20"/>
-      <value value="30"/>
+      <value value="25"/>
       <value value="50"/>
       <value value="75"/>
-      <value value="85"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="redistribute-costs?">
-      <value value="false"/>
+      <value value="90"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="data-sharing?">
       <value value="true"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="initial-utility">
-      <value value="-4"/>
-    </enumeratedValueSet>
+    <steppedValueSet variable="max-initial-utility" first="-4" step="2" last="4"/>
   </experiment>
   <experiment name="vary_incentives" repetitions="50" sequentialRunOrder="false" runMetricsEveryStep="true">
     <setup>setup</setup>
