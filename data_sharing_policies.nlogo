@@ -65,7 +65,9 @@ to setup
       set resources (x / (x + random-gamma 2 1))
     ]
     set resources-last-round resources
-    set individual-utility initial-utility
+    ; we want random numbers in the interval [-4, 4], but netlogo can't do that directly, so we re-center twice
+    ; alternatively, we could do some beta distribution (as above)
+    set individual-utility ( random-float (max-initial-utility + 4 )) - 4
     set descriptive-norm initial-norm
     set shared-data? false
   ]
@@ -531,11 +533,11 @@ SLIDER
 187
 212
 220
-initial-utility
-initial-utility
+max-initial-utility
+max-initial-utility
 -4
 4
--4.0
+1.0
 .1
 1
 NIL
@@ -585,7 +587,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.6
+0.27
 .01
 1
 NIL
@@ -599,7 +601,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-1
+0
 
 SLIDER
 236
@@ -658,7 +660,7 @@ initial-norm
 initial-norm
 -.5
 .5
--0.5
+-0.4
 .1
 1
 NIL
@@ -735,7 +737,7 @@ funded-share
 funded-share
 1
 100
-50.0
+27.0
 1
 1
 %
