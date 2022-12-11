@@ -235,13 +235,18 @@ end
 ; the initial computation for the gini index was adapted from the peer reviewer game, bianchi et al. DOI: 10.1007/s11192-018-2825-4 (https://www.comses.net/codebases/6b77a08b-7e60-4f47-9ebb-6a8a2e87f486/releases/1.0.0/)
 ; the below and now used implementation was provided by TurtleZero on Stackoverflow: https://stackoverflow.com/a/70524851/3149349
 to-report gini [ samples ]
-  let n length samples
-  let indexes (range 1 (n + 1))
-  let bias-function [ [ i yi ] -> (n + 1 - i) * yi ]
-  let biased-samples (map bias-function indexes sort samples)
-  let ratio sum biased-samples / sum samples
-  let G (1 / n ) * (n + 1 - 2 * ratio)
-  report G
+  ; if we have only zeros, directly return 0
+  ifelse sum samples = 0 [
+    report 0
+  ][
+    let n length samples
+    let indexes (range 1 (n + 1))
+    let bias-function [ [ i yi ] -> (n + 1 - i) * yi ]
+    let biased-samples (map bias-function indexes sort samples)
+    let ratio sum biased-samples / sum samples
+    let G (1 / n ) * (n + 1 - 2 * ratio)
+    report G
+  ]
 end
 
 ; calculate quantiles
