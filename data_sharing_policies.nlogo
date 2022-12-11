@@ -306,7 +306,7 @@ proposal-sigma
 proposal-sigma
 0
 1
-0.15
+0.25
 .01
 1
 NIL
@@ -504,7 +504,7 @@ utility-change
 utility-change
 0
 .2
-0.1
+0.03
 .01
 1
 NIL
@@ -587,7 +587,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.46
+0.0
 .01
 1
 NIL
@@ -601,7 +601,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-1
+0
 
 SLIDER
 236
@@ -660,7 +660,7 @@ initial-norm
 initial-norm
 -.5
 .5
--0.4
+0.0
 .1
 1
 NIL
@@ -737,7 +737,7 @@ funded-share
 funded-share
 1
 100
-32.0
+15.0
 1
 1
 %
@@ -1242,13 +1242,10 @@ NetLogo 6.2.2
     </enumeratedValueSet>
     <steppedValueSet variable="sharing-incentive" first="0" step="0.2" last="1"/>
     <enumeratedValueSet variable="application-penalty">
-      <value value="20"/>
+      <value value="5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="resources-dist">
       <value value="&quot;uniform&quot;"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="sharing-costs?">
-      <value value="true"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="proposal-sigma">
       <value value="0.25"/>
@@ -1256,9 +1253,6 @@ NetLogo 6.2.2
     </enumeratedValueSet>
     <enumeratedValueSet variable="n-teams">
       <value value="100"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="originator-benefit">
-      <value value="0.1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="third-party-funding-ratio">
       <value value="2"/>
@@ -1275,19 +1269,17 @@ NetLogo 6.2.2
       <value value="&quot;small-world&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="funded-share">
-      <value value="10"/>
-      <value value="25"/>
+      <value value="15"/>
       <value value="50"/>
-      <value value="80"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="redistribute-costs?">
-      <value value="false"/>
+      <value value="85"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="data-sharing?">
       <value value="true"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="initial-utility">
-      <value value="-4"/>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-3"/>
+      <value value="0"/>
+      <value value="3"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
