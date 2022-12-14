@@ -1287,7 +1287,7 @@ NetLogo 6.2.2
       <value value="3"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="full_sweep" repetitions="60" sequentialRunOrder="false" runMetricsEveryStep="true">
+  <experiment name="full_sweep" repetitions="60" sequentialRunOrder="false" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
