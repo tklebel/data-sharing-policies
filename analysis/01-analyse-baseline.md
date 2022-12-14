@@ -24,7 +24,8 @@ no_network <- df %>%
   filter(network == "none")
   
 no_network_unif_dist <- no_network %>% 
-  filter(init_dist == "uniform")
+  filter(init_dist == "uniform",
+         max_initial_utilitiy == -4)
 
 
 pdata <- no_network_unif_dist %>% 
@@ -59,7 +60,7 @@ p1 / p2 / p3 +
 
 ::: {.cell-output .cell-output-stderr}
 ```
-Warning: Removed 6 rows containing missing values (`geom_line()`).
+Warning: Removed 5 rows containing missing values (`geom_line()`).
 ```
 :::
 
@@ -74,13 +75,71 @@ stable after an initial adaptation, and reflect the general level of selectivity
 of research funding: low selectivity leads to low inequality of resources and
 vice versa.
 
-The percentage of teams sharing data is also affected by the selectivity of
-funding: more selective funding leads to lower sharing. This is assuming no
-incentives at all and solely represents the agents' internal dynamics of
-assessing whether they are better or worse off in this round than the previous
-one.
+The percentage of teams sharing data is not affected by the selectivity of
+funding. Regardless of funding selectivity, about 20% of agents share data in 
+the long run. 
 
-> Is this an expected finding?
+> Is this an expected finding based on the model setup? Given that there are 
+costs to sharing data, shouldn't all teams stop sharing?
+
+## Effect of initial utility levels
+
+::: {.cell}
+
+```{.r .cell-code}
+no_network <- df %>% 
+  filter(network == "none")
+  
+no_network_unif_dist <- no_network %>% 
+  filter(init_dist == "uniform", funded_share == 50)
+
+
+pdata <- no_network_unif_dist %>% 
+  group_by(step, max_initial_utilitiy) %>% 
+  summarise(mean_gini = mean(resources_gini),
+            mean_cumulative_gini = mean(total_funding_gini),
+            mean_sharing = mean(perc_sharing)) %>% 
+  collect()
+
+p1 <- pdata %>%  
+  ggplot(aes(step, mean_gini, colour = as.factor(max_initial_utilitiy))) +
+  geom_line() +
+  labs(colour = "Initial utilitily",
+       y = "Gini of current resources")
+
+p2 <- pdata %>%  
+  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(max_initial_utilitiy))) +
+  geom_line() +
+  labs(colour = "Initial utilitily",
+       y = "Gini of total resources")
+
+p3 <- pdata %>%  
+  ggplot(aes(step, mean_sharing, colour = as.factor(max_initial_utilitiy))) +
+  geom_line() +
+  labs(colour = "Initial utilitily",
+       y = "% of groups sharing data") 
+
+p1 / p2 / p3 +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Removed 5 rows containing missing values (`geom_line()`).
+```
+:::
+
+::: {.cell-output-display}
+![Gini index and % of groups sharing data dependent on initial utility](01-analyse-baseline_files/figure-html/fig-vary-utility-1.png){#fig-vary-utility width=864}
+:::
+:::
+
+
+Initial utility settings have no meaningful effect on the equality of resources.
+Data sharing is initially higher for higher initial utility, which is as 
+expected. However, it is unclear why data sharing occurs at all, given that 
+there are no incentives and data sharing is a costly activity.
 
 
 ## Comparing network effects
@@ -90,7 +149,7 @@ one.
 
 ```{.r .cell-code}
 uniform <- df %>% 
-  filter(init_dist == "uniform")
+  filter(init_dist == "uniform", max_initial_utilitiy == 4)
 
 pdata <- uniform %>% 
   select(run_number, network, funded_share, step, perc_sharing, resources_gini,
@@ -129,17 +188,16 @@ Warning: Removed 3 rows containing missing values (`geom_line()`).
 :::
 
 ::: {.cell-output-display}
-![Effect of networks on (A) rate of sharing and (B) Gini coefficient of total resources. The rows represent the varying rate of funded teams in %. Uniform starting distribution.](01-analyse-baseline_files/figure-html/fig-network-effect-1.png){#fig-network-effect width=960}
+![Effect of networks on (A) rate of sharing and (B) Gini coefficient of total resources. The rows represent the varying rate of funded teams in %. Uniform starting distribution, uniform initial utility (up to 4).](01-analyse-baseline_files/figure-html/fig-network-effect-1.png){#fig-network-effect width=960}
 :::
 :::
 
 
 The red lines in @fig-network-effect correspond to @fig-vary-share-of-funded-teams.
 It is clear that with network effects and without any incentives, data sharing
-does not occur. The Gini of total resources is therefore stable across different
-rates of funder selectivity. It slightly declines for the case of no networks, 
-given that data sharing seems to perturb the otherwise stable trajectory of 
-funding allocation.
+is very low. This is unaffected by the funder selectivity.
+The Gini of total resources is therefore stable across different rates of funder
+selectivity. 
 
 ## Effect on success of different groups
 
@@ -147,8 +205,9 @@ funding allocation.
 ::: {.cell}
 
 ```{.r .cell-code}
-group_success <- no_network %>% 
-  group_by(step, funded_share, init_dist) %>% 
+group_success <- df %>% 
+  filter(max_initial_utilitiy %in% c(-4, 0, 4)) %>% 
+  group_by(step, funded_share, max_initial_utilitiy) %>% 
   summarise(across(contains("mean_funds"), .fns = mean)) %>% 
   collect()
 ```
@@ -165,7 +224,7 @@ pdata %>%
   ggplot(aes(step, value, colour = quantile)) +
   geom_line() +
   facet_grid(rows = vars(funded_share),
-             cols = vars(init_dist)) +
+             cols = vars(max_initial_utilitiy)) +
   guides(colour = guide_legend(reverse = TRUE)) +
   labs(y = "Total funding acquired", colour = "Initial resource quantile") +
   theme(legend.position = "top")
@@ -184,16 +243,6 @@ others (fourth quantile, "q4") acquire substantially more funding over the
 course of the simulation. This effect is much weaker for less selective funding
 regimes.
 
-The effect of the initial resource distribution is small, and as expected. 
-However, the terminology (coming from the peer review model) is wrong: what is
-termed a "left-skewed" distribution should be a distribution that has few low
-values and many high values (more high values than low values). This was the 
-wrong way until now and will be changed in later iterations of the simulation.
-
-In substantive terms: where the initial resource distribution had few actors
-with high resources (wrongly termed "left-skewed" here) leads to a more unequal
-distribution later on.
-
 
 Below we provide the same for a random
 network (@fig-resources-by-quantile-random-network), and for a small-world
@@ -207,8 +256,8 @@ non-network part).
 
 ```{.r .cell-code}
 group_success <- df %>% 
-  filter(network == "random") %>% 
-  group_by(step, funded_share, init_dist) %>% 
+  filter(network == "random", max_initial_utilitiy %in% c(-4, 0, 4)) %>% 
+  group_by(step, funded_share, max_initial_utilitiy) %>% 
   summarise(across(contains("mean_funds"), .fns = mean)) %>% 
   collect()
 
@@ -220,7 +269,7 @@ pdata %>%
   ggplot(aes(step, value, colour = quantile)) +
   geom_line() +
   facet_grid(rows = vars(funded_share),
-             cols = vars(init_dist)) +
+             cols = vars(max_initial_utilitiy)) +
   guides(colour = guide_legend(reverse = TRUE)) +
   labs(y = "Total funding acquired", colour = "Initial resource quantile") +
   theme(legend.position = "top")
@@ -235,8 +284,8 @@ pdata %>%
 
 ```{.r .cell-code}
 group_success <- df %>% 
-  filter(network == "small-world") %>% 
-  group_by(step, funded_share, init_dist) %>% 
+  filter(network == "small-world", max_initial_utilitiy %in% c(-4, 0, 4)) %>% 
+  group_by(step, funded_share, max_initial_utilitiy) %>% 
   summarise(across(contains("mean_funds"), .fns = mean)) %>% 
   collect()
 
@@ -248,7 +297,7 @@ pdata %>%
   ggplot(aes(step, value, colour = quantile)) +
   geom_line() +
   facet_grid(rows = vars(funded_share),
-             cols = vars(init_dist)) +
+             cols = vars(max_initial_utilitiy)) +
   guides(colour = guide_legend(reverse = TRUE)) +
   labs(y = "Total funding acquired", colour = "Initial resource quantile") +
   theme(legend.position = "top")
@@ -258,3 +307,6 @@ pdata %>%
 ![Mean resources by initial resource quantile with small-world network](01-analyse-baseline_files/figure-html/fig-resources-by-quantile-small-world-network-1.png){#fig-resources-by-quantile-small-world-network width=768}
 :::
 :::
+
+
+## Which quantiles share data?
