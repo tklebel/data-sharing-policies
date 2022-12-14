@@ -1,5 +1,6 @@
 library(targets)
 library(tarchetypes)
+library(arrow)
 
 source("R/functions.R")
 
