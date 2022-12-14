@@ -310,3 +310,43 @@ pdata %>%
 
 
 ## Which quantiles share data?
+
+::: {.cell}
+
+```{.r .cell-code}
+team_sharing <- df %>% 
+  filter(network == "none", max_initial_utilitiy %in% c(-4, 0, 4)) %>% 
+  group_by(step, funded_share, max_initial_utilitiy) %>% 
+  summarise(across(contains("data_sharing"), .fns = mean)) %>% 
+  collect()
+
+pdata <- team_sharing %>% 
+  pivot_longer(contains("data_sharing"), names_to = "quantile",
+               names_pattern = ".*_(q\\d)")
+
+pdata %>% 
+  ggplot(aes(step, value, colour = quantile)) +
+  geom_line(alpha = .8) +
+  facet_grid(rows = vars(funded_share),
+             cols = vars(max_initial_utilitiy)) +
+  guides(colour = guide_legend(reverse = TRUE)) +
+  labs(y = "% of teams sharing data", colour = "Initial resource quantile") +
+  theme(legend.position = "top")
+```
+
+::: {.cell-output-display}
+![Mean % of teams sharing by initial resource quantile with no network. Rows represent the % of teams receiving sharing.](01-analyse-baseline_files/figure-html/fig-sharing-by-quantile-no-network-1.png){#fig-sharing-by-quantile-no-network width=768}
+:::
+:::
+
+
+
+There are no big differences visible in @fig-sharing-by-quantile-no-network 
+regarding which teams take up sharing. If anything, under competitive funding,
+top and bottom quartiles are sharing data less initially, but this largely 
+equals out over time (except for the top right box, with competitive funding and
+completely uniform initial utility). 
+
+There are somewhat larger differences for the case of non-competitive funding
+(bottom row), but given that this is quite an unrealistic case, I don't think
+it is meaningful to discuss this further.
