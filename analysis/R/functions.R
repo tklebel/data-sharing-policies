@@ -4,6 +4,26 @@ read_experiments <- function(path) {
     mutate(across(contains("gini"), as.numeric))
 }
 
+setup_schema <- schema(
+  `[run number]` = int64(), `initial-norm` = int64(), b_norm = int64(), 
+  `sharing-incentive` = float64(), `application-penalty` = int64(), 
+  `resources-dist` = utf8(), `proposal-sigma` = float64(), 
+  `n-teams` = int64(), `third-party-funding-ratio` = int64(), 
+  `utility-change` = float64(), b_utility = int64(), network = utf8(), 
+  `funded-share` = int64(),`data-sharing?` = bool(), 
+  `max-initial-utility` = int64(), `[step]` = int64(), 
+  `gini [resources] of teams` = float64(), `gini [total-funding] of teams` = float64(), 
+  `mean [effort] of teams` = float64(), `%-sharing` = int64(), 
+  `mean-funding-within teams with [initial-resources-quantile = "q1"]` = float64(), 
+  `mean-funding-within teams with [initial-resources-quantile = "q2"]` = float64(), 
+  `mean-funding-within teams with [initial-resources-quantile = "q3"]` = float64(), 
+  `mean-funding-within teams with [initial-resources-quantile = "q4"]` = float64(),
+  `data-sharing-within teams with [initial-resources-quantile = "q1"]` = float64(), 
+  `data-sharing-within teams with [initial-resources-quantile = "q2"]` = float64(), 
+  `data-sharing-within teams with [initial-resources-quantile = "q3"]` = float64(), 
+  `data-sharing-within teams with [initial-resources-quantile = "q4"]` = float64()
+)
+
 select_baseline <- function(df) {
   df %>% 
     select(run_number = `[run number]`, init_dist = `resources-dist`, network, 
