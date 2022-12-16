@@ -601,11 +601,12 @@ actors to gain an advantage.
 
 Theoretically, one could make two competing arguments: with Bourdieu
 (homo academicus), one could argue that high-prestige actors are too slow and 
-hesitant to change their ways (habitus). Alternatively, arguing with Rogers 
+hesitant to change their ways/habitus. Alternatively, arguing with Rogers 
 (Diffusion of innovation), better resourced actors would be leaders of 
 innovation.
 
-Our results align with what could postulate with Bourdieu. However, this ignores
+Our results align with what could be postulated with Bourdieu. However, this 
+ignores
 the potential that high-profile actors take strategic action: embarking on data
 sharing, knowing that this will be important in the future. Furthermore, our 
 model ignores scaling effects: that more resources might make it easier to take
