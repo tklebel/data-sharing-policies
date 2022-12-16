@@ -191,14 +191,14 @@ selectivity.
 
 ```{r}
 group_success <- df %>% 
-  filter(max_initial_utility %in% c(-4, 0, 4)) %>% 
+  filter(network == "none", max_initial_utility %in% c(-4, 0, 4)) %>% 
   group_by(step, funded_share, max_initial_utility) %>% 
   summarise(across(contains("mean_funds"), .fns = mean)) %>% 
   collect()
 ```
 
 ```{r, fig.width=8, fig.height=8}
-#| label: fig-resources-by-quantile
+#| label: fig-resources-by-quantile-no-entwork
 #| fig-cap: Mean total resources by initial resource quantile with no network. 
 #|          Higher quantiles (e.g., q4) had initially higher levels of funding.
 

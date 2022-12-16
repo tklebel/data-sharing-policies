@@ -423,8 +423,202 @@ to the two pathways to success, but this is still to be confirmed. Once sharing
 tops out and teams settle into either sharing or not sharing, inequality rises 
 again.
 
-# Uptake across quartiles
+# Success across quartiles
 
-# Open questions
+::: {.cell}
 
-- Why is a higher sharing incentive leading to lower Gini? 
+```{.r .cell-code}
+group_success <- df %>% 
+  filter(max_initial_utility == -3, network == "none") %>% 
+  group_by(step, sharing_incentive, funded_share) %>% 
+  summarise(across(contains("mean_funds"), .fns = mean)) %>% 
+  collect()
+```
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+pdata <- group_success %>% 
+  pivot_longer(contains("mean_funds"), names_to = "quantile",
+               names_pattern = ".*_(q\\d)")
+
+pdata %>% 
+  ggplot(aes(step, value, colour = quantile)) +
+  geom_line() +
+  facet_grid(rows = vars(sharing_incentive),
+             cols = vars(funded_share)) +
+  guides(colour = guide_legend(reverse = TRUE)) +
+  labs(y = "Total funding acquired", colour = "Initial resource quantile") +
+  theme(legend.position = "top") +
+  coord_cartesian(ylim = c(0, 100))
+```
+
+::: {.cell-output-display}
+![Mean total resources by initial resource quantile with no network. Higher quantiles (e.g., q4) had initially higher levels of funding. Max initial utility is fixed at -3. Columns represent cases of funder selectivity. Rows represent varying sharing incentives. Y-Axis is trunced to reveal aspects at earlier stages in the simulations.](02-analyse-funding-intervention_files/figure-html/fig-resources-by-quantile-no-networks-1.png){#fig-resources-by-quantile-no-networks width=768}
+:::
+:::
+
+The above @fig-resources-by-quantile-no-networks might provide tentative answers
+on the question of randomness vs. two-pathways to success. Most relevantly, the
+case of low funder selectivity (15% funded teams) and moderate incentives (.4):
+Initially, the top quartile (which had the most resources when starting out) is
+more successful. However, it soon gets overtaken by the middle two quartiles.
+This might be evidence to the fact that these quartiles take up sharing and
+are therefore successful (to be confirmed below).
+
+Given that these effects are stronger with the presence of networks, it is
+particularly interesting to observe the small-world network case in 
+@fig-resources-by-quantile-small-world: with moderate incentives, there seems
+to be indeed a switch: lower resourced quartiles take up sharing as an 
+alternative strategy and are more successful on the longer term. This is 
+restricted to the middle quartiles for the case of 15% funded teams (e.g., by 
+limited funder reach), but goes to a complete switch of resources among 
+quartiles with 50% of funded teams.
+
+It should be noted that this whole upheaval does not lead to a complete reversal,
+and thus similar levels of inequality as if no team was sharing data. Quite the 
+opposite, resources seem to be split more equally across quartiles, which is 
+also reflected in the lower Gini coefficients for total resources.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+group_success <- df %>% 
+  filter(max_initial_utility == -3, network == "random") %>% 
+  group_by(step, sharing_incentive, funded_share) %>% 
+  summarise(across(contains("mean_funds"), .fns = mean)) %>% 
+  collect()
+
+pdata <- group_success %>% 
+  pivot_longer(contains("mean_funds"), names_to = "quantile",
+               names_pattern = ".*_(q\\d)")
+
+pdata %>% 
+  ggplot(aes(step, value, colour = quantile)) +
+  geom_line() +
+  facet_grid(rows = vars(sharing_incentive),
+             cols = vars(funded_share)) +
+  guides(colour = guide_legend(reverse = TRUE)) +
+  labs(y = "Total funding acquired", colour = "Initial resource quantile") +
+  theme(legend.position = "top") +
+  coord_cartesian(ylim = c(0, 100))
+```
+
+::: {.cell-output-display}
+![Mean total resources by initial resource quantile with no network. Higher quantiles (e.g., q4) had initially higher levels of funding. Max initial utility is fixed at -3. Random network. Columns represent cases of funder selectivity. Rows represent varying sharing incentives. Y-Axis is trunced to reveal aspects at earlier stages in the simulations.](02-analyse-funding-intervention_files/figure-html/fig-resources-by-quantile-random-network-1.png){#fig-resources-by-quantile-random-network width=768}
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+group_success <- df %>% 
+  filter(max_initial_utility == -3, network == "random") %>% 
+  group_by(step, sharing_incentive, funded_share) %>% 
+  summarise(across(contains("mean_funds"), .fns = mean)) %>% 
+  collect()
+
+pdata <- group_success %>% 
+  pivot_longer(contains("mean_funds"), names_to = "quantile",
+               names_pattern = ".*_(q\\d)")
+
+pdata %>% 
+  ggplot(aes(step, value, colour = quantile)) +
+  geom_line() +
+  facet_grid(rows = vars(sharing_incentive),
+             cols = vars(funded_share)) +
+  guides(colour = guide_legend(reverse = TRUE)) +
+  labs(y = "Total funding acquired", colour = "Initial resource quantile") +
+  theme(legend.position = "top") +
+  coord_cartesian(ylim = c(0, 100))
+```
+
+::: {.cell-output-display}
+![Mean total resources by initial resource quantile with no network. Higher quantiles (e.g., q4) had initially higher levels of funding. Max initial utility is fixed at -3. Small-world network. Columns represent cases of funder selectivity. Rows represent varying sharing incentives. Y-Axis is trunced to reveal aspects at earlier stages in the simulations.](02-analyse-funding-intervention_files/figure-html/fig-resources-by-quantile-small-world-1.png){#fig-resources-by-quantile-small-world width=768}
+:::
+:::
+
+
+## Which quantiles share data?
+
+::: {.cell}
+
+```{.r .cell-code}
+team_sharing <- df %>% 
+  filter(funded_share %in% c(15, 50), max_initial_utility == -3,
+         sharing_incentive == .4) %>% 
+  group_by(step, funded_share, network) %>% 
+  summarise(across(contains("data_sharing"), .fns = mean)) %>% 
+  collect()
+
+pdata <- team_sharing %>% 
+  pivot_longer(contains("data_sharing"), names_to = "quantile",
+               names_pattern = ".*_(q\\d)")
+
+pdata %>% 
+  ggplot(aes(step, value, colour = quantile)) +
+  geom_line(alpha = .8) +
+  facet_grid(rows = vars(funded_share),
+             cols = vars(network)) +
+  guides(colour = guide_legend(reverse = TRUE)) +
+  labs(y = "% of teams sharing data", colour = "Initial resource quantile") +
+  theme(legend.position = "top")
+```
+
+::: {.cell-output-display}
+![Mean % of teams sharing by initial resource quantile by network type. Rows represent the % of teams receiving sharing. Max initial utility is fixed at -3, sharing incentive is fixed at .4.](02-analyse-funding-intervention_files/figure-html/fig-sharing-by-quantile-1.png){#fig-sharing-by-quantile width=768}
+:::
+:::
+
+
+@fig-sharing-by-quantile seems to confirm the hypothesis of the two-pathway 
+model: This is particularly visible in the case of 50% funded teams and 
+small-world networks. Here, the bottom quartiles (i.e., the poorest) take up
+sharing more quickly and to a much larger extent. Given that 
+@fig-resources-by-quantile-small-world above showed an initial advantage of 
+total resources for higher resourced quartiles, this complements the picture:
+Initially, top teams do not share data and are still successful. Lower resourced
+teams are able to be successful through increasing their sharing effort, 
+outperforming the better resourced actors over time. 
+
+It should be noted that these patterns emerge, despite the fact that we 
+initialise the model without any correlation or clustering in resources 
+according to the networks. That is: all networks have low and high resourced 
+networks at the start. If we had stratification, with some clusters with high
+resources and others with low resources, we might see this more strongly or not
+at all -> interesting follow up question.
+
+# Summary
+- Incentives lead to higher data sharing in our model.
+- Funder selectivity is an additionally important determinant of the diffusion 
+of practices: with no selectivity, the policy does not have an effect. Likewise,
+if selectivity is high, the effect is also small.
+- Introducing data sharing incentives might open up alternative pathways to 
+success: taking up data sharing might be a successful strategy for low-resourced
+actors to gain an advantage.
+
+Theoretically, one could make two competing arguments: with Bourdieu
+(homo academicus), one could argue that high-prestige actors are too slow and 
+hesitant to change their ways (habitus). Alternatively, arguing with Rogers 
+(Diffusion of innovation), better resourced actors would be leaders of 
+innovation.
+
+Our results align with what could postulate with Bourdieu. However, this ignores
+the potential that high-profile actors take strategic action: embarking on data
+sharing, knowing that this will be important in the future. Furthermore, our 
+model ignores scaling effects: that more resources might make it easier to take
+up sharing. Still, I'm intrigued by the fact that what we expected (negative 
+effect of data sharing on inequality) did not in fact emerge, but the opposite.
+
+
+# Limitations
+There are many limitations, but currently there are two that stand out to me:
+
+- Max initial utilitiy is uniform. It might be better to model this with skewed
+distributions: case (a) - majority low effort but some high effort, case (b) the
+opposite, case (c) normal distribution.
+- Correlation between clustering and resources. The above analysis raises the 
+interesting question what would happen if resources were tied to network 
+position. 

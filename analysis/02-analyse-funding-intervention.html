@@ -414,13 +414,165 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>It is surprising how different the results of 50% funded teams are to those with 15% funded teams, also in a qualitative sense: there are no alternating extremes here. Sharing uptake is quick for medium incentives (.4 and .6), and settles at about the share of teams being funded (50%).</p>
 <p>Total inequality of resources exhibits similar patterns as above: very high incentives lead to <em>very</em> low inequality, which can be equated to purely random funding. However, with medium incentives and network effects, randomness does not take over, at least not in the long run: after an initial drop in inequality, it rises again somewhat. This is tied to the uptick in sharing: while the rate of sharing is rising quickly, inequality goes down. I suspect this is due to the two pathways to success, but this is still to be confirmed. Once sharing tops out and teams settle into either sharing or not sharing, inequality rises again.</p>
 </section>
-<section id="uptake-across-quartiles" class="level1">
-<h1>Uptake across quartiles</h1>
+<section id="success-across-quartiles" class="level1">
+<h1>Success across quartiles</h1>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>group_success <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(max_initial_utility <span class="sc">==</span> <span class="sc">-</span><span class="dv">3</span>, network <span class="sc">==</span> <span class="st">"none"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(step, sharing_incentive, funded_share) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"mean_funds"</span>), <span class="at">.fns =</span> mean)) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>pdata <span class="ot">&lt;-</span> group_success <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">contains</span>(<span class="st">"mean_funds"</span>), <span class="at">names_to =</span> <span class="st">"quantile"</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_pattern =</span> <span class="st">".*_(q</span><span class="sc">\\</span><span class="st">d)"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>pdata <span class="sc">%&gt;%</span> </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(step, value, <span class="at">colour =</span> quantile)) <span class="sc">+</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="at">rows =</span> <span class="fu">vars</span>(sharing_incentive),</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">cols =</span> <span class="fu">vars</span>(funded_share)) <span class="sc">+</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">colour =</span> <span class="fu">guide_legend</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Total funding acquired"</span>, <span class="at">colour =</span> <span class="st">"Initial resource quantile"</span>) <span class="sc">+</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>) <span class="sc">+</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-resources-by-quantile-no-networks" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="02-analyse-funding-intervention_files/figure-html/fig-resources-by-quantile-no-networks-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;6: Mean total resources by initial resource quantile with no network. Higher quantiles (e.g., q4) had initially higher levels of funding. Max initial utility is fixed at -3. Columns represent cases of funder selectivity. Rows represent varying sharing incentives. Y-Axis is trunced to reveal aspects at earlier stages in the simulations.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The above <a href="#fig-resources-by-quantile-no-networks">Figure&nbsp;6</a> might provide tentative answers on the question of randomness vs.&nbsp;two-pathways to success. Most relevantly, the case of low funder selectivity (15% funded teams) and moderate incentives (.4): Initially, the top quartile (which had the most resources when starting out) is more successful. However, it soon gets overtaken by the middle two quartiles. This might be evidence to the fact that these quartiles take up sharing and are therefore successful (to be confirmed below).</p>
+<p>Given that these effects are stronger with the presence of networks, it is particularly interesting to observe the small-world network case in <a href="#fig-resources-by-quantile-small-world">Figure&nbsp;8</a>: with moderate incentives, there seems to be indeed a switch: lower resourced quartiles take up sharing as an alternative strategy and are more successful on the longer term. This is restricted to the middle quartiles for the case of 15% funded teams (e.g., by limited funder reach), but goes to a complete switch of resources among quartiles with 50% of funded teams.</p>
+<p>It should be noted that this whole upheaval does not lead to a complete reversal, and thus similar levels of inequality as if no team was sharing data. Quite the opposite, resources seem to be split more equally across quartiles, which is also reflected in the lower Gini coefficients for total resources.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>group_success <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(max_initial_utility <span class="sc">==</span> <span class="sc">-</span><span class="dv">3</span>, network <span class="sc">==</span> <span class="st">"random"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(step, sharing_incentive, funded_share) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"mean_funds"</span>), <span class="at">.fns =</span> mean)) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>pdata <span class="ot">&lt;-</span> group_success <span class="sc">%&gt;%</span> </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">contains</span>(<span class="st">"mean_funds"</span>), <span class="at">names_to =</span> <span class="st">"quantile"</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_pattern =</span> <span class="st">".*_(q</span><span class="sc">\\</span><span class="st">d)"</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>pdata <span class="sc">%&gt;%</span> </span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(step, value, <span class="at">colour =</span> quantile)) <span class="sc">+</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="at">rows =</span> <span class="fu">vars</span>(sharing_incentive),</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>             <span class="at">cols =</span> <span class="fu">vars</span>(funded_share)) <span class="sc">+</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">colour =</span> <span class="fu">guide_legend</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Total funding acquired"</span>, <span class="at">colour =</span> <span class="st">"Initial resource quantile"</span>) <span class="sc">+</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>) <span class="sc">+</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-resources-by-quantile-random-network" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="02-analyse-funding-intervention_files/figure-html/fig-resources-by-quantile-random-network-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;7: Mean total resources by initial resource quantile with no network. Higher quantiles (e.g., q4) had initially higher levels of funding. Max initial utility is fixed at -3. Random network. Columns represent cases of funder selectivity. Rows represent varying sharing incentives. Y-Axis is trunced to reveal aspects at earlier stages in the simulations.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>group_success <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(max_initial_utility <span class="sc">==</span> <span class="sc">-</span><span class="dv">3</span>, network <span class="sc">==</span> <span class="st">"random"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(step, sharing_incentive, funded_share) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"mean_funds"</span>), <span class="at">.fns =</span> mean)) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>pdata <span class="ot">&lt;-</span> group_success <span class="sc">%&gt;%</span> </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">contains</span>(<span class="st">"mean_funds"</span>), <span class="at">names_to =</span> <span class="st">"quantile"</span>,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_pattern =</span> <span class="st">".*_(q</span><span class="sc">\\</span><span class="st">d)"</span>)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>pdata <span class="sc">%&gt;%</span> </span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(step, value, <span class="at">colour =</span> quantile)) <span class="sc">+</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="at">rows =</span> <span class="fu">vars</span>(sharing_incentive),</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>             <span class="at">cols =</span> <span class="fu">vars</span>(funded_share)) <span class="sc">+</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">colour =</span> <span class="fu">guide_legend</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Total funding acquired"</span>, <span class="at">colour =</span> <span class="st">"Initial resource quantile"</span>) <span class="sc">+</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>) <span class="sc">+</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-resources-by-quantile-small-world" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="02-analyse-funding-intervention_files/figure-html/fig-resources-by-quantile-small-world-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8: Mean total resources by initial resource quantile with no network. Higher quantiles (e.g., q4) had initially higher levels of funding. Max initial utility is fixed at -3. Small-world network. Columns represent cases of funder selectivity. Rows represent varying sharing incentives. Y-Axis is trunced to reveal aspects at earlier stages in the simulations.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="which-quantiles-share-data" class="level2">
+<h2 class="anchored" data-anchor-id="which-quantiles-share-data">Which quantiles share data?</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>team_sharing <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(funded_share <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">15</span>, <span class="dv">50</span>), max_initial_utility <span class="sc">==</span> <span class="sc">-</span><span class="dv">3</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>         sharing_incentive <span class="sc">==</span> .<span class="dv">4</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(step, funded_share, network) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">contains</span>(<span class="st">"data_sharing"</span>), <span class="at">.fns =</span> mean)) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>pdata <span class="ot">&lt;-</span> team_sharing <span class="sc">%&gt;%</span> </span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">contains</span>(<span class="st">"data_sharing"</span>), <span class="at">names_to =</span> <span class="st">"quantile"</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_pattern =</span> <span class="st">".*_(q</span><span class="sc">\\</span><span class="st">d)"</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>pdata <span class="sc">%&gt;%</span> </span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(step, value, <span class="at">colour =</span> quantile)) <span class="sc">+</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">alpha =</span> .<span class="dv">8</span>) <span class="sc">+</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="at">rows =</span> <span class="fu">vars</span>(funded_share),</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>             <span class="at">cols =</span> <span class="fu">vars</span>(network)) <span class="sc">+</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">colour =</span> <span class="fu">guide_legend</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"% of teams sharing data"</span>, <span class="at">colour =</span> <span class="st">"Initial resource quantile"</span>) <span class="sc">+</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-sharing-by-quantile" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="02-analyse-funding-intervention_files/figure-html/fig-sharing-by-quantile-1.png" class="img-fluid figure-img" width="768"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9: Mean % of teams sharing by initial resource quantile by network type. Rows represent the % of teams receiving sharing. Max initial utility is fixed at -3, sharing incentive is fixed at .4.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-sharing-by-quantile">Figure&nbsp;9</a> seems to confirm the hypothesis of the two-pathway model: This is particularly visible in the case of 50% funded teams and small-world networks. Here, the bottom quartiles (i.e., the poorest) take up sharing more quickly and to a much larger extent. Given that <a href="#fig-resources-by-quantile-small-world">Figure&nbsp;8</a> above showed an initial advantage of total resources for higher resourced quartiles, this complements the picture: Initially, top teams do not share data and are still successful. Lower resourced teams are able to be successful through increasing their sharing effort, outperforming the better resourced actors over time.</p>
+<p>It should be noted that these patterns emerge, despite the fact that we initialise the model without any correlation or clustering in resources according to the networks. That is: all networks have low and high resourced networks at the start. If we had stratification, with some clusters with high resources and others with low resources, we might see this more strongly or not at all -&gt; interesting follow up question.</p>
 </section>
-<section id="open-questions" class="level1">
-<h1>Open questions</h1>
+</section>
+<section id="summary" class="level1">
+<h1>Summary</h1>
 <ul>
-<li>Why is a higher sharing incentive leading to lower Gini?</li>
+<li>Incentives lead to higher data sharing in our model.</li>
+<li>Funder selectivity is an additionally important determinant of the diffusion of practices: with no selectivity, the policy does not have an effect. Likewise, if selectivity is high, the effect is also small.</li>
+<li>Introducing data sharing incentives might open up alternative pathways to success: taking up data sharing might be a successful strategy for low-resourced actors to gain an advantage.</li>
+</ul>
+<p>Theoretically, one could make two competing arguments: with Bourdieu (homo academicus), one could argue that high-prestige actors are too slow and hesitant to change their ways (habitus). Alternatively, arguing with Rogers (Diffusion of innovation), better resourced actors would be leaders of innovation.</p>
+<p>Our results align with what could postulate with Bourdieu. However, this ignores the potential that high-profile actors take strategic action: embarking on data sharing, knowing that this will be important in the future. Furthermore, our model ignores scaling effects: that more resources might make it easier to take up sharing. Still, I’m intrigued by the fact that what we expected (negative effect of data sharing on inequality) did not in fact emerge, but the opposite.</p>
+</section>
+<section id="limitations" class="level1">
+<h1>Limitations</h1>
+<p>There are many limitations, but currently there are two that stand out to me:</p>
+<ul>
+<li>Max initial utilitiy is uniform. It might be better to model this with skewed distributions: case (a) - majority low effort but some high effort, case (b) the opposite, case (c) normal distribution.</li>
+<li>Correlation between clustering and resources. The above analysis raises the interesting question what would happen if resources were tied to network position.</li>
 </ul>
 </section>
 

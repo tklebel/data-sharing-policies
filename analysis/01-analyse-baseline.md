@@ -14,8 +14,9 @@ execute:
 :::
 
 
-# Effect of grant size
+All plotted data represents the average over 50 runs per condition.
 
+# Effect of grant size
 
 ::: {.cell}
 
@@ -25,7 +26,7 @@ no_network <- df %>%
   
 no_network_unif_dist <- no_network %>% 
   filter(init_dist == "uniform",
-         max_initial_utilitiy == -4)
+         max_initial_utility == -4)
 
 
 pdata <- no_network_unif_dist %>% 
@@ -95,26 +96,26 @@ no_network_unif_dist <- no_network %>%
 
 
 pdata <- no_network_unif_dist %>% 
-  group_by(step, max_initial_utilitiy) %>% 
+  group_by(step, max_initial_utility) %>% 
   summarise(mean_gini = mean(resources_gini),
             mean_cumulative_gini = mean(total_funding_gini),
             mean_sharing = mean(perc_sharing)) %>% 
   collect()
 
 p1 <- pdata %>%  
-  ggplot(aes(step, mean_gini, colour = as.factor(max_initial_utilitiy))) +
+  ggplot(aes(step, mean_gini, colour = as.factor(max_initial_utility))) +
   geom_line() +
   labs(colour = "Initial utilitily",
        y = "Gini of current resources")
 
 p2 <- pdata %>%  
-  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(max_initial_utilitiy))) +
+  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(max_initial_utility))) +
   geom_line() +
   labs(colour = "Initial utilitily",
        y = "Gini of total resources")
 
 p3 <- pdata %>%  
-  ggplot(aes(step, mean_sharing, colour = as.factor(max_initial_utilitiy))) +
+  ggplot(aes(step, mean_sharing, colour = as.factor(max_initial_utility))) +
   geom_line() +
   labs(colour = "Initial utilitily",
        y = "% of groups sharing data") 
@@ -149,7 +150,7 @@ there are no incentives and data sharing is a costly activity.
 
 ```{.r .cell-code}
 uniform <- df %>% 
-  filter(init_dist == "uniform", max_initial_utilitiy == 4)
+  filter(init_dist == "uniform", max_initial_utility == 4)
 
 pdata <- uniform %>% 
   select(run_number, network, funded_share, step, perc_sharing, resources_gini,
@@ -206,8 +207,8 @@ selectivity.
 
 ```{.r .cell-code}
 group_success <- df %>% 
-  filter(max_initial_utilitiy %in% c(-4, 0, 4)) %>% 
-  group_by(step, funded_share, max_initial_utilitiy) %>% 
+  filter(network == "none", max_initial_utility %in% c(-4, 0, 4)) %>% 
+  group_by(step, funded_share, max_initial_utility) %>% 
   summarise(across(contains("mean_funds"), .fns = mean)) %>% 
   collect()
 ```
@@ -224,14 +225,14 @@ pdata %>%
   ggplot(aes(step, value, colour = quantile)) +
   geom_line() +
   facet_grid(rows = vars(funded_share),
-             cols = vars(max_initial_utilitiy)) +
+             cols = vars(max_initial_utility)) +
   guides(colour = guide_legend(reverse = TRUE)) +
   labs(y = "Total funding acquired", colour = "Initial resource quantile") +
   theme(legend.position = "top")
 ```
 
 ::: {.cell-output-display}
-![Mean total resources by initial resource quantile with no network. Higher quantiles (e.g., q4) had initially higher levels of funding.](01-analyse-baseline_files/figure-html/fig-resources-by-quantile-1.png){#fig-resources-by-quantile width=768}
+![Mean total resources by initial resource quantile with no network. Higher quantiles (e.g., q4) had initially higher levels of funding.](01-analyse-baseline_files/figure-html/fig-resources-by-quantile-no-entwork-1.png){#fig-resources-by-quantile-no-entwork width=768}
 :::
 :::
 
@@ -256,8 +257,8 @@ non-network part).
 
 ```{.r .cell-code}
 group_success <- df %>% 
-  filter(network == "random", max_initial_utilitiy %in% c(-4, 0, 4)) %>% 
-  group_by(step, funded_share, max_initial_utilitiy) %>% 
+  filter(network == "random", max_initial_utility %in% c(-4, 0, 4)) %>% 
+  group_by(step, funded_share, max_initial_utility) %>% 
   summarise(across(contains("mean_funds"), .fns = mean)) %>% 
   collect()
 
@@ -269,7 +270,7 @@ pdata %>%
   ggplot(aes(step, value, colour = quantile)) +
   geom_line() +
   facet_grid(rows = vars(funded_share),
-             cols = vars(max_initial_utilitiy)) +
+             cols = vars(max_initial_utility)) +
   guides(colour = guide_legend(reverse = TRUE)) +
   labs(y = "Total funding acquired", colour = "Initial resource quantile") +
   theme(legend.position = "top")
@@ -284,8 +285,8 @@ pdata %>%
 
 ```{.r .cell-code}
 group_success <- df %>% 
-  filter(network == "small-world", max_initial_utilitiy %in% c(-4, 0, 4)) %>% 
-  group_by(step, funded_share, max_initial_utilitiy) %>% 
+  filter(network == "small-world", max_initial_utility %in% c(-4, 0, 4)) %>% 
+  group_by(step, funded_share, max_initial_utility) %>% 
   summarise(across(contains("mean_funds"), .fns = mean)) %>% 
   collect()
 
@@ -297,7 +298,7 @@ pdata %>%
   ggplot(aes(step, value, colour = quantile)) +
   geom_line() +
   facet_grid(rows = vars(funded_share),
-             cols = vars(max_initial_utilitiy)) +
+             cols = vars(max_initial_utility)) +
   guides(colour = guide_legend(reverse = TRUE)) +
   labs(y = "Total funding acquired", colour = "Initial resource quantile") +
   theme(legend.position = "top")
@@ -315,8 +316,8 @@ pdata %>%
 
 ```{.r .cell-code}
 team_sharing <- df %>% 
-  filter(network == "none", max_initial_utilitiy %in% c(-4, 0, 4)) %>% 
-  group_by(step, funded_share, max_initial_utilitiy) %>% 
+  filter(network == "none", max_initial_utility %in% c(-4, 0, 4)) %>% 
+  group_by(step, funded_share, max_initial_utility) %>% 
   summarise(across(contains("data_sharing"), .fns = mean)) %>% 
   collect()
 
@@ -328,7 +329,7 @@ pdata %>%
   ggplot(aes(step, value, colour = quantile)) +
   geom_line(alpha = .8) +
   facet_grid(rows = vars(funded_share),
-             cols = vars(max_initial_utilitiy)) +
+             cols = vars(max_initial_utility)) +
   guides(colour = guide_legend(reverse = TRUE)) +
   labs(y = "% of teams sharing data", colour = "Initial resource quantile") +
   theme(legend.position = "top")
