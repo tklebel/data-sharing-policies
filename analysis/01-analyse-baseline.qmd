@@ -34,8 +34,9 @@ df <- df %>%
   filter(proposal_sigma == .15)
 ```
 
-# Effect of grant size
+All plotted data represents the average over 50 runs per condition.
 
+# Effect of grant size
 ```{r fig.width=9, fig.height=9}
 #| label: fig-vary-share-of-funded-teams
 #| fig-cap: Gini index and % of groups sharing data dependent on grant size
