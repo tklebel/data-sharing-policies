@@ -6,13 +6,8 @@ globals [
   bottom-teams
 ]
 
-breed [teams team]
-
-undirected-link-breed [ team-links team-link ]
-
-teams-own [
+turtles-own [
   resources
-  initial-resources-quantile
   resources-last-round
   total-funding ; record how much funding each group has accrued over time
   proposal-strength
@@ -30,40 +25,24 @@ to setup
   clear-all
 
   ask patches [set pcolor white]
-  ; radius for the circle
-  let radius 24
 
-  ifelse network != "none" [
-    if network = "random" [
-      nw:generate-random teams team-links n-teams 0.02 [
-        fd radius
-      ]
-    ]
-    if network = "small-world" [
-      nw:generate-watts-strogatz teams team-links n-teams 3 .2  [
-        fd radius
-      ]
-    ]
-  ] [
-    create-teams n-teams [
-      fd radius
-    ]
-  ]
+  (ifelse
+    network = "random"      [ nw:generate-random turtles links n-teams 0.02 ]
+    network = "small-world" [ nw:generate-watts-strogatz turtles links n-teams 3 .2 ]
+                            [ create-turtles n-teams ]
+  )
 
-
-  ask teams [
+  ask turtles [
     set shape "circle"
     set color 65
+    ; radius for the circle
+    fd 24
     ; create resource distribution
-    if resources-dist = "uniform" [set resources random-float 1]
-    if resources-dist = "right-skewed" [
-      let x random-gamma 2 1
-      set resources (x / (x + random-gamma 7 1))
-    ]
-    if resources-dist = "left-skewed" [
-      let x random-gamma 7 1
-      set resources (x / (x + random-gamma 2 1))
-    ]
+    set resources (ifelse-value
+      resources-dist = "uniform" [ random-float 1 ]
+      resources-dist = "right-skewed" [ gamma-dist 2 7 ]
+      resources-dist = "left-skewed" [ gamma-dist 7 2 ]
+    )
     set resources-last-round resources
     ; we want random numbers in the interval [-4, 4], but netlogo can't do that directly, so we re-center twice
     ; alternatively, we could do some beta distribution (as above)
@@ -72,20 +51,9 @@ to setup
     set shared-data? false
   ]
 
-  ; assign teams to quantiles
-  let q25 calc-pct 25 [resources] of teams
-  let q50 calc-pct 50 [resources] of teams
-  let q75 calc-pct 75 [resources] of teams
-
-  ask teams [
-    if resources < q25 [set initial-resources-quantile "q1"] ;q[0-25)
-    if resources >= q25 and resources < q50 [set initial-resources-quantile "q2"] ;q[25-50)
-    if resources >= q50 and resources < q75 [set initial-resources-quantile "q3"] ;q[50-75)
-    if resources >= q75 [set initial-resources-quantile "q4"] ;q[75-100]
-  ]
-
   reset-ticks
 end
+
 
 to go
   tick
@@ -101,16 +69,44 @@ to go
     update-utility
     update-norms
   ]
+end
 
 
+to update-indices
+  ; update color to represent effort, and set resources for next round
+  ask turtles [
+    set color 60 + 10 * (1 - inv_effort) ; dark colour represent high effort
+    set resources-last-round resources
+  ]
+end
+
+to share-data
+  ask turtles [
+    ifelse network = "none" [
+      ; when there is no network, don't take descriptive norms into account
+      set effort b_utility * individual-utility
+    ][
+      set effort b_utility * individual-utility + b_norm * descriptive-norm
+    ]
+
+    set inv_effort 1 / (1 + exp ( - effort ))
+    set shared-data? random-float 1 > 1 - inv_effort
+  ]
+
+  ask turtles [
+    ; new implementation: costs of sharing data are not tied to having shared data.
+    ; instead, costs are related to the effort that goes into sharing.
+    ; costs can be up to 10% of base funding budget.
+    set resources resources - (1 / (n-teams * 10)) * inv_effort ; costs are up to 10% of base funding budget
+  ]
 end
 
 to generate-proposals
   ; normalise resources. this is necessary so that effort and resources are on the same scale
   ; find max resources
   let m-resources max-resources
-  let min-resources min [resources] of teams
-  ask teams [
+  let min-resources min [resources] of turtles
+  ask turtles [
     ; https://stats.stackexchange.com/a/70807/42950
     let norm-resources (resources - min-resources) / (m-resources - min-resources)
     let mu ( 1 - sharing-incentive ) * norm-resources + inv_effort * sharing-incentive
@@ -119,25 +115,25 @@ to generate-proposals
 end
 
 to award-grants
-  ask teams [
+  ask turtles [
     set funded? false
   ]
   let baseline-pool 1
   let funder-resources third-party-funding-ratio * baseline-pool
 
   ; base funding
-  ask teams [
+  ask turtles [
     set resources resources + baseline-pool / n-teams
   ]
 
   let n-grants precision (n-teams * funded-share / 100) 0
 
-  set rank-list sort-on [(- proposal-strength)] teams ; need to invert proposal-strength, so that higher values are on top of the list
+  set rank-list sort-on [(- proposal-strength)] turtles ; need to invert proposal-strength, so that higher values are on top of the list
   set top-teams ifelse-value (length rank-list < n-grants) [rank-list] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
 
   ; decrease resources for all (since writing grants costs resources), and
   let application-penalty-perc application-penalty / 100 ; convert back to percentage
-  ask teams [ set resources resources * (1 - application-penalty-perc) ]
+  ask turtles [ set resources resources * (1 - application-penalty-perc) ]
   ; add further one's for some (when receiving funding)
   let funding-per-team funder-resources / n-grants
   foreach top-teams [x -> ask x [
@@ -150,7 +146,7 @@ end
 
 
 to update-utility
-  ask teams [
+  ask turtles [
     ifelse shared-data?
     [
       ifelse resources > resources-last-round
@@ -177,7 +173,7 @@ end
 
 
 to update-norms
-  ask teams [
+  ask turtles [
     let neighbours link-neighbors
     let n-neighbours count neighbours
     let n-neighbours-sharing count neighbours with [shared-data?]
@@ -192,43 +188,22 @@ to update-norms
 end
 
 
-to share-data
-  ask teams [
-    ifelse network = "none" [
-      ; when there is no network, don't take descriptive norms into account
-      set effort b_utility * individual-utility
-    ][
-      set effort b_utility * individual-utility + b_norm * descriptive-norm
-    ]
 
-    set inv_effort 1 / (1 + exp ( - effort ))
-    set shared-data? random-float 1 > 1 - inv_effort
-  ]
-
-  ask teams [
-    ; new implementation: costs of sharing data are not tied to having shared data.
-    ; instead, costs are related to the effort that goes into sharing.
-    ; costs can be up to 10% of base funding budget.
-    set resources resources - (1 / (n-teams * 10)) * inv_effort ; costs are up to 10% of base funding budget
-  ]
-end
-
-to update-indices
-  ; update color to represent effort, and set resources for next round
-  ask teams [
-    set color 60 + 10 * (1 - inv_effort) ; dark colour represent high effort
-    set resources-last-round resources
-  ]
-end
 
 
 ; reporters --------------------
+
+to-report gamma-dist [ alpha-1 alpha-2 ]
+  let x random-gamma alpha-1 1
+  report x / (x + random-gamma alpha-2 1)
+end
+
 to-report max-resources
-  report max [ resources ] of teams
+  report max [ resources ] of turtles
 end
 
 to-report %-sharing
-  report data-sharing-within teams
+  report data-sharing-within turtles
 end
 
 
@@ -247,22 +222,6 @@ to-report gini [ samples ]
     let G (1 / n ) * (n + 1 - 2 * ratio)
     report G
   ]
-end
-
-; calculate quantiles
-; https://stackoverflow.com/a/54420235/3149349
-to-report calc-pct [ #pct #vals ]
-  let #listvals sort #vals
-  let #pct-position #pct / 100 * length #vals
-  ; find the ranks and values on either side of the desired percentile
-  let #low-rank floor #pct-position
-  let #low-val item #low-rank #listvals
-  let #high-rank ceiling #pct-position
-  let #high-val item #high-rank #listvals
-  ; interpolate
-  ifelse #high-rank = #low-rank
-  [ report #low-val ]
-  [ report #low-val + ((#pct-position - #low-rank) / (#high-rank - #low-rank)) * (#high-val - #low-val) ]
 end
 
 to-report data-sharing-within [agentset]
@@ -367,7 +326,7 @@ true
 false
 "" ""
 PENS
-"default" 0.05 1 -16777216 false "" "histogram [proposal-strength] of teams"
+"default" 0.05 1 -16777216 false "" "histogram [proposal-strength] of turtles"
 
 PLOT
 569
@@ -385,7 +344,7 @@ true
 false
 "" ""
 PENS
-"default" 0.05 1 -16777216 true "" "histogram [resources] of teams"
+"default" 0.05 1 -16777216 true "" "histogram [resources] of turtles"
 
 MONITOR
 271
@@ -404,7 +363,7 @@ MONITOR
 467
 353
 sum of resources
-sum [resources] of teams
+sum [resources] of turtles
 2
 1
 11
@@ -415,7 +374,7 @@ MONITOR
 558
 352
 min resources
-min [resources] of teams
+min [resources] of turtles
 2
 1
 11
@@ -462,7 +421,7 @@ true
 false
 "" ""
 PENS
-"default" 0.05 1 -16777216 true "" "histogram [inv_effort] of teams"
+"default" 0.05 1 -16777216 true "" "histogram [inv_effort] of turtles"
 
 PLOT
 1064
@@ -498,7 +457,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot gini [resources] of teams"
+"default" 1.0 0 -16777216 true "" "plot gini [resources] of turtles"
 
 SLIDER
 37
@@ -531,7 +490,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot mean [effort] of teams"
+"default" 1.0 0 -16777216 true "" "plot mean [effort] of turtles"
 
 SLIDER
 40
@@ -542,7 +501,7 @@ max-initial-utility
 max-initial-utility
 -4
 4
-3.0
+4.0
 .1
 1
 NIL
@@ -581,7 +540,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot sum [resources] of teams"
+"default" 1.0 0 -16777216 true "" "plot sum [resources] of turtles"
 
 SLIDER
 282
@@ -606,7 +565,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-2
+0
 
 SLIDER
 236
@@ -654,7 +613,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot mean [individual-utility] of teams"
+"default" 1.0 0 -16777216 true "" "plot mean [individual-utility] of turtles"
 
 SLIDER
 39
@@ -687,7 +646,7 @@ true
 false
 "" ""
 PENS
-"default" 0.05 1 -16777216 true "" "histogram [descriptive-norm] of teams"
+"default" 0.05 1 -16777216 true "" "histogram [descriptive-norm] of turtles"
 
 MONITOR
 270
@@ -695,7 +654,7 @@ MONITOR
 368
 305
 max effort
-max [effort] of teams
+max [effort] of turtles
 2
 1
 11
@@ -716,7 +675,7 @@ true
 false
 "" ""
 PENS
-"default" 0.1 1 -16777216 true "" "histogram [individual-utility] of teams"
+"default" 0.1 1 -16777216 true "" "histogram [individual-utility] of turtles"
 
 SLIDER
 42
@@ -764,7 +723,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot standard-deviation [individual-utility] of teams"
+"default" 1.0 0 -16777216 true "" "plot standard-deviation [individual-utility] of turtles"
 
 CHOOSER
 41
@@ -807,10 +766,21 @@ true
 true
 "" ""
 PENS
-"q1" 1.0 0 -2674135 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q1\"]"
-"q2" 1.0 0 -14439633 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q2\"]"
-"q3" 1.0 0 -14070903 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q3\"]"
-"q4" 1.0 0 -7858858 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q4\"]"
+"q1" 1.0 0 -2674135 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q1\"]"
+"q2" 1.0 0 -14439633 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q2\"]"
+"q3" 1.0 0 -14070903 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q3\"]"
+"q4" 1.0 0 -7858858 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q4\"]"
+
+SWITCH
+67
+460
+170
+493
+debug?
+debug?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
