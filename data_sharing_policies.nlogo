@@ -61,10 +61,8 @@ to go
   if data-sharing? [
     share-data
   ]
-
   generate-proposals
   award-grants
-
   if data-sharing? [
     update-utility
     update-norms
@@ -82,21 +80,17 @@ end
 
 to share-data
   ask turtles [
-    ifelse network = "none" [
-      ; when there is no network, don't take descriptive norms into account
-      set effort b_utility * individual-utility
-    ][
-      set effort b_utility * individual-utility + b_norm * descriptive-norm
-    ]
-
+    set effort b_utility * individual-utility + ifelse-value network = "none" [ 0 ] [ b_norm * descriptive-norm ]
     set inv_effort 1 / (1 + exp ( - effort ))
     set shared-data? random-float 1 > 1 - inv_effort
-  ]
 
-  ask turtles [
-    ; new implementation: costs of sharing data are not tied to having shared data.
-    ; instead, costs are related to the effort that goes into sharing.
-    ; costs can be up to 10% of base funding budget.
+    if debug? [
+      type "i am turtle " print who
+      type "my effort is " print effort
+      type "my probability of sharing data is " print inv_effort
+      type ifelse-value shared-data? [ "i shared data" ] [ "i did NOT share data" ]
+    ]
+
     set resources resources - (1 / (n-teams * 10)) * inv_effort ; costs are up to 10% of base funding budget
   ]
 end
