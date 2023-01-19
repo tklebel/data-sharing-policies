@@ -18,6 +18,7 @@ turtles-own [
   shared-data?
   funded? ;whether they got funding in this round
   sharing-dividend-pool
+  initial-resources
 ]
 
 
@@ -44,13 +45,13 @@ to setup
       resources-dist = "left-skewed" [ gamma-dist 7 2 ]
     )
     set resources-last-round resources
+    set initial-resources resources
     ; we want random numbers in the interval [-4, 4], but netlogo can't do that directly, so we re-center twice
     ; alternatively, we could do some beta distribution (as above)
     set individual-utility ( random-float (max-initial-utility + 4 )) - 4
     set descriptive-norm initial-norm
     set shared-data? false
   ]
-
   reset-ticks
 end
 
@@ -98,7 +99,7 @@ to generate-proposals
   ; normalise resources. this is necessary so that effort and resources are on the same scale
   ; find max resources
   let min-resources min [resources] of turtles
-  let range-resources max-resources - min-resources
+  let range-resources max [ resources ] of turtles - min-resources
   ask turtles [
     ; https://stats.stackexchange.com/a/70807/42950
     let norm-resources (resources - min-resources) / range-resources
@@ -166,29 +167,32 @@ end
 
 to update-norms
   ask turtles [
-    set descriptive-norm 10 * ( ifelse-value (count link-neighbors = 0)
-      [ 0 ] [ count link-neighbors with [ shared-data? ] / count link-neighbors ] - 0.5 )
+    set descriptive-norm ifelse-value any? link-neighbors
+    [ count link-neighbors with [ shared-data? ] / count link-neighbors - 0.5] [ -0.5 ]
     ; rescale norm. this is to ensure it is on the same scale as the utility
+    set descriptive-norm descriptive-norm * 10
   ]
 end
 
 
-
 ; reporters --------------------
+
+to-report upper-quartile [ dist ]
+  let med median dist
+  let upper filter [ x -> x > med ] dist
+  report ifelse-value empty? upper [ med ] [ median upper ]
+end
+
+to-report lower-quartile [ dist ]
+  let med median dist
+  let lower filter [ x -> x < med ] dist
+  report ifelse-value empty? lower [ med ] [ median lower ]
+end
 
 to-report gamma-dist [ alpha-1 alpha-2 ]
   let x random-gamma alpha-1 1
   report x / (x + random-gamma alpha-2 1)
 end
-
-to-report max-resources
-  report max [ resources ] of turtles
-end
-
-to-report %-sharing
-  report data-sharing-within turtles
-end
-
 
 ; the initial computation for the gini index was adapted from the peer reviewer game, bianchi et al. DOI: 10.1007/s11192-018-2825-4 (https://www.comses.net/codebases/6b77a08b-7e60-4f47-9ebb-6a8a2e87f486/releases/1.0.0/)
 ; the below and now used implementation was provided by TurtleZero on Stackoverflow: https://stackoverflow.com/a/70524851/3149349
@@ -207,13 +211,7 @@ to-report gini [ samples ]
   ]
 end
 
-to-report data-sharing-within [agentset]
-  let n count agentset
-  let sharers count agentset with [shared-data?]
-  report 100 * sharers / n
-end
-
-to-report mean-funding-within [agentset]
+to-report mean-funding-within [ agentset ]
   report precision mean [ total-funding ] of agentset 2
 end
 @#$#@#$#@
@@ -335,7 +333,7 @@ MONITOR
 365
 355
 max resources
-max-resources
+max [ resources ] of turtles
 2
 1
 11
@@ -422,7 +420,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot %-sharing"
+"default" 1.0 0 -16777216 true "" "plot count turtles with [ shared-data? ] / count turtles * 100"
 
 PLOT
 780
@@ -749,19 +747,19 @@ true
 true
 "" ""
 PENS
-"q1" 1.0 0 -2674135 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q1\"]"
-"q2" 1.0 0 -14439633 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q2\"]"
-"q3" 1.0 0 -14070903 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q3\"]"
-"q4" 1.0 0 -7858858 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q4\"]"
+"q1" 1.0 0 -2674135 true "" "plot mean-funding-within turtles with [initial-resources < lower-quartile [initial-resources] of turtles ]"
+"q2" 1.0 0 -14439633 true "" "plot mean-funding-within turtles with [initial-resources >= lower-quartile [initial-resources] of turtles and initial-resources < median [initial-resources] of turtles]"
+"q3" 1.0 0 -14070903 true "" "plot mean-funding-within turtles with [initial-resources >= median [initial-resources] of turtles and initial-resources < upper-quartile [initial-resources] of turtles]"
+"q4" 1.0 0 -7858858 true "" "plot mean-funding-within turtles with [initial-resources >= upper-quartile [initial-resources] of turtles ]"
 
 SWITCH
-67
-460
-170
-493
+42
+451
+145
+484
 debug?
 debug?
-0
+1
 1
 -1000
 
