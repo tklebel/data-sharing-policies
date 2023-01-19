@@ -73,6 +73,7 @@ to update-indices
   ask turtles [
     set color 60 + 10 * (1 - inv_effort) ; dark colour represent high effort
     set resources-last-round resources
+    set funded? false
   ]
 end
 
@@ -103,84 +104,73 @@ to generate-proposals
     let norm-resources (resources - min-resources) / range-resources
     let mu ( 1 - sharing-incentive ) * norm-resources + inv_effort * sharing-incentive
     set proposal-strength random-normal mu proposal-sigma
+
+    if debug? [
+      type "i am turtle " print who
+      type "my resources are " print resources
+      type "my normalised resources are " print norm-resources
+      type "the strength of my proposal is " print proposal-strength
+    ]
+
   ]
 end
 
 to award-grants
 
-  ; non è meglio spostare all'inizio o alla fine?
+  ; base funding + decrease resources for all (since writing grants costs resources),
   ask turtles [
-    set funded? false
+    set resources (resources + 1 / n-teams) * (1 - application-penalty)
   ]
 
-  let funder-resources third-party-funding-ratio
-
-  ; base funding
-  ask turtles [
-    set resources resources + 1 / n-teams
-  ]
-
-  let n-grants n-teams * funded-share / 100
-
+  let n-grants n-teams * funded-share
   set rank-list sort-on [(- proposal-strength)] turtles ; need to invert proposal-strength, so that higher values are on top of the list
-  set top-teams ifelse-value (length rank-list < n-grants) [rank-list] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
+  set top-teams ifelse-value (length rank-list < n-grants) [ rank-list ] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
 
-  ; decrease resources for all (since writing grants costs resources), and
-  ask turtles [ set resources resources * (1 - application-penalty) ]
+  if debug? [
+    type "the ranking of teams is " print rank-list
+    type "the top teams are " print top-teams
+  ]
+
   ; add further one's for some (when receiving funding)
-  let funding-per-team funder-resources / n-grants
-  foreach top-teams [x -> ask x [
-    set resources resources + funding-per-team
-    set total-funding total-funding + funding-per-team
-    set funded? true
-  ] ]
+  let funding-per-team third-party-funding-ratio / n-grants
+  foreach top-teams [a-team ->
+    ask a-team [
+      set resources resources + funding-per-team
+      set funded? true
+      set total-funding total-funding + funding-per-team
+    ]
+  ]
+
+  if debug? [
+    ask turtles [
+      type "i am team " print who
+      type "last round my resources were " print resources-last-round
+      type "the strength of my proposal is " print proposal-strength type "(max is " print max [ proposal-strength ] of turtles type ")"
+      type ifelse-value funded? [ "my proposal was funded" ] [ "my proposal was NOT funded" ]
+      type "now my resources are " print resources
+    ]
+  ]
 end
-
-
 
 to update-utility
   ask turtles [
-    ifelse shared-data?
-    [
-      ifelse resources > resources-last-round
-      [ increase-utility ]
-      [ decrease-utility ]
+    ifelse (shared-data? and resources > resources-last-round) or (not shared-data? and not (resources > resources-last-round))
+    [ set individual-utility individual-utility + utility-change
+      if individual-utility > 5 [ set individual-utility 5 ]
     ]
-    [
-      ifelse resources > resources-last-round
-      [ decrease-utility ]
-      [ increase-utility ]
+    [ set individual-utility individual-utility - utility-change
+      if individual-utility < -5 [ set individual-utility -5 ]
     ]
   ]
 end
-
-to increase-utility
-  set individual-utility individual-utility + utility-change
-  if individual-utility > 5 [set individual-utility 5]
-end
-
-to decrease-utility
-  set individual-utility individual-utility - utility-change
-  if individual-utility < -5 [set individual-utility -5]
-end
-
 
 to update-norms
   ask turtles [
-    let neighbours link-neighbors
-    let n-neighbours count neighbours
-    let n-neighbours-sharing count neighbours with [shared-data?]
-    ifelse n-neighbours = 0 [
-      set descriptive-norm -.5
-    ][
-      set descriptive-norm n-neighbours-sharing / n-neighbours - .5
-    ]
+    set descriptive-norm 10 * ( ifelse-value (count link-neighbors = 0)
+      [ 0 ] [ count link-neighbors with [ shared-data? ] / count link-neighbors ] - 0.5 )
     ; rescale norm. this is to ensure it is on the same scale as the utility
-    set descriptive-norm descriptive-norm * 10
   ]
 end
-
-
 
 
 
@@ -692,12 +682,12 @@ SLIDER
 453
 funded-share
 funded-share
+0
 1
-100
-85.0
+0.85
+0.05
 1
-1
-%
+NIL
 HORIZONTAL
 
 PLOT
