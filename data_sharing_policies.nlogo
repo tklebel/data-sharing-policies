@@ -58,9 +58,7 @@ end
 to go
   tick
   update-indices
-  if data-sharing? [
-    share-data
-  ]
+  if data-sharing? [ share-data ]
   generate-proposals
   award-grants
   if data-sharing? [
@@ -109,25 +107,26 @@ to generate-proposals
 end
 
 to award-grants
+
+  ; non è meglio spostare all'inizio o alla fine?
   ask turtles [
     set funded? false
   ]
-  let baseline-pool 1
-  let funder-resources third-party-funding-ratio * baseline-pool
+
+  let funder-resources third-party-funding-ratio
 
   ; base funding
   ask turtles [
-    set resources resources + baseline-pool / n-teams
+    set resources resources + 1 / n-teams
   ]
 
-  let n-grants precision (n-teams * funded-share / 100) 0
+  let n-grants n-teams * funded-share / 100
 
   set rank-list sort-on [(- proposal-strength)] turtles ; need to invert proposal-strength, so that higher values are on top of the list
   set top-teams ifelse-value (length rank-list < n-grants) [rank-list] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
 
   ; decrease resources for all (since writing grants costs resources), and
-  let application-penalty-perc application-penalty / 100 ; convert back to percentage
-  ask turtles [ set resources resources * (1 - application-penalty-perc) ]
+  ask turtles [ set resources resources * (1 - application-penalty) ]
   ; add further one's for some (when receiving funding)
   let funding-per-team funder-resources / n-grants
   foreach top-teams [x -> ask x [
@@ -679,11 +678,11 @@ SLIDER
 application-penalty
 application-penalty
 0
-50
-5.0
 1
+0.05
+0.05
 1
-%
+NIL
 HORIZONTAL
 
 SLIDER
