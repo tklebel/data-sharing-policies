@@ -1156,7 +1156,7 @@ NetLogo 6.2.2
       <value value="0"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="application-penalty">
-      <value value="0.2"/>
+      <value value="0.05"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="resources-dist">
       <value value="&quot;uniform&quot;"/>
