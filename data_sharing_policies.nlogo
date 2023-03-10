@@ -271,7 +271,7 @@ proposal-sigma
 proposal-sigma
 0
 1
-0.25
+0.15
 .01
 1
 NIL
@@ -502,7 +502,7 @@ max-initial-utility
 max-initial-utility
 -4
 4
-4.0
+-3.0
 .1
 1
 NIL
@@ -566,7 +566,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-0
+1
 
 SLIDER
 236
@@ -702,7 +702,7 @@ funded-share
 funded-share
 0
 1
-0.85
+0.15
 0.05
 1
 NIL
@@ -1156,7 +1156,7 @@ NetLogo 6.2.2
       <value value="0"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="application-penalty">
-      <value value="20"/>
+      <value value="0.2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="resources-dist">
       <value value="&quot;uniform&quot;"/>
@@ -1183,11 +1183,11 @@ NetLogo 6.2.2
       <value value="&quot;small-world&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="funded-share">
-      <value value="10"/>
-      <value value="25"/>
-      <value value="50"/>
-      <value value="75"/>
-      <value value="90"/>
+      <value value="0.1"/>
+      <value value="0.25"/>
+      <value value="0.5"/>
+      <value value="0.75"/>
+      <value value="0.9"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="data-sharing?">
       <value value="true"/>
@@ -1218,7 +1218,7 @@ NetLogo 6.2.2
     </enumeratedValueSet>
     <steppedValueSet variable="sharing-incentive" first="0" step="0.2" last="1"/>
     <enumeratedValueSet variable="application-penalty">
-      <value value="5"/>
+      <value value="0.05"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="resources-dist">
       <value value="&quot;uniform&quot;"/>
@@ -1245,9 +1245,9 @@ NetLogo 6.2.2
       <value value="&quot;small-world&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="funded-share">
-      <value value="15"/>
-      <value value="50"/>
-      <value value="85"/>
+      <value value="0.15"/>
+      <value value="0.5"/>
+      <value value="0.85"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="data-sharing?">
       <value value="true"/>
