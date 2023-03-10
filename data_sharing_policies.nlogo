@@ -187,6 +187,16 @@ end
 
 ; reporters --------------------
 
+to-report data-sharing-within [agentset]
+  let n count agentset
+  let sharers count agentset with [shared-data?]
+  report 100 * sharers / n
+end
+
+to-report %-sharing
+  report data-sharing-within turtles
+end
+
 to-report upper-quartile [ dist ]
   let med median dist
   let upper filter [ x -> x > med ] dist
