@@ -1134,18 +1134,18 @@ NetLogo 6.2.2
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
-    <metric>gini [resources] of teams</metric>
-    <metric>gini [total-funding] of teams</metric>
-    <metric>mean [effort] of teams</metric>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
+    <metric>mean [effort] of turtles</metric>
     <metric>%-sharing</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q1"]</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q2"]</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q3"]</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q4"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q1"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q2"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q3"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q4"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q1"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q2"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q3"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q4"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q1"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q2"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q3"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q4"]</metric>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
@@ -1198,18 +1198,18 @@ NetLogo 6.2.2
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
-    <metric>gini [resources] of teams</metric>
-    <metric>gini [total-funding] of teams</metric>
-    <metric>mean [effort] of teams</metric>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
+    <metric>mean [effort] of turtles</metric>
     <metric>%-sharing</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q1"]</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q2"]</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q3"]</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q4"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q1"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q2"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q3"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q4"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q1"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q2"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q3"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q4"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q1"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q2"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q3"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q4"]</metric>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
