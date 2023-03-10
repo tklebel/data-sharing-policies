@@ -8,6 +8,7 @@ globals [
 
 turtles-own [
   resources
+  initial-resources-quantile
   resources-last-round
   total-funding ; record how much funding each group has accrued over time
   proposal-strength
@@ -52,6 +53,15 @@ to setup
     set descriptive-norm initial-norm
     set shared-data? false
   ]
+
+  ; assign to quantiles
+  ask turtles [
+    if initial-resources < lower-quartile [initial-resources] of turtles [set initial-resources-quantile "q1"] ;q[0-25)
+    if initial-resources >= lower-quartile [initial-resources] of turtles and initial-resources < median [initial-resources] of turtles [set initial-resources-quantile "q2"] ;q[25-50)
+    if initial-resources >= median [initial-resources] of turtles and initial-resources < upper-quartile [initial-resources] of turtles [set initial-resources-quantile "q3"] ;q[50-75)
+    if initial-resources >= upper-quartile [initial-resources] of turtles [set initial-resources-quantile "q4"] ;q[75-100]
+  ]
+
   reset-ticks
 end
 
@@ -747,10 +757,10 @@ true
 true
 "" ""
 PENS
-"q1" 1.0 0 -2674135 true "" "plot mean-funding-within turtles with [initial-resources < lower-quartile [initial-resources] of turtles ]"
-"q2" 1.0 0 -14439633 true "" "plot mean-funding-within turtles with [initial-resources >= lower-quartile [initial-resources] of turtles and initial-resources < median [initial-resources] of turtles]"
-"q3" 1.0 0 -14070903 true "" "plot mean-funding-within turtles with [initial-resources >= median [initial-resources] of turtles and initial-resources < upper-quartile [initial-resources] of turtles]"
-"q4" 1.0 0 -7858858 true "" "plot mean-funding-within turtles with [initial-resources >= upper-quartile [initial-resources] of turtles ]"
+"q1" 1.0 0 -2674135 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q1\"]"
+"q2" 1.0 0 -14439633 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q2\"]"
+"q3" 1.0 0 -14070903 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q3\"]"
+"q4" 1.0 0 -7858858 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q4\"]"
 
 SWITCH
 42
