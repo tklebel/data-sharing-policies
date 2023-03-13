@@ -58,12 +58,6 @@ p1 / p2 / p3 +
   plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
 
-::: {.cell-output .cell-output-stderr}
-```
-Warning: Removed 3 rows containing missing values (`geom_line()`).
-```
-:::
-
 ::: {.cell-output-display}
 ![Gini index and % of groups sharing data dependent on grant size. Funding incentive is fixed at 0.4.](02-analyse-funding-intervention_files/figure-html/fig-vary-share-of-funded-teams-1.png){#fig-vary-share-of-funded-teams width=576}
 :::
@@ -106,7 +100,7 @@ share data (under the incentives regime).
 
 ```{.r .cell-code}
 no_network <- df %>% 
-  filter(network == "none", funded_share == 15, max_initial_utility == -3)
+  filter(network == "none", funded_share == .15, max_initial_utility == -3)
 
 pdata <- no_network %>% 
   group_by(step, sharing_incentive) %>% 
@@ -137,12 +131,6 @@ p1 / p2 / p3 +
   plot_layout(guides = "collect") +
   plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
-
-::: {.cell-output .cell-output-stderr}
-```
-Warning: Removed 6 rows containing missing values (`geom_line()`).
-```
-:::
 
 ::: {.cell-output-display}
 ![Gini index and % of groups sharing data dependant on funding incentive. The share of teams being funded is fixed at 15%.](02-analyse-funding-intervention_files/figure-html/fig-vary-sharing-incentive-1.png){#fig-vary-sharing-incentive width=576}
@@ -235,12 +223,6 @@ p_sharing + p_gini + p_gini_total +
   theme(legend.position = "top")
 ```
 
-::: {.cell-output .cell-output-stderr}
-```
-Warning: Removed 6 rows containing missing values (`geom_line()`).
-```
-:::
-
 ::: {.cell-output-display}
 ![Effect of funding incentive on (A) rate of sharing, (B) Gini of current resources and (C) Gini of total resources. The rows represent the varying rate of funded teams in %. Uniform starting distribution, max initial utility set to -3.](02-analyse-funding-intervention_files/figure-html/fig-incentive-funded-share-1.png){#fig-incentive-funded-share width=1152}
 :::
@@ -287,7 +269,7 @@ initial utility.
 
 ```{.r .cell-code}
 pdata <- df %>% 
-  filter(funded_share %in% c(15, 50), max_initial_utility == -3) %>% 
+  filter(funded_share %in% c(.15, .5), max_initial_utility == -3) %>% 
   select(run_number, sharing_incentive, funded_share, step, perc_sharing, 
          resources_gini, network, total_funding_gini) %>% 
   group_by(sharing_incentive, funded_share, network, step) %>% 
@@ -299,21 +281,21 @@ pdata <- df %>%
   mutate(sharing_incentive = as.factor(sharing_incentive))
 
 p_gini <- pdata %>% 
-  filter(name == "mean_gini", funded_share == 15) %>% 
+  filter(name == "mean_gini", funded_share == .15) %>% 
   ggplot(aes(step, value, colour = sharing_incentive)) +
   geom_line() +
   facet_wrap(vars(network), ncol = 1) +
   labs(y = "Mean Gini of current resources")
 
 p_gini_total <- pdata %>% 
-  filter(name == "mean_cumulative_gini", funded_share == 15) %>% 
+  filter(name == "mean_cumulative_gini", funded_share == .15) %>% 
   ggplot(aes(step, value, colour = sharing_incentive)) +
   geom_line() +
   facet_wrap(vars(network), ncol = 1) +
   labs(y = "Mean Gini of total resources")
 
 p_sharing <- pdata %>% 
-  filter(name == "mean_sharing", funded_share == 15) %>% 
+  filter(name == "mean_sharing", funded_share == .15) %>% 
   ggplot(aes(step, value, colour = sharing_incentive)) +
   geom_line() +
   facet_wrap(vars(network), ncol = 1) +
@@ -324,12 +306,6 @@ p_sharing + p_gini + p_gini_total +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "top")
 ```
-
-::: {.cell-output .cell-output-stderr}
-```
-Warning: Removed 6 rows containing missing values (`geom_line()`).
-```
-:::
 
 ::: {.cell-output-display}
 ![Effect of funding incentive on (A) rate of sharing and (B) Gini coefficient. The rows represent the network configurations. Uniform starting distribution. 15% funded teams.](02-analyse-funding-intervention_files/figure-html/fig-incentive-network-15perc-1.png){#fig-incentive-network-15perc width=1152}
@@ -370,21 +346,21 @@ volatile and linked to the alternating extreme points of sharing/non-sharing.
 
 ```{.r .cell-code}
 p_gini <- pdata %>% 
-  filter(name == "mean_gini", funded_share == 50) %>% 
+  filter(name == "mean_gini", funded_share == .5) %>% 
   ggplot(aes(step, value, colour = sharing_incentive)) +
   geom_line() +
   facet_wrap(vars(network), ncol = 1) +
   labs(y = "Mean Gini of current resources")
 
 p_gini_total <- pdata %>% 
-  filter(name == "mean_cumulative_gini", funded_share == 50) %>% 
+  filter(name == "mean_cumulative_gini", funded_share == .5) %>% 
   ggplot(aes(step, value, colour = sharing_incentive)) +
   geom_line() +
   facet_wrap(vars(network), ncol = 1) +
   labs(y = "Mean Gini of total resources")
 
 p_sharing <- pdata %>% 
-  filter(name == "mean_sharing", funded_share == 50) %>% 
+  filter(name == "mean_sharing", funded_share == .5) %>% 
   ggplot(aes(step, value, colour = sharing_incentive)) +
   geom_line() +
   facet_wrap(vars(network), ncol = 1) +
@@ -395,12 +371,6 @@ p_sharing + p_gini + p_gini_total +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "top")
 ```
-
-::: {.cell-output .cell-output-stderr}
-```
-Warning: Removed 6 rows containing missing values (`geom_line()`).
-```
-:::
 
 ::: {.cell-output-display}
 ![Effect of funding incentive on (A) rate of sharing and (B) Gini coefficient. The rows represent the network configurations. Uniform starting distribution. 50% funded teams.](02-analyse-funding-intervention_files/figure-html/fig-incentive-network-50perc-1.png){#fig-incentive-network-50perc width=1152}
@@ -547,7 +517,7 @@ pdata %>%
 
 ```{.r .cell-code}
 team_sharing <- df %>% 
-  filter(funded_share %in% c(15, 50), max_initial_utility == -3,
+  filter(funded_share %in% c(.15, .5), max_initial_utility == -3,
          sharing_incentive == .4) %>% 
   group_by(step, funded_share, network) %>% 
   summarise(across(contains("data_sharing"), .fns = mean)) %>% 
