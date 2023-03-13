@@ -285,6 +285,8 @@ pdata %>%
 #| label: fig-sharing-by-quantile-no-network
 #| fig-cap: Mean % of teams sharing by initial resource quantile with no network.
 #|          Rows represent the % of teams receiving sharing.
+#|          Columns represent different settings for the maximum of initial 
+#|          utility
 
 team_sharing <- df %>% 
   filter(network == "none", max_initial_utility %in% c(-4, 0, 4)) %>% 
