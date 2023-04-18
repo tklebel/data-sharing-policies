@@ -1329,6 +1329,55 @@ NetLogo 6.2.2
       <value value="3"/>
     </enumeratedValueSet>
   </experiment>
+  <experiment name="funder-selectivity" repetitions="100" sequentialRunOrder="false" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
+    <metric>mean [effort] of turtles</metric>
+    <metric>%-sharing</metric>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_norm">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sharing-incentive">
+      <value value="0.4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_utility">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="4"/>
+    </enumeratedValueSet>
+  </experiment>
 </experiments>
 @#$#@#$#@
 @#$#@#$#@
