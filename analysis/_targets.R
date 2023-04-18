@@ -21,5 +21,12 @@ list(
     "../outputs/data_sharing_policies vary_incentives-table-5.csv",
     format = "file"
   ),
-  tarchetypes::tar_quarto(funding_intervention, "02-analyse-funding-intervention.qmd")
+  tarchetypes::tar_quarto(funding_intervention, "02-analyse-funding-intervention.qmd"),
+  # funding intervention -----------
+  tar_target(
+    selectivity_file,
+    "../outputs/data_sharing_policies funder-selectivity-table-2.csv",
+    format = "file"
+  ),
+  tarchetypes::tar_quarto(funder_selectivity, "03-analyse-funder-selectivity.qmd")
 )
