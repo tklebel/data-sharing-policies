@@ -41,21 +41,22 @@ p1 <- pdata %>%
   geom_line() +
     facet_wrap(vars(max_initial_utility), nrow = n_row) +
     labs(colour = "% of teams receiving funding",
-       y = "Gini of current resources")
+       y = "Gini of current resources", x = NULL)
 
 p2 <- pdata %>%  
   ggplot(aes(step, mean_cumulative_gini, colour = as.factor(funded_share))) +
   geom_line() +
     facet_wrap(vars(max_initial_utility), nrow = n_row) +
     labs(colour = "% of teams receiving funding",
-       y = "Gini of total resources")
+       y = "Gini of total resources",
+       x = "Step")
 
 p3 <- pdata %>%  
   ggplot(aes(step, mean_sharing, colour = as.factor(funded_share))) +
   geom_line() +
   facet_wrap(vars(max_initial_utility), nrow = n_row) +
   labs(colour = "% of teams receiving funding",
-       y = "% of teams sharing data") 
+       y = "% of teams sharing data", x = NULL) 
 
 p3 / p1 / p2 +
   plot_layout(guides = "collect") +
@@ -63,6 +64,6 @@ p3 / p1 / p2 +
 ```
 
 ::: {.cell-output-display}
-![Gini index and % of groups sharing data dependent on grant size](03-analyse-funder-selectivity_files/figure-html/fig-funder-selectivity-1.png){#fig-funder-selectivity width=864}
+![Gini index and % of groups sharing data dependent on grant size](03-analyse-funder-selectivity_files/figure-html/fig-funder-selectivity-1.png){#fig-funder-selectivity width=672}
 :::
 :::
