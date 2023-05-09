@@ -1,0 +1,5 @@
+../../NetLogo\ 6.3.0/NetLogo_Console --headless \
+  --threads 12 \
+  --model "../data_sharing_policies.nlogo" \
+  --experiment "baseline" \
+  --table ../outputs/baseline.csv
