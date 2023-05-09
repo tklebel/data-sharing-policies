@@ -1,0 +1,9 @@
+# unix commands to remove first few lines of files
+
+# location
+
+# sed -i -e 1d -e 6d .csv
+sed -i '1,6d' ../outputs/baseline.csv
+sed -i '1,6d' baseline20.csv
+sed -i '1,6d' ../outputs/data_sharing_policies\ vary_incentives-table.csv
+sed -i 18519526q data_sharing_policies\ baseline-table.csv
