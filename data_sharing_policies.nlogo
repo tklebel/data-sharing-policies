@@ -234,6 +234,12 @@ end
 to-report mean-funding-within [ agentset ]
   report precision mean [ total-funding ] of agentset 2
 end
+
+to-report individual-data
+  ; this should be simplified with map or foreach, but don't know how
+  report [(list who precision initial-resources 3 precision resources 3 precision total-funding 3 precision effort 3 data-sharing?)] of turtles
+end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 257
@@ -271,7 +277,7 @@ proposal-sigma
 proposal-sigma
 0
 1
-0.15
+0.25
 .01
 1
 NIL
@@ -502,7 +508,7 @@ max-initial-utility
 max-initial-utility
 -4
 4
--3.0
+4.0
 .1
 1
 NIL
@@ -552,7 +558,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.6
+0.0
 .01
 1
 NIL
@@ -566,7 +572,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-1
+0
 
 SLIDER
 236
@@ -702,7 +708,7 @@ funded-share
 funded-share
 0
 1
-0.15
+0.9
 0.05
 1
 NIL
@@ -1375,8 +1381,63 @@ NetLogo 6.2.2
       <value value="true"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+      <value value="-3"/>
       <value value="4"/>
     </enumeratedValueSet>
+  </experiment>
+  <experiment name="baseline_individual_level_data" repetitions="1" sequentialRunOrder="false" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>individual-data</metric>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_norm">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sharing-incentive">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.25"/>
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_utility">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;small-world&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="funded-share">
+      <value value="0.1"/>
+      <value value="0.25"/>
+      <value value="0.5"/>
+      <value value="0.75"/>
+      <value value="0.9"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="max-initial-utility" first="-4" step="2" last="4"/>
   </experiment>
 </experiments>
 @#$#@#$#@
