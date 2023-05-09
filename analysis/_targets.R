@@ -28,5 +28,11 @@ list(
     "../outputs/data_sharing_policies funder-selectivity-table-2.csv",
     format = "file"
   ),
-  tarchetypes::tar_quarto(funder_selectivity, "03-analyse-funder-selectivity.qmd")
+  tarchetypes::tar_quarto(funder_selectivity, "03-analyse-funder-selectivity.qmd"),
+  # retaining individual level data ------
+  tar_target(
+    individual_level_file,
+    "../outputs/data_sharing_policies baseline_individual_level_data-table 2.csv",
+    format = "file"
+  )
 )
