@@ -87,3 +87,33 @@ select_funder_selectivity <- function(df) {
            mean_effort = `mean [effort] of teams`, perc_sharing = `%-sharing`
     )
 }
+
+
+schema_individual_level_data <- schema(
+  `[run number]` = int64(), `initial-norm` = int64(), b_norm = int64(), 
+  `sharing-incentive` = float64(), `application-penalty` = float64(), 
+  `resources-dist` = utf8(), `proposal-sigma` = float64(), 
+  `n-teams` = int64(), `third-party-funding-ratio` = int64(), 
+  `utility-change` = float64(), b_utility = int64(), network = utf8(), 
+  `funded-share` = float64(),`data-sharing?` = bool(), 
+  `max-initial-utility` = int64(), `[step]` = int64(),
+  `individual-data` = string()
+)
+
+
+
+unnest_individual_data <- function(df, col = `individual-data`) {
+  num_cols <- c("who", "initial_resources", "resources", "total_funding",
+                "effort")
+  logi_col <- "data_sharing"
+  all_cols <- c(num_cols, logi_col)
+  
+  df %>% 
+    mutate(ind_data = str_remove_all({{col}}, "(^\\[\\[)|(\\]\\]$)")) %>% 
+    separate(ind_data, paste0("team", 1:100), sep = "\\] \\[") %>% 
+    pivot_longer(starts_with("team"), names_to = "team", values_to = "vals") %>% 
+    separate(vals, all_cols, sep = "\\s") %>% 
+    mutate(across(all_of(num_cols), as.numeric),
+           across(all_of(logi_col), as.logical)) %>% 
+    select(-team, -`individual-data`)
+}
