@@ -21,7 +21,7 @@ theme_set(theme_bw())
 
 options(dplyr.summarise.inform = FALSE)
 
-df_all <- open_dataset(tar_read(baseline_file),
+df_all <- open_dataset("../outputs/baseline.csv",
                    format = "csv", schema = setup_schema, skip = 1,
                    convert_options = CsvConvertOptions$create(
                      null_values = "<RuntimePrimitiveException>")
@@ -98,7 +98,7 @@ no_network <- df %>%
   filter(network == "none")
   
 no_network_unif_dist <- no_network %>% 
-  filter(init_dist == "uniform", funded_share == 50)
+  filter(init_dist == "uniform", funded_share == .5)
 
 
 pdata <- no_network_unif_dist %>% 
