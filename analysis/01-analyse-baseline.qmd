@@ -285,6 +285,8 @@ pdata %>%
 #| label: fig-sharing-by-quantile-no-network
 #| fig-cap: Mean % of teams sharing by initial resource quantile with no network.
 #|          Rows represent the % of teams receiving sharing.
+#|          Columns represent different settings for the maximum of initial 
+#|          utility
 
 team_sharing <- df %>% 
   filter(network == "none", max_initial_utility %in% c(-4, 0, 4)) %>% 
@@ -306,13 +308,23 @@ pdata %>%
   theme(legend.position = "top")
 ```
 
+Regarding the question of which teams take up sharing, results can be split into
+two broad patterns (@fig-sharing-by-quantile-no-network): For low or moderate 
+settings of the maximum initial utility, that is, when tendency to share is 
+either very low or low to moderate across teams, about 20% of teams share data
+in the long run, and there are now differences in terms of initial quartiles.
 
-There are no big differences visible in @fig-sharing-by-quantile-no-network 
-regarding which teams take up sharing. If anything, under competitive funding,
-top and bottom quartiles are sharing data less initially, but this largely 
-equals out over time (except for the top right box, with competitive funding and
-completely uniform initial utility). 
+For the remaining case of low to high initial sharing tendency, results differ.
+Firstly, the overall rate of sharing is higher, with up to 60% of teams sharing
+data (When disaggregating by quartile). Secondly, the quartiles differ in 
+sharing rate, although it is difficult to discern a clear pattern. The data
+seem to suggest that under competitive funding (and no incentives), the top (q4)
+and bottom (q1) quartiles share more data, whereas the quartiles in the middle
+have partly higher sharing rates under comprehensive funding. However, it is 
+unclear why there would be any difference at all between the groups.
 
-There are somewhat larger differences for the case of non-competitive funding
-(bottom row), but given that this is quite an unrealistic case, I don't think
-it is meaningful to discuss this further.
+This result was found to be sensitive to the "application penalty", that is, the
+amount of resources that are removed each round because generating proposals is
+also thought of as a costly activity. With a higher penalty than in the current
+analysis, there is no difference between the groups.
+

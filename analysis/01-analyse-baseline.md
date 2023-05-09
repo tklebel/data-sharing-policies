@@ -59,12 +59,6 @@ p1 / p2 / p3 +
   plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
 
-::: {.cell-output .cell-output-stderr}
-```
-Warning: Removed 5 rows containing missing values (`geom_line()`).
-```
-:::
-
 ::: {.cell-output-display}
 ![Gini index and % of groups sharing data dependent on grant size](01-analyse-baseline_files/figure-html/fig-vary-share-of-funded-teams-1.png){#fig-vary-share-of-funded-teams width=864}
 :::
@@ -92,7 +86,7 @@ no_network <- df %>%
   filter(network == "none")
   
 no_network_unif_dist <- no_network %>% 
-  filter(init_dist == "uniform", funded_share == 50)
+  filter(init_dist == "uniform", funded_share == .5)
 
 
 pdata <- no_network_unif_dist %>% 
@@ -124,12 +118,6 @@ p1 / p2 / p3 +
   plot_layout(guides = "collect") +
   plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
-
-::: {.cell-output .cell-output-stderr}
-```
-Warning: Removed 5 rows containing missing values (`geom_line()`).
-```
-:::
 
 ::: {.cell-output-display}
 ![Gini index and % of groups sharing data dependent on initial utility](01-analyse-baseline_files/figure-html/fig-vary-utility-1.png){#fig-vary-utility width=864}
@@ -181,12 +169,6 @@ p_sharing + p_gini +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "top")
 ```
-
-::: {.cell-output .cell-output-stderr}
-```
-Warning: Removed 3 rows containing missing values (`geom_line()`).
-```
-:::
 
 ::: {.cell-output-display}
 ![Effect of networks on (A) rate of sharing and (B) Gini coefficient of total resources. The rows represent the varying rate of funded teams in %. Uniform starting distribution, uniform initial utility (up to 4).](01-analyse-baseline_files/figure-html/fig-network-effect-1.png){#fig-network-effect width=960}
@@ -336,18 +318,28 @@ pdata %>%
 ```
 
 ::: {.cell-output-display}
-![Mean % of teams sharing by initial resource quantile with no network. Rows represent the % of teams receiving sharing.](01-analyse-baseline_files/figure-html/fig-sharing-by-quantile-no-network-1.png){#fig-sharing-by-quantile-no-network width=768}
+![Mean % of teams sharing by initial resource quantile with no network. Rows represent the % of teams receiving sharing. Columns represent different settings for the maximum of initial utility](01-analyse-baseline_files/figure-html/fig-sharing-by-quantile-no-network-1.png){#fig-sharing-by-quantile-no-network width=768}
 :::
 :::
 
 
+Regarding the question of which teams take up sharing, results can be split into
+two broad patterns (@fig-sharing-by-quantile-no-network): For low or moderate 
+settings of the maximum initial utility, that is, when tendency to share is 
+either very low or low to moderate across teams, about 20% of teams share data
+in the long run, and there are now differences in terms of initial quartiles.
 
-There are no big differences visible in @fig-sharing-by-quantile-no-network 
-regarding which teams take up sharing. If anything, under competitive funding,
-top and bottom quartiles are sharing data less initially, but this largely 
-equals out over time (except for the top right box, with competitive funding and
-completely uniform initial utility). 
+For the remaining case of low to high initial sharing tendency, results differ.
+Firstly, the overall rate of sharing is higher, with up to 60% of teams sharing
+data (When disaggregating by quartile). Secondly, the quartiles differ in 
+sharing rate, although it is difficult to discern a clear pattern. The data
+seem to suggest that under competitive funding (and no incentives), the top (q4)
+and bottom (q1) quartiles share more data, whereas the quartiles in the middle
+have partly higher sharing rates under comprehensive funding. However, it is 
+unclear why there would be any difference at all between the groups.
 
-There are somewhat larger differences for the case of non-competitive funding
-(bottom row), but given that this is quite an unrealistic case, I don't think
-it is meaningful to discuss this further.
+This result was found to be sensitive to the "application penalty", that is, the
+amount of resources that are removed each round because generating proposals is
+also thought of as a costly activity. With a higher penalty than in the current
+analysis, there is no difference between the groups.
+

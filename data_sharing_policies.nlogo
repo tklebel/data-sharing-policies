@@ -6,11 +6,7 @@ globals [
   bottom-teams
 ]
 
-breed [teams team]
-
-undirected-link-breed [ team-links team-link ]
-
-teams-own [
+turtles-own [
   resources
   initial-resources-quantile
   resources-last-round
@@ -23,6 +19,7 @@ teams-own [
   shared-data?
   funded? ;whether they got funding in this round
   sharing-dividend-pool
+  initial-resources
 ]
 
 
@@ -30,41 +27,26 @@ to setup
   clear-all
 
   ask patches [set pcolor white]
-  ; radius for the circle
-  let radius 24
 
-  ifelse network != "none" [
-    if network = "random" [
-      nw:generate-random teams team-links n-teams 0.02 [
-        fd radius
-      ]
-    ]
-    if network = "small-world" [
-      nw:generate-watts-strogatz teams team-links n-teams 3 .2  [
-        fd radius
-      ]
-    ]
-  ] [
-    create-teams n-teams [
-      fd radius
-    ]
-  ]
+  (ifelse
+    network = "random"      [ nw:generate-random turtles links n-teams 0.02 ]
+    network = "small-world" [ nw:generate-watts-strogatz turtles links n-teams 3 .2 ]
+                            [ create-turtles n-teams ]
+  )
 
-
-  ask teams [
+  ask turtles [
     set shape "circle"
     set color 65
+    ; radius for the circle
+    fd 24
     ; create resource distribution
-    if resources-dist = "uniform" [set resources random-float 1]
-    if resources-dist = "right-skewed" [
-      let x random-gamma 2 1
-      set resources (x / (x + random-gamma 7 1))
-    ]
-    if resources-dist = "left-skewed" [
-      let x random-gamma 7 1
-      set resources (x / (x + random-gamma 2 1))
-    ]
+    set resources (ifelse-value
+      resources-dist = "uniform" [ random-float 1 ]
+      resources-dist = "right-skewed" [ gamma-dist 2 7 ]
+      resources-dist = "left-skewed" [ gamma-dist 7 2 ]
+    )
     set resources-last-round resources
+    set initial-resources resources
     ; we want random numbers in the interval [-4, 4], but netlogo can't do that directly, so we re-center twice
     ; alternatively, we could do some beta distribution (as above)
     set individual-utility ( random-float (max-initial-utility + 4 )) - 4
@@ -72,165 +54,165 @@ to setup
     set shared-data? false
   ]
 
-  ; assign teams to quantiles
-  let q25 calc-pct 25 [resources] of teams
-  let q50 calc-pct 50 [resources] of teams
-  let q75 calc-pct 75 [resources] of teams
-
-  ask teams [
-    if resources < q25 [set initial-resources-quantile "q1"] ;q[0-25)
-    if resources >= q25 and resources < q50 [set initial-resources-quantile "q2"] ;q[25-50)
-    if resources >= q50 and resources < q75 [set initial-resources-quantile "q3"] ;q[50-75)
-    if resources >= q75 [set initial-resources-quantile "q4"] ;q[75-100]
+  ; assign to quantiles
+  ask turtles [
+    if initial-resources < lower-quartile [initial-resources] of turtles [set initial-resources-quantile "q1"] ;q[0-25)
+    if initial-resources >= lower-quartile [initial-resources] of turtles and initial-resources < median [initial-resources] of turtles [set initial-resources-quantile "q2"] ;q[25-50)
+    if initial-resources >= median [initial-resources] of turtles and initial-resources < upper-quartile [initial-resources] of turtles [set initial-resources-quantile "q3"] ;q[50-75)
+    if initial-resources >= upper-quartile [initial-resources] of turtles [set initial-resources-quantile "q4"] ;q[75-100]
   ]
 
   reset-ticks
 end
 
+
 to go
   tick
   update-indices
-  if data-sharing? [
-    share-data
-  ]
-
+  if data-sharing? [ share-data ]
   generate-proposals
   award-grants
-
   if data-sharing? [
     update-utility
     update-norms
   ]
+end
 
 
+to update-indices
+  ; update color to represent effort, and set resources for next round
+  ask turtles [
+    set color 60 + 10 * (1 - inv_effort) ; dark colour represent high effort
+    set resources-last-round resources
+    set funded? false
+  ]
+end
+
+to share-data
+  ask turtles [
+    set effort b_utility * individual-utility + ifelse-value network = "none" [ 0 ] [ b_norm * descriptive-norm ]
+    set inv_effort 1 / (1 + exp ( - effort ))
+    set shared-data? random-float 1 > 1 - inv_effort
+
+    if debug? [
+      type "i am turtle " print who
+      type "my effort is " print effort
+      type "my probability of sharing data is " print inv_effort
+      type ifelse-value shared-data? [ "i shared data" ] [ "i did NOT share data" ]
+    ]
+
+    set resources resources - (1 / (n-teams * 10)) * inv_effort ; costs are up to 10% of base funding budget
+  ]
 end
 
 to generate-proposals
   ; normalise resources. this is necessary so that effort and resources are on the same scale
   ; find max resources
-  let m-resources max-resources
-  let min-resources min [resources] of teams
-  ask teams [
+  let min-resources min [resources] of turtles
+  let range-resources max [ resources ] of turtles - min-resources
+  ask turtles [
     ; https://stats.stackexchange.com/a/70807/42950
-    let norm-resources (resources - min-resources) / (m-resources - min-resources)
+    let norm-resources (resources - min-resources) / range-resources
     let mu ( 1 - sharing-incentive ) * norm-resources + inv_effort * sharing-incentive
     set proposal-strength random-normal mu proposal-sigma
+
+    if debug? [
+      type "i am turtle " print who
+      type "my resources are " print resources
+      type "my normalised resources are " print norm-resources
+      type "the strength of my proposal is " print proposal-strength
+    ]
+
   ]
 end
 
 to award-grants
-  ask teams [
-    set funded? false
-  ]
-  let baseline-pool 1
-  let funder-resources third-party-funding-ratio * baseline-pool
 
-  ; base funding
-  ask teams [
-    set resources resources + baseline-pool / n-teams
+  ; base funding + decrease resources for all (since writing grants costs resources),
+  ask turtles [
+    set resources (resources + 1 / n-teams) * (1 - application-penalty)
   ]
 
-  let n-grants precision (n-teams * funded-share / 100) 0
+  let n-grants n-teams * funded-share
+  set rank-list sort-on [(- proposal-strength)] turtles ; need to invert proposal-strength, so that higher values are on top of the list
+  set top-teams ifelse-value (length rank-list < n-grants) [ rank-list ] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
 
-  set rank-list sort-on [(- proposal-strength)] teams ; need to invert proposal-strength, so that higher values are on top of the list
-  set top-teams ifelse-value (length rank-list < n-grants) [rank-list] [ sublist rank-list 0 n-grants ] ; https://stackoverflow.com/a/40712061/3149349
+  if debug? [
+    type "the ranking of teams is " print rank-list
+    type "the top teams are " print top-teams
+  ]
 
-  ; decrease resources for all (since writing grants costs resources), and
-  let application-penalty-perc application-penalty / 100 ; convert back to percentage
-  ask teams [ set resources resources * (1 - application-penalty-perc) ]
   ; add further one's for some (when receiving funding)
-  let funding-per-team funder-resources / n-grants
-  foreach top-teams [x -> ask x [
-    set resources resources + funding-per-team
-    set total-funding total-funding + funding-per-team
-    set funded? true
-  ] ]
+  let funding-per-team third-party-funding-ratio / n-grants
+  foreach top-teams [a-team ->
+    ask a-team [
+      set resources resources + funding-per-team
+      set funded? true
+      set total-funding total-funding + funding-per-team
+    ]
+  ]
+
+  if debug? [
+    ask turtles [
+      type "i am team " print who
+      type "last round my resources were " print resources-last-round
+      type "the strength of my proposal is " print proposal-strength type "(max is " print max [ proposal-strength ] of turtles type ")"
+      type ifelse-value funded? [ "my proposal was funded" ] [ "my proposal was NOT funded" ]
+      type "now my resources are " print resources
+    ]
+  ]
 end
-
-
 
 to update-utility
-  ask teams [
-    ifelse shared-data?
-    [
-      ifelse resources > resources-last-round
-      [ increase-utility ]
-      [ decrease-utility ]
+  ask turtles [
+    ifelse (shared-data? and resources > resources-last-round) or (not shared-data? and not (resources > resources-last-round))
+    [ set individual-utility individual-utility + utility-change
+      if individual-utility > 5 [ set individual-utility 5 ]
     ]
-    [
-      ifelse resources > resources-last-round
-      [ decrease-utility ]
-      [ increase-utility ]
+    [ set individual-utility individual-utility - utility-change
+      if individual-utility < -5 [ set individual-utility -5 ]
     ]
   ]
 end
 
-to increase-utility
-  set individual-utility individual-utility + utility-change
-  if individual-utility > 5 [set individual-utility 5]
-end
-
-to decrease-utility
-  set individual-utility individual-utility - utility-change
-  if individual-utility < -5 [set individual-utility -5]
-end
-
-
 to update-norms
-  ask teams [
-    let neighbours link-neighbors
-    let n-neighbours count neighbours
-    let n-neighbours-sharing count neighbours with [shared-data?]
-    ifelse n-neighbours = 0 [
-      set descriptive-norm -.5
-    ][
-      set descriptive-norm n-neighbours-sharing / n-neighbours - .5
-    ]
+  ask turtles [
+    set descriptive-norm ifelse-value any? link-neighbors
+    [ count link-neighbors with [ shared-data? ] / count link-neighbors - 0.5] [ -0.5 ]
     ; rescale norm. this is to ensure it is on the same scale as the utility
     set descriptive-norm descriptive-norm * 10
   ]
 end
 
 
-to share-data
-  ask teams [
-    ifelse network = "none" [
-      ; when there is no network, don't take descriptive norms into account
-      set effort b_utility * individual-utility
-    ][
-      set effort b_utility * individual-utility + b_norm * descriptive-norm
-    ]
-
-    set inv_effort 1 / (1 + exp ( - effort ))
-    set shared-data? random-float 1 > 1 - inv_effort
-  ]
-
-  ask teams [
-    ; new implementation: costs of sharing data are not tied to having shared data.
-    ; instead, costs are related to the effort that goes into sharing.
-    ; costs can be up to 10% of base funding budget.
-    set resources resources - (1 / (n-teams * 10)) * inv_effort ; costs are up to 10% of base funding budget
-  ]
-end
-
-to update-indices
-  ; update color to represent effort, and set resources for next round
-  ask teams [
-    set color 60 + 10 * (1 - inv_effort) ; dark colour represent high effort
-    set resources-last-round resources
-  ]
-end
-
-
 ; reporters --------------------
-to-report max-resources
-  report max [ resources ] of teams
+
+to-report data-sharing-within [agentset]
+  let n count agentset
+  let sharers count agentset with [shared-data?]
+  report 100 * sharers / n
 end
 
 to-report %-sharing
-  report data-sharing-within teams
+  report data-sharing-within turtles
 end
 
+to-report upper-quartile [ dist ]
+  let med median dist
+  let upper filter [ x -> x > med ] dist
+  report ifelse-value empty? upper [ med ] [ median upper ]
+end
+
+to-report lower-quartile [ dist ]
+  let med median dist
+  let lower filter [ x -> x < med ] dist
+  report ifelse-value empty? lower [ med ] [ median lower ]
+end
+
+to-report gamma-dist [ alpha-1 alpha-2 ]
+  let x random-gamma alpha-1 1
+  report x / (x + random-gamma alpha-2 1)
+end
 
 ; the initial computation for the gini index was adapted from the peer reviewer game, bianchi et al. DOI: 10.1007/s11192-018-2825-4 (https://www.comses.net/codebases/6b77a08b-7e60-4f47-9ebb-6a8a2e87f486/releases/1.0.0/)
 ; the below and now used implementation was provided by TurtleZero on Stackoverflow: https://stackoverflow.com/a/70524851/3149349
@@ -249,31 +231,15 @@ to-report gini [ samples ]
   ]
 end
 
-; calculate quantiles
-; https://stackoverflow.com/a/54420235/3149349
-to-report calc-pct [ #pct #vals ]
-  let #listvals sort #vals
-  let #pct-position #pct / 100 * length #vals
-  ; find the ranks and values on either side of the desired percentile
-  let #low-rank floor #pct-position
-  let #low-val item #low-rank #listvals
-  let #high-rank ceiling #pct-position
-  let #high-val item #high-rank #listvals
-  ; interpolate
-  ifelse #high-rank = #low-rank
-  [ report #low-val ]
-  [ report #low-val + ((#pct-position - #low-rank) / (#high-rank - #low-rank)) * (#high-val - #low-val) ]
-end
-
-to-report data-sharing-within [agentset]
-  let n count agentset
-  let sharers count agentset with [shared-data?]
-  report 100 * sharers / n
-end
-
-to-report mean-funding-within [agentset]
+to-report mean-funding-within [ agentset ]
   report precision mean [ total-funding ] of agentset 2
 end
+
+to-report individual-data
+  ; this should be simplified with map or foreach, but don't know how
+  report [(list who precision initial-resources 3 precision resources 3 precision total-funding 3 precision effort 3 data-sharing?)] of turtles
+end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 257
@@ -367,7 +333,7 @@ true
 false
 "" ""
 PENS
-"default" 0.05 1 -16777216 false "" "histogram [proposal-strength] of teams"
+"default" 0.05 1 -16777216 false "" "histogram [proposal-strength] of turtles"
 
 PLOT
 569
@@ -385,7 +351,7 @@ true
 false
 "" ""
 PENS
-"default" 0.05 1 -16777216 true "" "histogram [resources] of teams"
+"default" 0.05 1 -16777216 true "" "histogram [resources] of turtles"
 
 MONITOR
 271
@@ -393,7 +359,7 @@ MONITOR
 365
 355
 max resources
-max-resources
+max [ resources ] of turtles
 2
 1
 11
@@ -404,7 +370,7 @@ MONITOR
 467
 353
 sum of resources
-sum [resources] of teams
+sum [resources] of turtles
 2
 1
 11
@@ -415,7 +381,7 @@ MONITOR
 558
 352
 min resources
-min [resources] of teams
+min [resources] of turtles
 2
 1
 11
@@ -462,7 +428,7 @@ true
 false
 "" ""
 PENS
-"default" 0.05 1 -16777216 true "" "histogram [inv_effort] of teams"
+"default" 0.05 1 -16777216 true "" "histogram [inv_effort] of turtles"
 
 PLOT
 1064
@@ -480,7 +446,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot %-sharing"
+"default" 1.0 0 -16777216 true "" "plot count turtles with [ shared-data? ] / count turtles * 100"
 
 PLOT
 780
@@ -498,7 +464,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot gini [resources] of teams"
+"default" 1.0 0 -16777216 true "" "plot gini [resources] of turtles"
 
 SLIDER
 37
@@ -531,7 +497,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot mean [effort] of teams"
+"default" 1.0 0 -16777216 true "" "plot mean [effort] of turtles"
 
 SLIDER
 40
@@ -542,7 +508,7 @@ max-initial-utility
 max-initial-utility
 -4
 4
-3.0
+4.0
 .1
 1
 NIL
@@ -581,7 +547,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot sum [resources] of teams"
+"default" 1.0 0 -16777216 true "" "plot sum [resources] of turtles"
 
 SLIDER
 282
@@ -592,7 +558,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.6
+0.0
 .01
 1
 NIL
@@ -606,7 +572,7 @@ CHOOSER
 network
 network
 "none" "random" "small-world"
-2
+0
 
 SLIDER
 236
@@ -654,7 +620,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot mean [individual-utility] of teams"
+"default" 1.0 0 -16777216 true "" "plot mean [individual-utility] of turtles"
 
 SLIDER
 39
@@ -687,7 +653,7 @@ true
 false
 "" ""
 PENS
-"default" 0.05 1 -16777216 true "" "histogram [descriptive-norm] of teams"
+"default" 0.05 1 -16777216 true "" "histogram [descriptive-norm] of turtles"
 
 MONITOR
 270
@@ -695,7 +661,7 @@ MONITOR
 368
 305
 max effort
-max [effort] of teams
+max [effort] of turtles
 2
 1
 11
@@ -716,7 +682,7 @@ true
 false
 "" ""
 PENS
-"default" 0.1 1 -16777216 true "" "histogram [individual-utility] of teams"
+"default" 0.1 1 -16777216 true "" "histogram [individual-utility] of turtles"
 
 SLIDER
 42
@@ -726,11 +692,11 @@ SLIDER
 application-penalty
 application-penalty
 0
-50
-5.0
 1
+0.05
+0.05
 1
-%
+NIL
 HORIZONTAL
 
 SLIDER
@@ -740,12 +706,12 @@ SLIDER
 453
 funded-share
 funded-share
+0
 1
-100
-85.0
+0.9
+0.05
 1
-1
-%
+NIL
 HORIZONTAL
 
 PLOT
@@ -764,7 +730,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot standard-deviation [individual-utility] of teams"
+"default" 1.0 0 -16777216 true "" "plot standard-deviation [individual-utility] of turtles"
 
 CHOOSER
 41
@@ -807,10 +773,21 @@ true
 true
 "" ""
 PENS
-"q1" 1.0 0 -2674135 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q1\"]"
-"q2" 1.0 0 -14439633 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q2\"]"
-"q3" 1.0 0 -14070903 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q3\"]"
-"q4" 1.0 0 -7858858 true "" "plot mean-funding-within teams with [initial-resources-quantile = \"q4\"]"
+"q1" 1.0 0 -2674135 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q1\"]"
+"q2" 1.0 0 -14439633 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q2\"]"
+"q3" 1.0 0 -14070903 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q3\"]"
+"q4" 1.0 0 -7858858 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q4\"]"
+
+SWITCH
+42
+451
+145
+484
+debug?
+debug?
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1163,18 +1140,18 @@ NetLogo 6.2.2
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
-    <metric>gini [resources] of teams</metric>
-    <metric>gini [total-funding] of teams</metric>
-    <metric>mean [effort] of teams</metric>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
+    <metric>mean [effort] of turtles</metric>
     <metric>%-sharing</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q1"]</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q2"]</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q3"]</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q4"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q1"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q2"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q3"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q4"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q1"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q2"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q3"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q4"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q1"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q2"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q3"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q4"]</metric>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
@@ -1185,7 +1162,7 @@ NetLogo 6.2.2
       <value value="0"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="application-penalty">
-      <value value="20"/>
+      <value value="0.05"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="resources-dist">
       <value value="&quot;uniform&quot;"/>
@@ -1212,11 +1189,11 @@ NetLogo 6.2.2
       <value value="&quot;small-world&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="funded-share">
-      <value value="10"/>
-      <value value="25"/>
-      <value value="50"/>
-      <value value="75"/>
-      <value value="90"/>
+      <value value="0.1"/>
+      <value value="0.25"/>
+      <value value="0.5"/>
+      <value value="0.75"/>
+      <value value="0.9"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="data-sharing?">
       <value value="true"/>
@@ -1227,18 +1204,18 @@ NetLogo 6.2.2
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
-    <metric>gini [resources] of teams</metric>
-    <metric>gini [total-funding] of teams</metric>
-    <metric>mean [effort] of teams</metric>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
+    <metric>mean [effort] of turtles</metric>
     <metric>%-sharing</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q1"]</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q2"]</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q3"]</metric>
-    <metric>mean-funding-within teams with [initial-resources-quantile = "q4"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q1"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q2"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q3"]</metric>
-    <metric>data-sharing-within teams with [initial-resources-quantile = "q4"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q1"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q2"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q3"]</metric>
+    <metric>mean-funding-within turtles with [initial-resources-quantile = "q4"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q1"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q2"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q3"]</metric>
+    <metric>data-sharing-within turtles with [initial-resources-quantile = "q4"]</metric>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
@@ -1247,7 +1224,7 @@ NetLogo 6.2.2
     </enumeratedValueSet>
     <steppedValueSet variable="sharing-incentive" first="0" step="0.2" last="1"/>
     <enumeratedValueSet variable="application-penalty">
-      <value value="5"/>
+      <value value="0.05"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="resources-dist">
       <value value="&quot;uniform&quot;"/>
@@ -1274,9 +1251,9 @@ NetLogo 6.2.2
       <value value="&quot;small-world&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="funded-share">
-      <value value="15"/>
-      <value value="50"/>
-      <value value="85"/>
+      <value value="0.15"/>
+      <value value="0.5"/>
+      <value value="0.85"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="data-sharing?">
       <value value="true"/>
@@ -1356,6 +1333,245 @@ NetLogo 6.2.2
       <value value="-3"/>
       <value value="0"/>
       <value value="3"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="funder-selectivity" repetitions="100" sequentialRunOrder="false" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
+    <metric>mean [effort] of turtles</metric>
+    <metric>%-sharing</metric>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_norm">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sharing-incentive">
+      <value value="0.4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_utility">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+      <value value="-3"/>
+      <value value="4"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="baseline_individual_level_data" repetitions="1" sequentialRunOrder="false" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>individual-data</metric>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_norm">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sharing-incentive">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.25"/>
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_utility">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;small-world&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="funded-share">
+      <value value="0.1"/>
+      <value value="0.25"/>
+      <value value="0.5"/>
+      <value value="0.75"/>
+      <value value="0.9"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="max-initial-utility" first="-4" step="2" last="4"/>
+  </experiment>
+  <experiment name="vary_incentives_individuals_no_network" repetitions="100" sequentialRunOrder="false" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>individual-data</metric>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_norm">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_utility">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+      <value value="4"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="vary_incentives_individuals_random_network" repetitions="100" sequentialRunOrder="false" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>individual-data</metric>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_norm">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_utility">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;random&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+      <value value="4"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="vary_incentives_individuals_small_world" repetitions="100" sequentialRunOrder="false" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>individual-data</metric>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_norm">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="b_utility">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;small-world&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+      <value value="4"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
