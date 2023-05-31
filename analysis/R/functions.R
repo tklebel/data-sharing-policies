@@ -117,3 +117,21 @@ unnest_individual_data <- function(df, col = `individual-data`) {
            across(all_of(logi_col), as.logical)) %>% 
     select(-team, -`individual-data`)
 }
+
+
+re_arrange <- function(df) {
+  num_cols <- c("who", "initial_resources", "resources", "total_funding",
+                "effort")
+  logi_col <- "data_sharing"
+  all_cols <- c(num_cols, logi_col)
+  
+  df <- dplyr::mutate(df, ind_data = stringr::str_remove_all(individualdata, "(^\\[\\[)|(\\]\\]$)"))
+  df <- tidyr::separate(df, ind_data, paste0("team", 1:100), sep = "\\] \\[")
+  df <- tidyr::pivot_longer(df, tidyselect::starts_with("team"), names_to = "team", values_to = "vals")
+  df <- tidyr::separate(df, vals, all_cols, sep = "\\s")
+  df <- dplyr::mutate(df, dplyr::across(tidyselect::all_of(num_cols), as.numeric),
+                      dplyr::across(tidyselect::all_of(logi_col), as.logical))
+  df <- dplyr::select(df, -team, -individualdata)
+  df
+}
+
