@@ -237,9 +237,8 @@ end
 
 to-report individual-data
   ; this should be simplified with map or foreach, but don't know how
-  report [(list who precision initial-resources 3 precision resources 3 precision total-funding 3 precision effort 3 data-sharing?)] of turtles
+  report [(list who precision initial-resources 3 precision resources 3 precision total-funding 3 precision effort 3 shared-data?)] of turtles
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 257
