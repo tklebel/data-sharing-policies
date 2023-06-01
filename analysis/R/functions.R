@@ -105,7 +105,7 @@ schema_individual_level_data <- schema(
 unnest_individual_data <- function(df, col = `individual-data`) {
   num_cols <- c("who", "initial_resources", "resources", "total_funding",
                 "effort")
-  logi_col <- "data_sharing"
+  logi_col <- "shared_data"
   all_cols <- c(num_cols, logi_col)
   
   df %>% 
@@ -122,7 +122,7 @@ unnest_individual_data <- function(df, col = `individual-data`) {
 re_arrange <- function(df) {
   num_cols <- c("who", "initial_resources", "resources", "total_funding",
                 "effort")
-  logi_col <- "data_sharing"
+  logi_col <- "shared_data"
   all_cols <- c(num_cols, logi_col)
   
   df <- dplyr::mutate(df, ind_data = stringr::str_remove_all(individualdata, "(^\\[\\[)|(\\]\\]$)"))
