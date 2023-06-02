@@ -3,3 +3,6 @@
   --model "data_sharing_policies.nlogo" \
   --experiment "vary_incentives_individuals_random_network" \
   --table outputs/vary_incentives_individuals_random_network.csv
+  
+sed -i '1,6d' outputs/vary_incentives_individuals_random_network.csv
+pbzip2 outputs/vary_incentives_individuals_random_network.csv
