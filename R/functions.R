@@ -145,18 +145,34 @@ re_arrange <- function(df) {
 
 
 # Functions for network summaries and visualisation ------
-plot_graph <- function(graph, layout = "stress") {
-  graph %>% 
-    activate(nodes) %>% 
-    mutate(group = group_louvain(),
-           degree = centrality_degree(),
-           page_rank = centrality_pagerank()) %>% 
-    ggraph(layout) +
-    geom_edge_link() +
-    geom_node_point(aes(colour = as.factor(group),
-                        size = page_rank)) +
-    theme_graph() +
-    theme(legend.position = "none")
+plot_graph <- function(graph, layout = "stress", groups = TRUE,
+                       size = c("degree", "page_rank")) {
+  
+  size <- match.arg(size)
+  if (groups) {
+    graph %>% 
+      activate(nodes) %>% 
+      mutate(group = group_louvain(),
+             degree = centrality_degree(),
+             page_rank = centrality_pagerank()) %>% 
+      ggraph(layout) +
+      geom_edge_link() +
+      geom_node_point(aes(colour = as.factor(group),
+                          size = .data[[size]])) +
+      theme_graph() +
+      theme(legend.position = "none")
+  } else {
+    graph %>% 
+      activate(nodes) %>% 
+      mutate(degree = centrality_degree(),
+             page_rank = centrality_pagerank()) %>% 
+      ggraph(layout) +
+      geom_edge_link() +
+      geom_node_point(aes(size = .data[[size]])) +
+      theme_graph() +
+      theme(legend.position = "none")
+  }
+
 }
 
 summarise_graph <- function(graph) {
