@@ -41,8 +41,10 @@ source(here::here("R/functions.R"))
 # Baseline - random network
 
 For the random network, we simulate a graph according to the Erdős--Rényi model
-in the $G(n,p)$ variant, with $n = 100$ and $p = 0.06$. @fig-random-graph shows
-the resulting network. Key summary statistics are provided in @tbl-random.
+in the $G(n,p)$ variant, with $n = 100$ and $p = 0.06$. The value for $p$ was
+chosen to be as low as possible while still obtaining a fully connected network.
+@fig-random-graph shows the resulting network. Key summary statistics are
+provided in @tbl-random.
 
 ```{r}
 set.seed(20230617)
