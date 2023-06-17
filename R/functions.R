@@ -160,8 +160,8 @@ plot_graph <- function(graph, layout = "stress") {
 }
 
 summarise_graph <- function(graph) {
-  clustering <- graph %>% transitivity()
-  mean_distance <- graph %>% mean_distance()
+  clustering <- graph %>% igraph::transitivity()
+  mean_distance <- graph %>% igraph::mean_distance()
   
   graph %>%   
     activate(nodes) %>% 
