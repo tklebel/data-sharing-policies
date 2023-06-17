@@ -38,7 +38,7 @@ summarise_graph <- function(graph) {
 plot_degree <- function(graph) {
   degree_dist <- graph %>% 
     activate(nodes) %>% 
-    mutate(degree = centrality_degree()) %>% 
+    mutate(degree = centrality_degree(mode = "total")) %>% 
     as_tibble() %>% 
     count(degree)
   
@@ -228,9 +228,78 @@ new_frag %>% degree()
 plot_degree(new_frag)
 
 
+# diagnostics work now
+# next step:
+# create algorithm for addition of edges via preferential attachment
+
+# start with one of the graphs that we have
+fragmented
+
+# select a node
+from <- sample(1:90, size = 1)
+
+# compute probability
+p <- fragmented %>% 
+  mutate(degree = centrality_degree(mode = "total"),
+         p = degree / sum(degree)) %>% 
+  pull(p)
+to <- sample(1:90, 1, replace = TRUE, prob = p)
+
+fragmented %>% 
+  bind_edges(tibble(from = from, to = to))
 
 
+add_edge_preferential <- function(graph, n_new_edges = 1) {
+  # select a node
+  from <- sample(seq_along(graph), size = 1)
+  
+  # compute probability
+  p <- graph %>% 
+    mutate(degree = centrality_degree(mode = "total"),
+           p = degree / sum(degree)) %>% 
+    pull(p)
+  # NEED TO AVOID DRAWING THE SAME NODE, TO AVOID LOOPS
+  to <- sample(seq_along(graph), size = n_new_edges, replace = TRUE, prob = p)
+  
+  graph %>% 
+    bind_edges(tibble(from = from, to = to))
+}
 
+rerun_addition <- function(graph, times = 10, n_new_edges = 1) {
+  tick <- 0
+  out <- graph
+  while (tick < times) {
+    tick <- tick + 1
+    out <- add_edge_preferential(out, n_new_edges = n_new_edges)
+  }
+  out
+}
+
+added_edges <- rerun_addition(fragmented, times = 5, n_new_edges = 15)
+added_edges <- rerun_addition(added_edges, times = 5, n_new_edges = 5)
+added_edges <- rerun_addition(added_edges, times = 20, n_new_edges = 1)
+summarise_graph(added_edges)
+plot_graph(added_edges)
+plot_degree(added_edges) 
+plot_degree(fragmented)
+
+map(1:10, add_edge_preferential(fragmented))
+
+add
+fragmented %>% 
+  add_edge_preferential(n_new_edges = 20)
+
+
+g <- sample_pa(1000) %>% 
+  as_tbl_graph()
+plot_degree(g) +
+  scale_y_log10() +
+  scale_x_log10()
+summarise_graph(g)
+g %>% 
+  ggraph("stress") +
+  geom_node_point() +
+  geom_edge_link()
   
 # bipartite ----
 # bp <- sample_bipartite(50, 50, p = .1)
