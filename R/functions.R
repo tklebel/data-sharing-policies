@@ -4,7 +4,15 @@ read_experiments <- function(path) {
     mutate(across(contains("gini"), as.numeric))
 }
 
-setup_schema <- schema(
+# this is haphazard, but make sure the script runs even without loading arrow
+int64 <- arrow::int64
+float64 <- arrow::float64
+utf8 <- arrow::utf8
+bool <- arrow::bool
+string <- arrow::string
+
+
+setup_schema <- arrow::schema(
   `[run number]` = int64(), `initial-norm` = int64(), b_norm = int64(), 
   `sharing-incentive` = float64(), `application-penalty` = float64(), 
   `resources-dist` = utf8(), `proposal-sigma` = float64(), 
@@ -65,7 +73,7 @@ select_intervention <- function(df) {
     )
 }
 
-schema_funder_selectivity <- schema(
+schema_funder_selectivity <- arrow::schema(
   `[run number]` = int64(), `initial-norm` = int64(), b_norm = int64(), 
   `sharing-incentive` = float64(), `application-penalty` = float64(), 
   `resources-dist` = utf8(), `proposal-sigma` = float64(), 
@@ -89,7 +97,7 @@ select_funder_selectivity <- function(df) {
 }
 
 
-schema_individual_level_data <- schema(
+schema_individual_level_data <- arrow::schema(
   `[run number]` = int64(), `initial-norm` = int64(), b_norm = int64(), 
   `sharing-incentive` = float64(), `application-penalty` = float64(), 
   `resources-dist` = utf8(), `proposal-sigma` = float64(), 
