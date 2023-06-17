@@ -2,6 +2,9 @@
 title: "Network generation"
 format: html
 editor: source
+author: Thomas Klebel
+date-modified: today
+bibliography: references.bib
 ---
 
 # Rationale
@@ -12,4 +15,68 @@ abstractions that the model entails, thus making the model slightly more
 "realistic", in that actual researchers are of course embedded into a network of
 social ties, and these ties have an effect on the researchers themselves.
 
+The literature on co-authorship networks (see e.g., @newman2004, @newman2001,
+@kumar2015) generally finds them to exhibit dynamics of both small-world
+networks @watts1998 and scale-free networks @albert2002. In plain language,
+co-authorship networks tend to comprise small groups of authors who collaborate
+frequently, with a few highly connected authors, who tend to be well-known and
+key figures in a community. Given that our model considers research *teams*,
+rather than *individual researchers*, we did not attempt to calibrate our
+networks against any given network, but rather to contrast networks with high
+and low clustering. This can be thought of contrasting research in the natural
+sciences, such as in physics, with research in the social sciences.
+<!--- Important: I feel that this comparison is still made up. I would need to find literature on communities rather than individual authors, to make such a claim. --->
 As a baseline, we consider a random network.
+
+# Package setup
+
+```{r, message=FALSE}
+library(tidyverse)
+library(tidygraph)
+library(ggraph)
+
+source(here::here("R/functions.R"))
+```
+
+# Baseline - random network
+
+For the random network, we simulate a graph according to the Erdős--Rényi model
+in the $G(n,p)$ variant, with $n = 100$ and $p = 0.06$. @fig-random-graph shows
+the resulting network. Key summary statistics are provided in @tbl-random.
+
+```{r}
+set.seed(20230617)
+n <- 100
+p <- .06
+random_network <- play_erdos_renyi(n = n, p = p, directed = FALSE)
+
+# add an id column for the analysis
+random_network <- random_network %>% 
+  mutate(id = 1:n)
+```
+
+```{r random-graph-viz, warning=FALSE}
+#| label: fig-random-graph
+#| fig-cap: "Random network. Node size corresponds to the node's degree."
+plot_graph(random_network, layout = "stress", groups = FALSE)
+```
+
+```{r}
+#| label: tbl-random
+#| tbl-cap: "Summary statistics for random network"
+summarise_graph(random_network) %>% 
+  rename("Number of Nodes" = n_nodes, "Average degree" = avg_degree,
+         "Clustering coefficient" = clustering, "Average path distance" = mean_dist) %>% 
+  knitr::kable()
+```
+
+```{r}
+# save to file
+igraph::write_graph(random_network, "data/random_network.gml", format = "graphml")
+```
+
+# Case 1: High clustering
+
+# Case 2: Low clustering
+
+# References
