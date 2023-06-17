@@ -18,7 +18,7 @@ config$spark.executor.memory <- "15G"
 config$spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version <- 2
 config$spark.speculation <- TRUE # add speculation to remove tasks that take too long
 config$spark.speculation.multiplier <- 2
-config$spark.executor.memoryOverheadFactor <- .2 # default is .1
+config$spark.executor.memoryOverheadFactor <- .2 # default is .1 - this is probably not needed
 config$spark.speculation.quantile <- .4
 # options(sparklyr.log.console = TRUE)
 
