@@ -6,56 +6,7 @@ library(ggtext)
 
 extrafont::loadfonts(device = "win")
 
-
-plot_graph <- function(graph, layout = "stress") {
-  graph %>% 
-    activate(nodes) %>% 
-    mutate(group = group_louvain(),
-           degree = centrality_degree(),
-           page_rank = centrality_pagerank()) %>% 
-    ggraph(layout) +
-    geom_edge_link() +
-    geom_node_point(aes(colour = as.factor(group),
-                        size = page_rank)) +
-    theme_graph() +
-    theme(legend.position = "none")
-}
-
-summarise_graph <- function(graph) {
-  clustering <- graph %>% transitivity()
-  mean_distance <- graph %>% mean_distance()
-  
-  graph %>%   
-    activate(nodes) %>% 
-    mutate(degree = centrality_degree()) %>% 
-    as_tibble() %>% 
-    summarise(avg_degree = mean(degree),
-              clustering = clustering, mean_dist = mean_distance)
-}
-
-
-
-plot_degree <- function(graph) {
-  degree_dist <- graph %>% 
-    activate(nodes) %>% 
-    mutate(degree = centrality_degree(mode = "total")) %>% 
-    as_tibble() %>% 
-    count(degree)
-  
-  
-  degree_dist %>% 
-    ggplot(aes(degree, n)) +
-    geom_point() +
-    geom_line() +
-    theme_bw() +
-    labs(x = "number of collaborators *k* (degree)",
-         y = "number of teams with *k* collaborators") +
-    theme(axis.title.x = ggtext::element_markdown(),
-          axis.title.y = ggtext::element_markdown())
-}
-
-
-
+source("R/functions.R")
 
 sw <- sample_smallworld(dim = 1, size = 100, nei = 2, p = .01)
 
@@ -249,31 +200,7 @@ fragmented %>%
   bind_edges(tibble(from = from, to = to))
 
 
-add_edge_preferential <- function(graph, n_new_edges = 1) {
-  # select a node
-  from <- sample(seq_along(graph), size = 1)
-  
-  # compute probability
-  p <- graph %>% 
-    mutate(degree = centrality_degree(mode = "total"),
-           p = degree / sum(degree)) %>% 
-    pull(p)
-  # NEED TO AVOID DRAWING THE SAME NODE, TO AVOID LOOPS
-  to <- sample(seq_along(graph), size = n_new_edges, replace = TRUE, prob = p)
-  
-  graph %>% 
-    bind_edges(tibble(from = from, to = to))
-}
 
-rerun_addition <- function(graph, times = 10, n_new_edges = 1) {
-  tick <- 0
-  out <- graph
-  while (tick < times) {
-    tick <- tick + 1
-    out <- add_edge_preferential(out, n_new_edges = n_new_edges)
-  }
-  out
-}
 
 added_edges <- rerun_addition(fragmented, times = 5, n_new_edges = 15)
 added_edges <- rerun_addition(added_edges, times = 5, n_new_edges = 5)
