@@ -167,7 +167,8 @@ summarise_graph <- function(graph) {
     activate(nodes) %>% 
     mutate(degree = centrality_degree()) %>% 
     as_tibble() %>% 
-    summarise(avg_degree = mean(degree),
+    summarise(n_nodes = n(),
+              avg_degree = mean(degree),
               clustering = clustering, mean_dist = mean_distance)
 }
 
