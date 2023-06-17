@@ -1,0 +1,15 @@
+---
+title: "Network generation"
+format: html
+editor: source
+---
+
+# Rationale
+
+We aim to assess network effects by embedding the teams in our simulation into
+different kinds of networks. This is intended to reduce the number of
+abstractions that the model entails, thus making the model slightly more
+"realistic", in that actual researchers are of course embedded into a network of
+social ties, and these ties have an effect on the researchers themselves.
+
+As a baseline, we consider a random network.
