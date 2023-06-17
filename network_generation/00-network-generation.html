@@ -167,15 +167,19 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<div class="cell">
+<div>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise_graph</span>(random_network) <span class="sc">%&gt;%</span> </span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">"Number of Nodes"</span> <span class="ot">=</span> n_nodes, <span class="st">"Average degree"</span> <span class="ot">=</span> avg_degree,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Clustering coefficient"</span> <span class="ot">=</span> clustering, <span class="st">"Average path distance"</span> <span class="ot">=</span> mean_dist) <span class="sc">%&gt;%</span> </span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div id="tbl-random" class="anchored">
+<div id="tbl-random" class="cell tbl-parent quarto-layout-panel anchored">
+<div class="panel-caption table-caption">
+<p>Table&nbsp;1: Summary statistics for random network</p>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div id="tbl-random-1" class="quarto-layout-cell quarto-layout-cell-subref anchored" data-ref-parent="tbl-random" style="flex-basis: 100.0%;justify-content: center;">
 <table class="table table-sm table-striped small">
-<caption>Table&nbsp;1: Summary statistics for random network</caption>
+<caption>(a) We report the global clustering coefficient, that is, the number of closed triangles divided by all triangles in the network. This is not identical to the average local clustering coefficient.</caption>
 <colgroup>
 <col style="width: 21%">
 <col style="width: 19%">
@@ -199,6 +203,7 @@ div.csl-indent {
 </tr>
 </tbody>
 </table>
+</div>
 </div>
 </div>
 </div>

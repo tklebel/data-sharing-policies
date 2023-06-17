@@ -66,6 +66,7 @@ plot_graph(random_network, layout = "stress", groups = FALSE)
 ```{r}
 #| label: tbl-random
 #| tbl-cap: "Summary statistics for random network"
+#| tbl-subcap: "We report the global clustering coefficient, that is, the number of closed triangles divided by all triangles in the network. This is not identical to the average local clustering coefficient."
 summarise_graph(random_network) %>% 
   rename("Number of Nodes" = n_nodes, "Average degree" = avg_degree,
          "Clustering coefficient" = clustering, "Average path distance" = mean_dist) %>% 
