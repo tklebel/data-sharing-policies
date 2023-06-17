@@ -169,7 +169,8 @@ summarise_graph <- function(graph) {
     as_tibble() %>% 
     summarise(n_nodes = n(),
               avg_degree = mean(degree),
-              clustering = clustering, mean_dist = mean_distance)
+              clustering = clustering, mean_dist = mean_distance) %>% 
+    mutate(across(everything(), round, 3))
 }
 
 
