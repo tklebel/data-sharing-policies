@@ -34,8 +34,16 @@ As a baseline, we consider a random network.
 library(tidyverse)
 library(tidygraph)
 library(ggraph)
+library(igraph)
 
 source(here::here("R/functions.R"))
+
+pretty_summary <- function(graph) {
+  summarise_graph(graph) %>% 
+  rename("Number of Nodes" = n_nodes, "Average degree" = avg_degree,
+         "Clustering coefficient" = clustering, "Average path distance" = mean_dist) %>% 
+  knitr::kable()
+}
 ```
 
 # Baseline - random network
@@ -67,19 +75,183 @@ plot_graph(random_network, layout = "stress", groups = FALSE)
 #| label: tbl-random
 #| tbl-cap: "Summary statistics for random network"
 #| tbl-subcap: "We report the global clustering coefficient, that is, the number of closed triangles divided by all triangles in the network. This is not identical to the average local clustering coefficient."
-summarise_graph(random_network) %>% 
-  rename("Number of Nodes" = n_nodes, "Average degree" = avg_degree,
-         "Clustering coefficient" = clustering, "Average path distance" = mean_dist) %>% 
-  knitr::kable()
+pretty_summary(random_network)
 ```
 
 ```{r}
+# we save the layout as well, so that VOSViewer can read the file
+random_layout <- layout_with_kk(random_network)
+
 # save to file
-igraph::write_graph(random_network, "data/random_network.gml", format = "graphml")
+random_network %>% 
+  mutate(x = random_layout[, 1],
+         y = random_layout[, 2]) %>% 
+  write_graph("data/random_network.gml", format = "gml")
 ```
 
-# Case 1: High clustering
+# Case 1: Low clustering
 
-# Case 2: Low clustering
+The first case of interest is a network with low clustering. The network is set
+up to exhibit traits of both small-world and scale-free networks. We simulate
+the network in three steps:
+
+1.  We first generate multiple small-world networks that resemble clusters or
+    communities within the field of interest.
+2.  We add many edges to a few randomly picked nodes to create hubs. The edges
+    are added by following the Barbasi-Albert algorithm:
+    1.  Pick a random node $o$.
+    2.  Pick a second node $k$ from all nodes (except the node chosen in step
+        1), with probability $p(e)$, where
+        $e = \frac{degree_k}{\sum_{i=1}^{k} degree_k}$
+    3.  Add edge from $o$ to $k$.
+3.  We remove any nodes that are not connected to the main component.
+4.  Add further nodes and edges according to the Barbasi-Albert algorithm to
+    ensure sample size of $n = 100$.
+
+## Step 1: create fragmented communities
+
+```{r fragmented-initial, fig.height=4, fig.width=8}
+fragmented_setup <- tibble(
+  n_dim = rep(1, 5), # number of clusters
+  dim_size = c(10, 25, 20, 25, 20), # n of clusters
+  order = c(1, 2, 1, 2, 1), # neigborhood size
+  p_rewire = c(.3, .2, .3, .2, .3) # rewire probability
+)
+
+fragmented_graphs <- pmap(fragmented_setup, play_smallworld)
+fragmented <- bind_graphs(fragmented_graphs)
+
+plot_graph(fragmented)
+```
+
+```{r}
+pretty_summary(fragmented)
+```
+
+## Step 2: add hubs
+
+```{r}
+hubs <- rerun_addition(fragmented, times = 1, n_new_edges = 15)
+hubs <- rerun_addition(hubs, times = 1, n_new_edges = 10)
+```
+
+```{r fragmented-hubs}
+plot_graph(hubs, groups = TRUE)
+```
+
+```{r}
+pretty_summary(hubs)
+```
+
+## Step 3: Remove unconnected nodes
+
+```{r}
+connected <- hubs %>% 
+  filter(!node_is_isolated())
+```
+
+## Step 4: Add nodes and edges
+
+```{r}
+final_fragmented <- sample_pa(100, start.graph = connected, out.pref = TRUE, 
+                               m = 1, power = 1, directed = FALSE) %>% 
+  as_tbl_graph()
+```
+
+```{r fragmented-final}
+plot_graph(final_fragmented, layout = "stress")
+```
+
+```{r}
+pretty_summary(final_fragmented)
+```
+
+```{r fragmented-degree-dist}
+plot_degree(final_fragmented)
+```
+
+```{r}
+fragmented_layout <- layout_with_kk(final_fragmented)
+
+# save to file
+final_fragmented %>% 
+  mutate(x = fragmented_layout[, 1],
+         y = fragmented_layout[, 2]) %>% 
+  write_graph("data/fragmented_network.gml", format = "gml")
+```
+
+# Case 2: High clustering
+
+## Step 1: create clustered communities
+
+```{r clustered-initial, fig.height=4, fig.width=8}
+clustered_setup <- tibble(
+  n_dim = rep(1, 4), # number of clusters
+  dim_size = c(10, 25, 20, 30), # n of clusters
+  order = c(3, 3, 4, 6), # neigborhood size
+  p_rewire = c(.01, .03, .05, .01) # rewire probability
+)
+
+clustered_graphs <- pmap(clustered_setup, play_smallworld)
+clustered <- bind_graphs(clustered_graphs)
+
+plot_graph(clustered)
+```
+
+```{r}
+pretty_summary(clustered)
+```
+
+## Step 2: add hubs
+
+```{r}
+hubs <- rerun_addition(clustered, times = 1, n_new_edges = 15)
+hubs <- rerun_addition(hubs, times = 3, n_new_edges = 10)
+```
+
+```{r clustered-hubs}
+plot_graph(hubs, groups = TRUE)
+```
+
+```{r}
+pretty_summary(hubs)
+```
+
+## Step 3: Remove unconnected nodes
+
+```{r}
+connected <- hubs %>% 
+  filter(!node_is_isolated())
+```
+
+## Step 4: Add nodes and edges
+
+```{r}
+final_clustered <- sample_pa(100, start.graph = connected, out.pref = TRUE, 
+                             m = 2, power = 1, directed = FALSE) %>% 
+  as_tbl_graph()
+```
+
+```{r clustered-final}
+plot_graph(final_clustered, layout = "stress")
+```
+
+```{r}
+pretty_summary(final_clustered)
+```
+
+```{r clustered-degree-dist}
+plot_degree(final_clustered)
+```
+
+```{r}
+clustered_layout <- layout_with_kk(final_clustered)
+
+# save to file
+final_clustered %>% 
+  mutate(x = clustered_layout[, 1],
+         y = clustered_layout[, 2]) %>% 
+  write_graph("data/clustered_network.gml", format = "gml")
+```
 
 # References
