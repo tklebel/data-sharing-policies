@@ -335,7 +335,7 @@ graph attribute was converted to numeric.</code></pre>
 <h2 class="anchored" data-anchor-id="step-3-remove-unconnected-nodes">Step 3: Remove unconnected nodes</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>connected <span class="ot">&lt;-</span> hubs <span class="sc">%&gt;%</span> </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">node_is_isolated</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">node_is_simplical</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="step-4-add-nodes-and-edges" class="level2">
@@ -372,9 +372,9 @@ graph attribute was converted to numeric.</code></pre>
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">3.52</td>
-<td style="text-align: right;">0.149</td>
-<td style="text-align: right;">4.449</td>
+<td style="text-align: right;">3.5</td>
+<td style="text-align: right;">0.124</td>
+<td style="text-align: right;">4.315</td>
 </tr>
 </tbody>
 </table>
@@ -439,8 +439,8 @@ graph attribute was converted to numeric.</code></pre>
 <tr class="odd">
 <td style="text-align: right;">85</td>
 <td style="text-align: right;">8.588</td>
-<td style="text-align: right;">0.608</td>
-<td style="text-align: right;">1.91</td>
+<td style="text-align: right;">0.626</td>
+<td style="text-align: right;">1.848</td>
 </tr>
 </tbody>
 </table>
@@ -481,8 +481,8 @@ graph attribute was converted to numeric.</code></pre>
 <tr class="odd">
 <td style="text-align: right;">85</td>
 <td style="text-align: right;">9.647</td>
-<td style="text-align: right;">0.512</td>
-<td style="text-align: right;">2.768</td>
+<td style="text-align: right;">0.517</td>
+<td style="text-align: right;">2.826</td>
 </tr>
 </tbody>
 </table>
@@ -493,7 +493,7 @@ graph attribute was converted to numeric.</code></pre>
 <h2 class="anchored" data-anchor-id="step-3-remove-unconnected-nodes-1">Step 3: Remove unconnected nodes</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>connected <span class="ot">&lt;-</span> hubs <span class="sc">%&gt;%</span> </span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">node_is_isolated</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">node_is_simplical</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="step-4-add-nodes-and-edges-1" class="level2">
@@ -531,8 +531,8 @@ graph attribute was converted to numeric.</code></pre>
 <tr class="odd">
 <td style="text-align: right;">100</td>
 <td style="text-align: right;">8.8</td>
-<td style="text-align: right;">0.473</td>
-<td style="text-align: right;">2.86</td>
+<td style="text-align: right;">0.481</td>
+<td style="text-align: right;">2.927</td>
 </tr>
 </tbody>
 </table>
