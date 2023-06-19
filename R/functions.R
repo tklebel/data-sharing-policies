@@ -213,16 +213,19 @@ plot_degree <- function(graph) {
 
 # functions for adding edges via preferential attachment -------------
 add_edge_preferential <- function(graph, n_new_edges = 1) {
+  bag <- seq_along(graph)
+  
   # select a node
-  from <- sample(seq_along(graph), size = 1)
+  from <- sample(bag, size = 1)
   
   # compute probability
   p <- graph %>% 
     mutate(degree = centrality_degree(mode = "total"),
            p = degree / sum(degree)) %>% 
     pull(p)
-  # NEED TO AVOID DRAWING THE SAME NODE, TO AVOID LOOPS
-  to <- sample(seq_along(graph), size = n_new_edges, replace = TRUE, prob = p)
+  
+  # avoid drawing the same node again
+  to <- sample(bag[-from], size = n_new_edges, replace = TRUE, prob = p[-from])
   
   graph %>% 
     bind_edges(tibble(from = from, to = to))
