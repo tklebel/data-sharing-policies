@@ -147,7 +147,7 @@ pretty_summary(hubs)
 
 ```{r}
 connected <- hubs %>% 
-  filter(!node_is_isolated())
+  filter(!node_is_simplical())
 ```
 
 ## Step 4: Add nodes and edges
@@ -221,7 +221,7 @@ pretty_summary(hubs)
 
 ```{r}
 connected <- hubs %>% 
-  filter(!node_is_isolated())
+  filter(!node_is_simplical())
 ```
 
 ## Step 4: Add nodes and edges
