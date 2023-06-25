@@ -4,6 +4,7 @@ format: pdf
 editor: source
 author: Thomas Klebel
 date-modified: today
+date: today
 bibliography: references.bib
 ---
 
