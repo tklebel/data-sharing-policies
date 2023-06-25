@@ -24,18 +24,21 @@ key figures in a community. Given that our model considers research *teams*,
 rather than *individual researchers*, we did not attempt to calibrate our
 networks against any given network, but rather to contrast networks with high
 and low clustering. This can be thought of contrasting research in the natural
-sciences, such as in physics, with research in the social sciences.
+sciences, such as in physics, with research in the social sciences and
+humanities.
 <!--- Important: I feel that this comparison is still made up. I would need to find literature on communities rather than individual authors, to make such a claim. --->
 As a baseline, we consider a random network.
 
 # Package setup
 
-```{r, message=FALSE}
+```{r, message=FALSE, echo=FALSE}
 library(tidyverse)
 library(tidygraph)
 library(ggraph)
 library(igraph)
 library(patchwork)
+
+knitr::opts_chunk$set(echo = FALSE)
 
 extrafont::loadfonts(device = "win")
 
@@ -84,7 +87,7 @@ plot_graph(random_network, layout = "stress", groups = FALSE)
 pretty_summary(random_network)
 ```
 
-```{r}
+```{r, warning=FALSE}
 # we save the layout as well, so that VOSViewer can read the file
 random_layout <- layout_with_kk(random_network)
 
@@ -109,12 +112,16 @@ the network in three steps:
     2.  Pick a second node $k$ from all nodes (except the node chosen in step
         1), with probability $p(e)$, where
         $e = \frac{degree_k}{\sum_{i=1}^{k} degree_k}$
-    3.  Add edge from $o$ to $k$.
+    3.  Add one edge from $o$ to $k$.
 3.  We remove any nodes that are not connected to the main component.
 4.  Add further nodes and edges according to the Barbasi-Albert algorithm to
     ensure sample size of $n = 100$.
 
 ## Step 1: create fragmented communities
+
+The fragmented communities are generated using the small-world algorithm
+proposed by @watts1998. We obtain low clustering by using small neighbourhood
+sizes (1-2), and a moderate rewiring probability (0.2-0.3).
 
 ```{r fragmented-initial, fig.height=4, fig.width=8}
 fragmented_setup <- tibble(
@@ -190,6 +197,10 @@ final_fragmented %>%
 
 ## Step 1: create clustered communities
 
+Highly clustered communities are obtained by using a larger neighbourhood size
+(3-6) for the clusters of 10-30 nodes, and setting a low rewire probability
+(0.01-0.05).
+
 ```{r clustered-initial, fig.height=4, fig.width=8}
 clustered_setup <- tibble(
   n_dim = rep(1, 4), # number of clusters
@@ -262,7 +273,23 @@ final_clustered %>%
 
 # Summary of networks
 
-@fig-network-overview shows all three generated networks.
+@fig-network-overview provides an overview of all three generated networks.
+Network (A) is clearly random, with no apparent clusters and relatively similar
+degree across all nodes. In addition, the clustering coefficient is very low
+(see @tbl-network-summary). This network serves as a baseline for our
+simulation.
+
+Network (B) exhibits equally low clustering, but high path length and low
+degree. This resembles a community where most agents are not well connected, and
+the distance to other agents is sometimes long. Nevertheless, the network
+includes a few hubs which are much more connected than the other agents. This
+might represent a typical sub-field within the social sciences and humanities.
+
+Network (C) is characterised by highly clustered communities, with high average
+degree, high clustering, and relatively short average paths. Hubs are present
+and connect the different communities, but are more similar to other nodes in
+terms of their degree than in the case of network (B). This network might
+represent a typical sub-field within the natural sciences.
 
 ```{r, fig.height=12, fig.width=5, echo=FALSE}
 #| label: fig-network-overview
