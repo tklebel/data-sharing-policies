@@ -1,6 +1,6 @@
 ---
 title: "Network generation"
-format: html
+format: pdf
 editor: source
 author: Thomas Klebel
 date-modified: today
@@ -40,7 +40,7 @@ library(patchwork)
 
 knitr::opts_chunk$set(echo = FALSE)
 
-extrafont::loadfonts(device = "win")
+extrafont::loadfonts(device = "all")
 
 source(here::here("R/functions.R"))
 
@@ -305,7 +305,8 @@ p_random +
   p_fragemented +
   p_clustered +
   plot_layout(nrow = 3) +
-  plot_annotation(tag_levels = "A") 
+  plot_annotation(tag_levels = "A", 
+                  theme = theme_graph(base_family = "Arial")) 
 ```
 
 ```{r, echo=FALSE}

@@ -159,7 +159,7 @@ plot_graph <- function(graph, layout = "stress", groups = TRUE,
       geom_edge_link() +
       geom_node_point(aes(colour = as.factor(group),
                           size = .data[[size]])) +
-      theme_graph(base_family = "Hind") +
+      theme_graph(base_family = "Arial") +
       theme(legend.position = "none")
   } else {
     graph %>% 
@@ -169,7 +169,7 @@ plot_graph <- function(graph, layout = "stress", groups = TRUE,
       ggraph(layout) +
       geom_edge_link() +
       geom_node_point(aes(size = .data[[size]])) +
-      theme_graph(base_family = "Hind") +
+      theme_graph(base_family = "Arial") +
       theme(legend.position = "none")
   }
 
