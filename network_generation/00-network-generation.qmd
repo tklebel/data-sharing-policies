@@ -41,11 +41,14 @@ extrafont::loadfonts(device = "win")
 
 source(here::here("R/functions.R"))
 
-pretty_summary <- function(graph) {
-  summarise_graph(graph) %>% 
-  rename("Number of Nodes" = n_nodes, "Average degree" = avg_degree,
-         "Clustering coefficient" = clustering, "Average path distance" = mean_dist) %>% 
-  knitr::kable()
+pretty_summary <- function(graph, summarise = TRUE) {
+  if (summarise) {
+    graph <- summarise_graph(graph)
+  }
+  graph %>%  
+    rename("Number of Nodes" = n_nodes, "Average degree" = avg_degree,
+           "Clustering coefficient" = clustering, "Average path distance" = mean_dist) %>% 
+    knitr::kable()
 }
 ```
 
@@ -259,9 +262,11 @@ final_clustered %>%
 
 # Summary of networks
 
-```{r, fig.height=12, fig.width=5}
+@fig-network-overview shows all three generated networks.
+
+```{r, fig.height=12, fig.width=5, echo=FALSE}
 #| label: fig-network-overview
-#| fig-cap: "Overview of network topologies. (A) Random network. (B) Network with low clustering. (C) Network with high clustering"
+#| fig-cap: "Overview of network topologies. (A) Random network. (B) Network with low clustering. (C) Network with high clustering. Colours represent groups optained via the Louvain algorithm. The size of nodes refers to their total degree."
 
 p_random <- plot_graph(random_network)
 p_fragemented <- plot_graph(final_fragmented)
@@ -274,6 +279,21 @@ p_random +
   plot_annotation(tag_levels = "A") 
 ```
 
-TO ADD HERE: overview table.
+```{r, echo=FALSE}
+#| label: tbl-network-summary
+#| tbl-cap: "Network properties of generated networks"
+
+random_summary <- summarise_graph(random_network) %>% 
+  mutate(Topology = "Random")
+fragmented_summary <- summarise_graph(final_fragmented) %>% 
+    mutate(Topology = "Low clustering")
+clustered_summary <- summarise_graph(final_clustered) %>% 
+    mutate(Topology = "High clustering")
+
+bind_rows(random_summary, fragmented_summary, clustered_summary) %>% 
+  select(Topology, everything()) %>% 
+  pretty_summary(summarise = FALSE)
+
+```
 
 # References
