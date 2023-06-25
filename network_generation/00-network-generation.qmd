@@ -124,6 +124,7 @@ proposed by @watts1998. We obtain low clustering by using small neighbourhood
 sizes (1-2), and a moderate rewiring probability (0.2-0.3).
 
 ```{r fragmented-initial, fig.height=4, fig.width=8}
+set.seed(987237)
 fragmented_setup <- tibble(
   n_dim = rep(1, 5), # number of clusters
   dim_size = c(10, 25, 20, 25, 20), # n of clusters
@@ -202,6 +203,7 @@ Highly clustered communities are obtained by using a larger neighbourhood size
 (0.01-0.05).
 
 ```{r clustered-initial, fig.height=4, fig.width=8}
+set.seed(8723234)
 clustered_setup <- tibble(
   n_dim = rep(1, 4), # number of clusters
   dim_size = c(10, 25, 20, 30), # n of clusters
