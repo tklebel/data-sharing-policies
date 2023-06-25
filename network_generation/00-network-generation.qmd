@@ -293,7 +293,7 @@ and connect the different communities, but are more similar to other nodes in
 terms of their degree than in the case of network (B). This network might
 represent a typical sub-field within the natural sciences.
 
-```{r, fig.height=12, fig.width=5, echo=FALSE}
+```{r, fig.height=12, fig.width=5, echo=FALSE, warning=FALSE}
 #| label: fig-network-overview
 #| fig-cap: "Overview of network topologies. (A) Random network. (B) Network with low clustering. (C) Network with high clustering. Colours represent groups optained via the Louvain algorithm. The size of nodes refers to their total degree."
 
