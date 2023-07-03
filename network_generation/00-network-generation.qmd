@@ -1,6 +1,6 @@
 ---
 title: "Network generation"
-format: pdf
+format: html
 editor: source
 author: Thomas Klebel
 date-modified: today
@@ -69,10 +69,6 @@ set.seed(20230617)
 n <- 100
 p <- .06
 random_network <- play_erdos_renyi(n = n, p = p, directed = FALSE)
-
-# add an id column for the analysis
-random_network <- random_network %>% 
-  mutate(id = 1:n)
 ```
 
 ```{r random-graph-viz, warning=FALSE}
@@ -94,8 +90,9 @@ random_layout <- layout_with_kk(random_network)
 
 # save to file
 random_network %>% 
-  mutate(x = random_layout[, 1],
-         y = random_layout[, 2]) %>% 
+  mutate(xcor = random_layout[, 1],
+         ycor = random_layout[, 2],
+         turtleid = 1:n) %>% # add an id column for the analysis
   write_graph("data/random_network.gml", format = "gml")
 ```
 
@@ -190,8 +187,9 @@ fragmented_layout <- layout_with_kk(final_fragmented)
 
 # save to file
 final_fragmented %>% 
-  mutate(x = fragmented_layout[, 1],
-         y = fragmented_layout[, 2]) %>% 
+  mutate(xcor = fragmented_layout[, 1],
+         ycor = fragmented_layout[, 2],
+         turtleid = 1:n) %>% # add an id column for the analysis
   write_graph("data/fragmented_network.gml", format = "gml")
 ```
 
@@ -269,8 +267,9 @@ clustered_layout <- layout_with_kk(final_clustered)
 
 # save to file
 final_clustered %>% 
-  mutate(x = clustered_layout[, 1],
-         y = clustered_layout[, 2]) %>% 
+  mutate(xcor = clustered_layout[, 1],
+         ycor = clustered_layout[, 2],
+         turtleid = 1:n) %>% # add an id column for the analysis) 
   write_graph("data/clustered_network.gml", format = "gml")
 ```
 
