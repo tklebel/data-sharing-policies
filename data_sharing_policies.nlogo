@@ -8,6 +8,7 @@ globals [
 
 turtles-own [
   resources
+  turtleid ; id from network generation
   initial-resources-quantile
   resources-last-round
   total-funding ; record how much funding each group has accrued over time
@@ -28,17 +29,19 @@ to setup
 
   ask patches [set pcolor white]
 
+  create-turtles n-teams
+
   (ifelse
-    network = "random"      [ nw:generate-random turtles links n-teams 0.02 ]
-    network = "small-world" [ nw:generate-watts-strogatz turtles links n-teams 3 .2 ]
-                            [ create-turtles n-teams ]
+    network = "random"      [ nw:load-gml "network_generation/data/random_network.gml" turtles links ]
+    network = "clustered" [ nw:load-gml "network_generation/data/clustered_network.gml" turtles links ]
+    network = "fragmented" [ nw:load-gml "network_generation/data/fragmented_network.gml" turtles links ]
+    network = "none" [ ask turtles [ fd 6 ] ] ; layout in a circle
   )
 
   ask turtles [
     set shape "circle"
     set color 65
-    ; radius for the circle
-    fd 24
+    set size .5
     ; create resource distribution
     set resources (ifelse-value
       resources-dist = "uniform" [ random-float 1 ]
@@ -241,13 +244,13 @@ to-report individual-data
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-257
+269
 10
-502
-256
+517
+259
 -1
 -1
-4.65
+16.0
 1
 10
 1
@@ -257,10 +260,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--25
-25
--25
-25
+-7
+7
+-7
+7
 0
 0
 1
@@ -557,7 +560,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.0
+0.06
 .01
 1
 NIL
@@ -570,8 +573,8 @@ CHOOSER
 556
 network
 network
-"none" "random" "small-world"
-0
+"none" "random" "clustered" "fragmented"
+2
 
 SLIDER
 236
@@ -597,7 +600,7 @@ b_norm
 b_norm
 0
 1
-1.0
+0.95
 0.01
 1
 NIL
@@ -707,7 +710,7 @@ funded-share
 funded-share
 0
 1
-0.9
+0.15
 0.05
 1
 NIL
