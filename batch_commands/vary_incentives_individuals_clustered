@@ -1,0 +1,8 @@
+../NetLogo\ 6.3.0/NetLogo_Console --headless \
+  --threads 16 \
+  --model "data_sharing_policies.nlogo" \
+  --experiment "vary_incentives_individuals_clustered" \
+  --table outputs/vary_incentives_individuals_clustered.csv
+
+sed -i '1,6d' outputs/vary_incentives_individuals_clustered.csv
+pbzip2 outputs/vary_incentives_individuals_clustered.csv
