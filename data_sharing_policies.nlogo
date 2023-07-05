@@ -29,13 +29,16 @@ to setup
 
   ask patches [set pcolor white]
 
-  create-turtles n-teams
+
 
   (ifelse
     network = "random"      [ nw:load-gml "network_generation/data/random_network.gml" turtles links ]
     network = "clustered" [ nw:load-gml "network_generation/data/clustered_network.gml" turtles links ]
     network = "fragmented" [ nw:load-gml "network_generation/data/fragmented_network.gml" turtles links ]
-    network = "none" [ ask turtles [ fd 6 ] ] ; layout in a circle
+    network = "none" [
+      create-turtles n-teams
+      ask turtles [ fd 6 ]  ; layout in a circle
+    ]
   )
 
   ask turtles [
