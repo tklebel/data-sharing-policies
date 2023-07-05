@@ -29,8 +29,6 @@ to setup
 
   ask patches [set pcolor white]
 
-
-
   (ifelse
     network = "random"      [ nw:load-gml "network_generation/data/random_network.gml" turtles links ]
     network = "clustered" [ nw:load-gml "network_generation/data/clustered_network.gml" turtles links ]
