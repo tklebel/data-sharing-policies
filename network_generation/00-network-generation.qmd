@@ -234,10 +234,10 @@ Highly clustered communities are obtained by using a larger neighbourhood size
 ```{r clustered-initial, fig.height=4, fig.width=8}
 set.seed(8723234)
 clustered_setup <- tibble(
-  n_dim = rep(1, 4), # number of clusters
-  dim_size = c(10, 25, 20, 30), # n of clusters
-  order = c(3, 3, 4, 6), # neigborhood size
-  p_rewire = c(.01, .03, .05, .01) # rewire probability
+  n_dim = rep(1, 6), # number of clusters
+  dim_size = c(5, 10, 10, 15, 20, 30), # n of clusters
+  order = c(2, 2, 3, 3, 4, 5), # neigborhood size
+  p_rewire = c(.01, .01, .01, .03, .05, .01) # rewire probability
 )
 
 clustered_graphs <- pmap(clustered_setup, play_smallworld)

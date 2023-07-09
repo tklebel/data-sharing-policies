@@ -159,7 +159,7 @@ div.csl-indent {
 </section>
 <section id="case-1-low-clustering" class="level1">
 <h1>Case 1: Low clustering</h1>
-<p>The first case of interest is a network with low clustering. The network is set up to exhibit traits of both small-world and scale-free networks. We simulate the network in three steps:</p>
+<p>The first case of interest is a network with low clustering. The network is set up to exhibit traits of both small-world and scale-free networks. We simulate the network in four steps:</p>
 <ol type="1">
 <li>We first generate multiple small-world networks that resemble clusters or communities within the field of interest. This step might create isolated nodes, due to the low neighbourhood size and the moderate rewiring probability.</li>
 <li>We add many edges to a few randomly picked nodes to create hubs. The edges are added by following the Barbasi-Albert algorithm, but without adding any further nodes:
@@ -304,6 +304,17 @@ div.csl-indent {
 </section>
 <section id="case-2-high-clustering" class="level1">
 <h1>Case 2: High clustering</h1>
+<p>Generating the network with high clustering follows the same rationale as the one for low clustering. Since the settings in this case do not create isolated nodes in step 1, the procedure can be slightly simplified:</p>
+<ol type="1">
+<li>We first generate multiple small-world networks that resemble clusters or communities within the field of interest, with <span class="math inline">\(n = 85\)</span>.</li>
+<li>We add many edges to a few randomly picked nodes to create hubs. The edges are added by following the Barbasi-Albert algorithm, but without adding any further nodes:
+<ol type="1">
+<li>Pick a random node <span class="math inline">\(o\)</span>.</li>
+<li>Pick a second node <span class="math inline">\(k\)</span> from all nodes (except the node chosen in step 1), with probability <span class="math inline">\(p(e)\)</span>, where <span class="math inline">\(e = \frac{degree_k}{\sum_{i=1}^{k} degree_k}\)</span></li>
+<li>Add one edge from <span class="math inline">\(o\)</span> to <span class="math inline">\(k\)</span>.</li>
+</ol></li>
+<li>Add further nodes and edges according to the Barbasi-Albert algorithm to ensure a sample size of <span class="math inline">\(n = 100\)</span>.</li>
+</ol>
 <section id="step-1-create-clustered-communities" class="level2">
 <h2 class="anchored" data-anchor-id="step-1-create-clustered-communities">Step 1: create clustered communities</h2>
 <p>Highly clustered communities are obtained by using a larger neighbourhood size (3-6) for the clusters of 10-30 nodes, and setting a low rewire probability (0.01-0.05).</p>
@@ -331,10 +342,10 @@ div.csl-indent {
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">85</td>
-<td style="text-align: right;">8.588</td>
-<td style="text-align: right;">0.599</td>
-<td style="text-align: right;">1.828</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">7.444</td>
+<td style="text-align: right;">0.591</td>
+<td style="text-align: right;">1.752</td>
 </tr>
 </tbody>
 </table>
@@ -367,21 +378,18 @@ div.csl-indent {
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">85</td>
-<td style="text-align: right;">9.647</td>
-<td style="text-align: right;">0.52</td>
-<td style="text-align: right;">2.869</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">8.444</td>
+<td style="text-align: right;">0.467</td>
+<td style="text-align: right;">3.048</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </section>
-<section id="step-3-remove-unconnected-nodes" class="level2">
-<h2 class="anchored" data-anchor-id="step-3-remove-unconnected-nodes">Step 3: Remove unconnected nodes</h2>
-</section>
-<section id="step-4-add-nodes-and-edges" class="level2">
-<h2 class="anchored" data-anchor-id="step-4-add-nodes-and-edges">Step 4: Add nodes and edges</h2>
+<section id="step-3-add-nodes-and-edges-1" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-add-nodes-and-edges-1">Step 3: Add nodes and edges</h2>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="00-network-generation_files/figure-html/clustered-final-1.png" class="img-fluid" width="672"></p>
@@ -407,9 +415,9 @@ div.csl-indent {
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">8.8</td>
-<td style="text-align: right;">0.483</td>
-<td style="text-align: right;">2.975</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0.442</td>
+<td style="text-align: right;">3.105</td>
 </tr>
 </tbody>
 </table>
@@ -476,9 +484,9 @@ div.csl-indent {
 <tr class="odd">
 <td style="text-align: left;">High clustering</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">8.80</td>
-<td style="text-align: right;">0.483</td>
-<td style="text-align: right;">2.975</td>
+<td style="text-align: right;">8.00</td>
+<td style="text-align: right;">0.442</td>
+<td style="text-align: right;">3.105</td>
 </tr>
 </tbody>
 </table>
