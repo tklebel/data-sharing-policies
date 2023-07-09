@@ -24,11 +24,16 @@ frequently, with a few highly connected authors, who tend to be well-known and
 key figures in a community. Given that our model considers research *teams*,
 rather than *individual researchers*, we did not attempt to calibrate our
 networks against any given network, but rather to contrast networks with high
-and low clustering. This can be thought of contrasting research in the natural
-sciences, such as in physics, with research in the social sciences and
-humanities.
-<!--- Important: I feel that this comparison is still made up. I would need to find literature on communities rather than individual authors, to make such a claim. --->
-As a baseline, we consider a random network.
+and low clustering. Previous research on co-authorships has reported moderate to
+high clustering for fields such as Physics, IT, and Management studies
+[@tang2017, @newman2001], and low clustering for fields such as Sociology
+[@tang2017, @moody2004], Medicine [@tang2017], and the biomedical sciences more
+broadly [@kumar2015]. Approaches to analysing co-authorships vary considerably,
+and there is no reliable evidence on characteristics of co-authorship networks
+in the humanities.
+
+Our approach thus contrasts broad types of networks, rather than specific
+networks of specific communities. As a baseline, we consider a random network.
 
 # Package setup
 
@@ -313,14 +318,12 @@ simulation.
 Network (B) exhibits equally low clustering, but high path length and low
 degree. This resembles a community where most agents are not well connected, and
 the distance to other agents is sometimes long. Nevertheless, the network
-includes a few hubs which are much more connected than the other agents. This
-might represent a typical sub-field within the social sciences and humanities.
+includes a few hubs which are much more connected than the other agents.
 
 Network (C) is characterised by highly clustered communities, with high average
 degree, high clustering, and relatively short average paths. Hubs are present
 and connect the different communities, but are more similar to other nodes in
-terms of their degree than in the case of network (B). This network might
-represent a typical sub-field within the natural sciences.
+terms of their degree than in the case of network (B).
 
 ```{r, fig.height=12, fig.width=5, echo=FALSE, warning=FALSE}
 #| label: fig-network-overview
