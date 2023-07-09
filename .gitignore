@@ -4,10 +4,13 @@
 .Ruserdata
 
 analysis/_targets/
-
+analysis/think*
 analysis/*files/*/*
 !analysis/*files/*/*png
 
 analysis/zzz.R
 outputs/*
 sample models/*
+
+network_generation/01*
+network_generation/data/ssk_dois.csv
