@@ -204,8 +204,8 @@ plot_degree <- function(graph) {
     geom_point() +
     geom_line() +
     theme_bw() +
-    labs(x = "number of collaborators *k* (degree)",
-         y = "number of teams with *k* collaborators") +
+    labs(x = "number of links *k* (degree)",
+         y = "number of teams with *k* links") +
     theme(axis.title.x = ggtext::element_markdown(),
           axis.title.y = ggtext::element_markdown())
 }
