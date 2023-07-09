@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Thomas Klebel">
-<meta name="dcterms.date" content="2023-07-03">
+<meta name="dcterms.date" content="2023-07-09">
 
 <title>Network generation</title>
 <style>
@@ -85,14 +85,14 @@ div.csl-indent {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">July 3, 2023</p>
+      <p class="date">July 9, 2023</p>
     </div>
   </div>
   
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">July 3, 2023</p>
+      <p class="date-modified">July 9, 2023</p>
     </div>
   </div>
     
@@ -161,15 +161,15 @@ div.csl-indent {
 <h1>Case 1: Low clustering</h1>
 <p>The first case of interest is a network with low clustering. The network is set up to exhibit traits of both small-world and scale-free networks. We simulate the network in three steps:</p>
 <ol type="1">
-<li>We first generate multiple small-world networks that resemble clusters or communities within the field of interest.</li>
-<li>We add many edges to a few randomly picked nodes to create hubs. The edges are added by following the Barbasi-Albert algorithm:
+<li>We first generate multiple small-world networks that resemble clusters or communities within the field of interest. This step might create isolated nodes, due to the low neighbourhood size and the moderate rewiring probability.</li>
+<li>We add many edges to a few randomly picked nodes to create hubs. The edges are added by following the Barbasi-Albert algorithm, but without adding any further nodes:
 <ol type="1">
 <li>Pick a random node <span class="math inline">\(o\)</span>.</li>
 <li>Pick a second node <span class="math inline">\(k\)</span> from all nodes (except the node chosen in step 1), with probability <span class="math inline">\(p(e)\)</span>, where <span class="math inline">\(e = \frac{degree_k}{\sum_{i=1}^{k} degree_k}\)</span></li>
 <li>Add one edge from <span class="math inline">\(o\)</span> to <span class="math inline">\(k\)</span>.</li>
 </ol></li>
-<li>We remove any nodes that are not connected to the main component.</li>
-<li>Add further nodes and edges according to the Barbasi-Albert algorithm to ensure sample size of <span class="math inline">\(n = 100\)</span>.</li>
+<li>Add further nodes and edges according to the Barbasi-Albert algorithm to ensure the size of of the main component is 100.</li>
+<li>We only retain the main component.</li>
 </ol>
 <section id="step-1-create-fragmented-communities" class="level2">
 <h2 class="anchored" data-anchor-id="step-1-create-fragmented-communities">Step 1: create fragmented communities</h2>
@@ -244,11 +244,24 @@ div.csl-indent {
 </div>
 </div>
 </section>
-<section id="step-3-remove-unconnected-nodes" class="level2">
-<h2 class="anchored" data-anchor-id="step-3-remove-unconnected-nodes">Step 3: Remove unconnected nodes</h2>
+<section id="step-3-add-nodes-and-edges" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-add-nodes-and-edges">Step 3: Add nodes and edges</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  component_id     n
+         &lt;int&gt; &lt;int&gt;
+1            1   100
+2            2     2
+3            3     1
+4            4     1
+5            5     1
+6            6     1</code></pre>
+</div>
+</div>
 </section>
-<section id="step-4-add-nodes-and-edges" class="level2">
-<h2 class="anchored" data-anchor-id="step-4-add-nodes-and-edges">Step 4: Add nodes and edges</h2>
+<section id="step-4-retain-main-component" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-retain-main-component">Step 4: Retain main component</h2>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="00-network-generation_files/figure-html/fragmented-final-1.png" class="img-fluid" width="672"></p>
@@ -274,9 +287,9 @@ div.csl-indent {
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">3.52</td>
-<td style="text-align: right;">0.135</td>
-<td style="text-align: right;">4.147</td>
+<td style="text-align: right;">3.6</td>
+<td style="text-align: right;">0.152</td>
+<td style="text-align: right;">4.31</td>
 </tr>
 </tbody>
 </table>
@@ -364,11 +377,11 @@ div.csl-indent {
 </div>
 </div>
 </section>
-<section id="step-3-remove-unconnected-nodes-1" class="level2">
-<h2 class="anchored" data-anchor-id="step-3-remove-unconnected-nodes-1">Step 3: Remove unconnected nodes</h2>
+<section id="step-3-remove-unconnected-nodes" class="level2">
+<h2 class="anchored" data-anchor-id="step-3-remove-unconnected-nodes">Step 3: Remove unconnected nodes</h2>
 </section>
-<section id="step-4-add-nodes-and-edges-1" class="level2">
-<h2 class="anchored" data-anchor-id="step-4-add-nodes-and-edges-1">Step 4: Add nodes and edges</h2>
+<section id="step-4-add-nodes-and-edges" class="level2">
+<h2 class="anchored" data-anchor-id="step-4-add-nodes-and-edges">Step 4: Add nodes and edges</h2>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="00-network-generation_files/figure-html/clustered-final-1.png" class="img-fluid" width="672"></p>
@@ -456,9 +469,9 @@ div.csl-indent {
 <tr class="even">
 <td style="text-align: left;">Low clustering</td>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">3.52</td>
-<td style="text-align: right;">0.135</td>
-<td style="text-align: right;">4.147</td>
+<td style="text-align: right;">3.60</td>
+<td style="text-align: right;">0.152</td>
+<td style="text-align: right;">4.310</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">High clustering</td>

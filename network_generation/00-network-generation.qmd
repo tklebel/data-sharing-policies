@@ -103,17 +103,20 @@ up to exhibit traits of both small-world and scale-free networks. We simulate
 the network in three steps:
 
 1.  We first generate multiple small-world networks that resemble clusters or
-    communities within the field of interest.
+    communities within the field of interest. This step might create isolated
+    nodes, due to the low neighbourhood size and the moderate rewiring
+    probability.
 2.  We add many edges to a few randomly picked nodes to create hubs. The edges
-    are added by following the Barbasi-Albert algorithm:
+    are added by following the Barbasi-Albert algorithm, but without adding any
+    further nodes:
     1.  Pick a random node $o$.
     2.  Pick a second node $k$ from all nodes (except the node chosen in step
         1), with probability $p(e)$, where
         $e = \frac{degree_k}{\sum_{i=1}^{k} degree_k}$
     3.  Add one edge from $o$ to $k$.
-3.  We remove any nodes that are not connected to the main component.
-4.  Add further nodes and edges according to the Barbasi-Albert algorithm to
-    ensure sample size of $n = 100$.
+3.  Add further nodes and edges according to the Barbasi-Albert algorithm to
+    ensure the size of of the main component is 100.
+4.  We only retain the main component.
 
 ## Step 1: create fragmented communities
 
@@ -155,19 +158,29 @@ plot_graph(hubs, groups = TRUE)
 pretty_summary(hubs)
 ```
 
-## Step 3: Remove unconnected nodes
+## Step 3: Add nodes and edges
 
 ```{r}
-connected <- hubs %>% 
-  filter(!node_is_simplical())
-```
-
-## Step 4: Add nodes and edges
-
-```{r}
-final_fragmented <- sample_pa(100, start.graph = connected, out.pref = TRUE, 
+fragmented <- sample_pa(106, start.graph = hubs, out.pref = TRUE, 
                                m = 1, power = 1, directed = FALSE) %>% 
   as_tbl_graph()
+```
+
+```{r}
+# the size of the main component is now 100
+fragmented %>% 
+  mutate(component_id = group_components()) %>% 
+  as_tibble() %>% 
+  count(component_id)
+```
+
+## Step 4: Retain main component
+
+```{r}
+final_fragmented <- fragmented %>% 
+  mutate(component_id = group_components()) %>% 
+  filter(component_id == 1) %>% 
+  select(-component_id)
 ```
 
 ```{r fragmented-final}
