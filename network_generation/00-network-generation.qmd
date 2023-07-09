@@ -86,12 +86,14 @@ pretty_summary(random_network)
 
 ```{r, warning=FALSE}
 # we save the layout as well, so that VOSViewer can read the file
-random_layout <- layout_with_kk(random_network)
+random_layout <- graphlayouts::layout_with_stress(random_network)
 
 # save to file
 random_network %>% 
-  mutate(xcor = random_layout[, 1],
+  mutate(xcor = random_layout[, 1], # coordinates for netlogo
          ycor = random_layout[, 2],
+         x = random_layout[, 1], # coordinates for VOSviewer
+         y = random_layout[, 2],
          turtleid = 1:n) %>% # add an id column for the analysis
   write_graph("data/random_network.gml", format = "gml")
 ```
@@ -196,12 +198,14 @@ plot_degree(final_fragmented)
 ```
 
 ```{r}
-fragmented_layout <- layout_with_kk(final_fragmented)
+fragmented_layout <- graphlayouts::layout_with_stress(final_fragmented)
 
 # save to file
 final_fragmented %>% 
-  mutate(xcor = fragmented_layout[, 1],
+   mutate(xcor = fragmented_layout[, 1], # coordinates for netlogo
          ycor = fragmented_layout[, 2],
+         x = fragmented_layout[, 1], # coordinates for VOSviewer
+         y = fragmented_layout[, 2],
          turtleid = 1:n) %>% # add an id column for the analysis
   write_graph("data/fragmented_network.gml", format = "gml")
 ```
@@ -274,7 +278,7 @@ final_clustered <- sample_pa(100, start.graph = hubs, out.pref = TRUE,
 ```
 
 ```{r clustered-final}
-plot_graph(final_clustered, layout = "stress")
+plot_graph(final_clustered, layout = "lgl")
 ```
 
 ```{r}
@@ -286,12 +290,14 @@ plot_degree(final_clustered)
 ```
 
 ```{r}
-clustered_layout <- layout_with_kk(final_clustered)
+clustered_layout <- graphlayouts::layout_with_stress(final_clustered)
 
 # save to file
 final_clustered %>% 
-  mutate(xcor = clustered_layout[, 1],
+  mutate(xcor = clustered_layout[, 1], # coordinates for netlogo
          ycor = clustered_layout[, 2],
+         x = clustered_layout[, 1], # coordinates for VOSviewer
+         y = clustered_layout[, 2],
          turtleid = 1:n) %>% # add an id column for the analysis) 
   write_graph("data/clustered_network.gml", format = "gml")
 ```
