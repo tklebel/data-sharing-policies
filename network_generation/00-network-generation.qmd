@@ -100,7 +100,7 @@ random_network %>%
 
 The first case of interest is a network with low clustering. The network is set
 up to exhibit traits of both small-world and scale-free networks. We simulate
-the network in three steps:
+the network in four steps:
 
 1.  We first generate multiple small-world networks that resemble clusters or
     communities within the field of interest. This step might create isolated
@@ -208,6 +208,23 @@ final_fragmented %>%
 
 # Case 2: High clustering
 
+Generating the network with high clustering follows the same rationale as the
+one for low clustering. Since the settings in this case do not create isolated
+nodes in step 1, the procedure can be slightly simplified:
+
+1.  We first generate multiple small-world networks that resemble clusters or
+    communities within the field of interest, with $n = 85$.
+2.  We add many edges to a few randomly picked nodes to create hubs. The edges
+    are added by following the Barbasi-Albert algorithm, but without adding any
+    further nodes:
+    1.  Pick a random node $o$.
+    2.  Pick a second node $k$ from all nodes (except the node chosen in step
+        1), with probability $p(e)$, where
+        $e = \frac{degree_k}{\sum_{i=1}^{k} degree_k}$
+    3.  Add one edge from $o$ to $k$.
+3.  Add further nodes and edges according to the Barbasi-Albert algorithm to
+    ensure a sample size of $n = 100$.
+
 ## Step 1: create clustered communities
 
 Highly clustered communities are obtained by using a larger neighbourhood size
@@ -248,17 +265,10 @@ plot_graph(hubs, groups = TRUE)
 pretty_summary(hubs)
 ```
 
-## Step 3: Remove unconnected nodes
+## Step 3: Add nodes and edges
 
 ```{r}
-connected <- hubs %>% 
-  filter(!node_is_simplical())
-```
-
-## Step 4: Add nodes and edges
-
-```{r}
-final_clustered <- sample_pa(100, start.graph = connected, out.pref = TRUE, 
+final_clustered <- sample_pa(100, start.graph = hubs, out.pref = TRUE, 
                              m = 2, power = 1, directed = FALSE) %>% 
   as_tbl_graph()
 ```
