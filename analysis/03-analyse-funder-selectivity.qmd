@@ -1,5 +1,5 @@
 ---
-title: "Baseline analysis"
+title: "Analysis of funder selectivity"
 format: 
   html:
     code-fold: true
