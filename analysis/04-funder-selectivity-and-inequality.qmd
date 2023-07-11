@@ -1,0 +1,95 @@
+---
+title: "Funder selectivity and inequality in data sharing"
+format: 
+  html:
+    code-fold: true
+  #pdf: default
+execute:
+  keep-md: true
+---
+
+Research questions:
+- What is the effect of a funding agency’s level of selectivity on the uptake of data sharing among research teams which allocate their resources strategically?
+- What is the effect of the introduced policy on inequality of resources within the system?
+
+
+Approach:
+
+1. Reproduce the below analysis from individual data
+2. Run across all three types of networks
+3. Analyse inequality/how takes up sharing with lagged regression or similar
+
+```{r, echo=FALSE, message=FALSE}
+library(patchwork)
+library(tidyverse)
+library(targets)
+library(arrow)
+
+source("R/functions.R")
+
+extrafont::loadfonts(device = "win")
+theme_set(theme_bw(base_family = "Hind"))
+
+options(dplyr.summarise.inform = FALSE)
+
+df_all <- open_dataset(tar_read(selectivity_file),
+                   format = "csv", schema = schema_funder_selectivity, skip = 1,
+                   convert_options = CsvConvertOptions$create(
+                     null_values = "<RuntimePrimitiveException>")
+                   )
+
+df <- select_funder_selectivity(df_all)
+
+```
+
+
+# Effect of grant size
+```{r fig.width=7, fig.height=9}
+#| label: fig-funder-selectivity
+#| fig-cap: Gini index and % of groups sharing data dependent on grant size
+
+
+pdata <- df %>% 
+  # remove this value. it was mainly kept for compatibility with prior analyses,
+  # but results are very similar to the run with setting -4, so no additional
+  # value to show it here
+  filter(max_initial_utility != -3, step > 0) %>% 
+  group_by(step, funded_share, max_initial_utility) %>% 
+  summarise(mean_gini = mean(resources_gini),
+            mean_cumulative_gini = mean(total_funding_gini),
+            mean_sharing = mean(perc_sharing)) %>% 
+  collect() %>% 
+  mutate(max_initial_utility = recode(max_initial_utility, `4` = "Uniform initial sharing effort",
+                                      `-4` = "Low initial sharing effort"),
+         funded_share = scales::percent(funded_share, accuracy = 1))
+
+n_row <- 1
+
+p1 <- pdata %>%  
+  ggplot(aes(step, mean_gini, colour = as.factor(funded_share))) +
+  geom_line() +
+    facet_wrap(vars(max_initial_utility), nrow = n_row) +
+    labs(colour = "% of teams receiving funding",
+       y = "Gini of current resources", x = NULL)
+
+p2 <- pdata %>%  
+  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(funded_share))) +
+  geom_line() +
+    facet_wrap(vars(max_initial_utility), nrow = n_row) +
+    labs(colour = "% of teams receiving funding",
+       y = "Gini of total resources",
+       x = "Step")
+
+p3 <- pdata %>%  
+  ggplot(aes(step, mean_sharing, colour = as.factor(funded_share))) +
+  geom_line() +
+  facet_wrap(vars(max_initial_utility), nrow = n_row) +
+  labs(colour = "% of teams receiving funding",
+       y = "% of teams sharing data", x = NULL) 
+
+p3 / p1 / p2 +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+```
+
+
