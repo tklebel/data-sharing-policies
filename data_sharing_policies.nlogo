@@ -280,7 +280,7 @@ proposal-sigma
 proposal-sigma
 0
 1
-0.25
+0.15
 .01
 1
 NIL
@@ -561,7 +561,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.06
+0.7
 .01
 1
 NIL
@@ -575,7 +575,7 @@ CHOOSER
 network
 network
 "none" "random" "clustered" "fragmented"
-2
+0
 
 SLIDER
 236
@@ -601,7 +601,7 @@ b_norm
 b_norm
 0
 1
-0.95
+1.0
 0.01
 1
 NIL
@@ -711,7 +711,7 @@ funded-share
 funded-share
 0
 1
-0.15
+0.3
 0.05
 1
 NIL
@@ -1203,7 +1203,7 @@ NetLogo 6.2.2
     </enumeratedValueSet>
     <steppedValueSet variable="max-initial-utility" first="-4" step="2" last="4"/>
   </experiment>
-  <experiment name="vary_incentives" repetitions="50" sequentialRunOrder="false" runMetricsEveryStep="true">
+  <experiment name="vary_incentives" repetitions="100" sequentialRunOrder="false" runMetricsEveryStep="true">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
@@ -1225,7 +1225,7 @@ NetLogo 6.2.2
     <enumeratedValueSet variable="b_norm">
       <value value="1"/>
     </enumeratedValueSet>
-    <steppedValueSet variable="sharing-incentive" first="0" step="0.2" last="1"/>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
     <enumeratedValueSet variable="application-penalty">
       <value value="0.05"/>
     </enumeratedValueSet>
@@ -1233,7 +1233,6 @@ NetLogo 6.2.2
       <value value="&quot;uniform&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="proposal-sigma">
-      <value value="0.25"/>
       <value value="0.15"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="n-teams">
@@ -1251,20 +1250,16 @@ NetLogo 6.2.2
     <enumeratedValueSet variable="network">
       <value value="&quot;none&quot;"/>
       <value value="&quot;random&quot;"/>
-      <value value="&quot;small-world&quot;"/>
+      <value value="&quot;fragmented&quot;"/>
+      <value value="&quot;clustered&quot;"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="funded-share">
-      <value value="0.15"/>
-      <value value="0.5"/>
-      <value value="0.85"/>
-    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
     <enumeratedValueSet variable="data-sharing?">
       <value value="true"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max-initial-utility">
-      <value value="-3"/>
-      <value value="0"/>
-      <value value="3"/>
+      <value value="-4"/>
+      <value value="4"/>
     </enumeratedValueSet>
   </experiment>
   <experiment name="full_sweep" repetitions="60" sequentialRunOrder="false" runMetricsEveryStep="false">
