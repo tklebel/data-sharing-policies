@@ -1,5 +1,5 @@
 ---
-title: "Analysis of funder selectivity"
+title: "Funder selectivity and inequality in data sharing"
 format: 
   html:
     code-fold: true
@@ -7,6 +7,17 @@ format:
 execute:
   keep-md: true
 ---
+
+Research questions:
+- What is the effect of a funding agency’s level of selectivity on the uptake of data sharing among research teams which allocate their resources strategically?
+- What is the effect of the introduced policy on inequality of resources within the system?
+
+
+Approach:
+
+1. Reproduce the below analysis from individual data
+2. Run across all three types of networks
+3. Analyse inequality/how takes up sharing with lagged regression or similar
 
 ```{r, echo=FALSE, message=FALSE}
 library(patchwork)
