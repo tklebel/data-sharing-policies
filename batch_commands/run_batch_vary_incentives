@@ -1,5 +1,8 @@
-../../NetLogo\ 6.3.0/NetLogo_Console --headless \
-  --threads 12 \
-  --model "../data_sharing_policies.nlogo" \
+../NetLogo\ 6.3.0/NetLogo_Console --headless \
+  --threads 16 \
+  --model "data_sharing_policies.nlogo" \
   --experiment "vary_incentives" \
-  --table ../outputs/vary-incentives.csv
+  --table outputs/vary_incentives.csv
+  
+sed -i '1,6d' outputs/vary_incentives.csv
+pbzip2 outputs/vary_incentives.csv
