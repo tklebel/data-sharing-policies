@@ -25,68 +25,68 @@ config$spark.speculation.quantile <- .4
 sc <- spark_connect(master = "yarn", config = config,
                     app_name = "pivot_columns")
 
-# 
-# parquet_df <- spark_read_parquet(
-#   sc, "parquet_df",
-#   path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network.parquet",
-#   memory = FALSE, 
-# )
-# 
-# 
-# # pivot data
-# re_arranged <- parquet_df %>% 
-#   spark_apply(f = re_arrange, memory = FALSE)
-# 
-# 
-# spark_write_parquet(
-#   re_arranged, 
-#   path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network_re_arranged.parquet",
-#   mode = "overwrite"
-#   # partition_by = c("fundedshare", "sharingincentive")
-# )
 
-# 
-# cat("processing random network\n")
-# 
-# parquet_df <- spark_read_parquet(
-#   sc, "parquet_df",
-#   path = "/tklebel/data_sharing_abm/vary_incentives_individuals_random_network.parquet",
-#   memory = FALSE, 
-# )
-# 
-# 
-# # pivot data
-# re_arranged <- parquet_df %>% 
-#   spark_apply(f = re_arrange, memory = FALSE)
-# 
-# 
-# spark_write_parquet(
-#   re_arranged, 
-#   path = "/tklebel/data_sharing_abm/vary_incentives_individuals_random_network_re_arranged.parquet",
-#   mode = "overwrite"
-#   # partition_by = c("fundedshare", "sharingincentive")
-# )
+parquet_df <- spark_read_parquet(
+  sc, "parquet_df",
+  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network.parquet",
+  memory = FALSE,
+)
 
-# cat("processing fragmented network\n")
-#
-# parquet_df <- spark_read_parquet(
-#  sc, "parquet_df",
-#  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_fragmented.parquet",
-#  memory = FALSE, 
-#)
-#
-#
+
 # pivot data
-#re_arranged <- parquet_df %>% 
-#  spark_apply(f = re_arrange, memory = FALSE)
-#
-#
-#spark_write_parquet(
-#  re_arranged, 
-#  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_fragmented_re_arranged.parquet",
-#  mode = "overwrite"
-#  # partition_by = c("fundedshare", "sharingincentive")
-#)
+re_arranged <- parquet_df %>%
+  spark_apply(f = re_arrange, memory = FALSE)
+
+
+spark_write_parquet(
+  re_arranged,
+  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network_re_arranged.parquet",
+  mode = "overwrite"
+  # partition_by = c("fundedshare", "sharingincentive")
+)
+
+
+cat("processing random network\n")
+
+parquet_df <- spark_read_parquet(
+  sc, "parquet_df",
+  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_random_network.parquet",
+  memory = FALSE,
+)
+
+
+# pivot data
+re_arranged <- parquet_df %>%
+  spark_apply(f = re_arrange, memory = FALSE)
+
+
+spark_write_parquet(
+  re_arranged,
+  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_random_network_re_arranged.parquet",
+  mode = "overwrite"
+  # partition_by = c("fundedshare", "sharingincentive")
+)
+
+cat("processing fragmented network\n")
+
+parquet_df <- spark_read_parquet(
+ sc, "parquet_df",
+ path = "/tklebel/data_sharing_abm/vary_incentives_individuals_fragmented.parquet",
+ memory = FALSE,
+)
+
+
+# pivot data
+re_arranged <- parquet_df %>%
+ spark_apply(f = re_arrange, memory = FALSE)
+
+
+spark_write_parquet(
+ re_arranged,
+ path = "/tklebel/data_sharing_abm/vary_incentives_individuals_fragmented_re_arranged.parquet",
+ mode = "overwrite"
+ # partition_by = c("fundedshare", "sharingincentive")
+)
 
 
 cat("processing clustered network\n")

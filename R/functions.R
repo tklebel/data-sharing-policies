@@ -128,8 +128,8 @@ unnest_individual_data <- function(df, col = `individual-data`) {
 
 
 re_arrange <- function(df) {
-  num_cols <- c("who", "initial_resources", "resources", "total_funding",
-                "effort")
+  num_cols <- c("who", "turtleid", "initial_resources", "resources", 
+                "total_funding", "effort")
   logi_col <- "shared_data"
   all_cols <- c(num_cols, logi_col)
   
@@ -139,7 +139,7 @@ re_arrange <- function(df) {
   df <- tidyr::separate(df, vals, all_cols, sep = "\\s")
   df <- dplyr::mutate(df, dplyr::across(tidyselect::all_of(num_cols), as.numeric),
                       dplyr::across(tidyselect::all_of(logi_col), as.logical))
-  df <- dplyr::select(df, -team, -individualdata)
+  df <- dplyr::select(df, -team, -individualdata, -who) # who is just turtleid - 1. We should have only retained one of both, but here we are
   df
 }
 
