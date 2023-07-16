@@ -107,7 +107,7 @@ p3 / p1 / p2 +
 
 # Random network
 ```{r fig.width=7, fig.height=9}
-#| label: fig-random network
+#| label: fig-random-network
 #| fig-cap: Gini index and % of groups sharing data dependent on grant size with random network.
 n_row <- 1
 
@@ -180,7 +180,7 @@ p3 / p1 / p2 +
 ```
 
 
-# fragmented network
+# Fragmented network
 ```{r fig.width=7, fig.height=9}
 #| label: fig-fragmented
 #| fig-cap: Gini index and % of groups sharing data dependent on grant size with fragmented network.
@@ -215,6 +215,28 @@ p3 / p1 / p2 +
   plot_layout(guides = "collect") +
   plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
+
+
+
+## Analysis/Interpretation
+Introducing network effects does change results. Where in the initial model with
+no network, teams would settle at quite high levels of sharing, even for 
+scenarios with low rates of funding, levels of sharing are lower for all cases
+with networks. The distributions of resources according to the Gini follow the
+same patterns, albeit at slightly different levels.
+
+For the case of a random network, equilibria are not very stable. Under highly
+competitive funding, the initial stage of the simulation shows large swings in
+the rate of teams sharing data - from no-one sharing data to 80% of teams 
+sharing data, back to 5% of teams sharing data to 75% of teams sharing data,
+and so forth. Eventually, the rates of sharing settle onto unstable equilibria 
+that reflect the level of funding selectivity: for the case of 10% of teams
+receiving funding, about 10-15% of teams share data, for the case of 20% of
+teams receiving funding, about 25% of teams share data, and so on.
+
+The same patterns of large initial swings and eventual equilibria hold true for
+the clustered and the fragmented network topology. 
+
 
 
 ```{r}
