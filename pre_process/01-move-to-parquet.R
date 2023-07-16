@@ -19,9 +19,65 @@ options(sparklyr.log.console = FALSE)
 
 sc <- spark_connect(master = "yarn", config = config,
                     app_name = "convert_to_parquet")
+# 
+# spark_read_csv(sc, name = "source_csv",
+#                path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network.csv.bz2",
+#                memory = FALSE)
+# 
+# temp_df <- tbl(sc, "source_csv")
+# 
+# # drop data that is redundant
+# selected_cols <- temp_df %>% 
+#   select(run_number, maxinitialutility, step, individualdata, fundedshare, 
+#          sharingincentive)
+# 
+# spark_write_parquet(
+#   selected_cols, 
+#   path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network.parquet",
+#   mode = "overwrite"
+# )
+# 
+# 
+# # random network
+# spark_read_csv(sc, name = "source_csv",
+#                path = "/tklebel/data_sharing_abm/vary_incentives_individuals_random_network.csv.bz2",
+#                memory = FALSE)
+# 
+# temp_df <- tbl(sc, "source_csv")
+# 
+# # drop data that is redundant
+# selected_cols <- temp_df %>% 
+#   select(run_number, maxinitialutility, step, individualdata, fundedshare, 
+#          sharingincentive)
+# 
+# spark_write_parquet(
+#   selected_cols, 
+#   path = "/tklebel/data_sharing_abm/vary_incentives_individuals_random_network.parquet",
+#   mode = "overwrite"
+# )
 
+# fragmented network
+# spark_read_csv(sc, name = "source_csv",
+#               path = "/tklebel/data_sharing_abm/vary_incentives_individuals_fragmented.csv.bz2",
+#               memory = FALSE)
+#
+#temp_df <- tbl(sc, "source_csv")
+
+# drop data that is redundant
+#selected_cols <- temp_df %>% 
+#  select(run_number, maxinitialutility, step, individualdata, fundedshare, 
+#         sharingincentive)
+#
+#spark_write_parquet(
+#  selected_cols, 
+#  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_fragmented.parquet",
+#  mode = "overwrite"
+#)
+
+
+# clustered network
 spark_read_csv(sc, name = "source_csv",
-               path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network.csv.bz2",
+               path = "/tklebel/data_sharing_abm/vary_incentives_individuals_clustered.csv.bz2",
                memory = FALSE)
 
 temp_df <- tbl(sc, "source_csv")
@@ -33,8 +89,10 @@ selected_cols <- temp_df %>%
 
 spark_write_parquet(
   selected_cols, 
-  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network.parquet",
+  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_clustered.parquet",
   mode = "overwrite"
 )
+
+
 
 spark_disconnect(sc)
