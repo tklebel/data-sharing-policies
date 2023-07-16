@@ -238,6 +238,18 @@ The same patterns of large initial swings and eventual equilibria hold true for
 the clustered and the fragmented network topology. 
 
 
+HIGHLY INTERESTING OBSERVATION: in the fragmented network, it is mostly those 
+teams which are not well-connected that keep sharing data (in line with the
+general findings). Is it then also those that receive more funding?
+Need to compare with centrality measures.
+
+This might be the reason, why the means that we show are much smoother for the 
+fragmented network, compared to the clustered, and especially the random network:
+in the fragmented network, the types of nodes sharing data are quite similar
+across runs, because there is a strong difference in degree between the nodes.
+In the clustered, and more so in the random network, there are not so big 
+differences in degree, and thus there is more variability in who shares.
+
 
 ```{r}
 spark_disconnect(sc)
