@@ -1,0 +1,150 @@
+---
+title: "Analysis of funder selectivity: individual level data"
+format: 
+  html:
+    code-fold: true
+  #pdf: default
+execute:
+  keep-md: true
+---
+
+
+
+
+HIGHLY INTERESTING OBSERVATION: in the fragmented network, it is mostly those teams which are not well-connected that keep sharing data (in line with the general finding that no network leads to more sharing than having a network. Those that are closer to having no network (low degree) are thus more likely to share). Is it then also those that receive more funding? Need to compare with centrality measures.
+
+This might be the reason, why the means that we show are much smoother for the fragmented network, compared to the clustered, and especially the random network: in the fragmented network, the types of nodes sharing data are quite similar across runs, because there is a strong difference in degree between the nodes. In the clustered, and more so in the random network, there are not so big differences in degree, and thus there is more variability in who shares.
+
+Research questions:
+
+-   Are always the same teams receiving funding?
+-   Are those that are being funded also those that share data?
+-   Are those that share data / receive funding more or less central in the network?
+
+```{r, echo=FALSE, message=FALSE}
+library(sparklyr)
+library(ggplot2)
+library(patchwork)
+library(dplyr)
+library(arrow)
+library(here)
+
+extrafont::loadfonts()
+theme_set(theme_bw(base_family = "Hind"))
+
+source(here("R/functions.R"))
+
+Sys.setenv(SPARK_HOME = "/home/tklebel/spark-3.4.0-bin-hadoop3/")
+Sys.setenv(HADOOP_HOME = "/home/hadoop/hadoop-3.3.1")
+Sys.setenv(HADOOP_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
+Sys.setenv(YARN_HOME = "/home/hadoop/hadoop-3.3.1")
+Sys.setenv(YARN_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
+Sys.setenv(JAVA_HOME="/usr/lib/jvm/java-1.11.0-openjdk-amd64")
+
+config <- spark_config()
+config$spark.executor.cores <- 5
+config$spark.executor.instances <- 20
+config$spark.executor.memory <- "20G"
+config$spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version <- 2
+
+sc <- spark_connect(master = "yarn", config = config,
+                    app_name = "funding_selectivity_individual_data")
+
+fragmented <- spark_read_parquet(
+  sc, "fragmented",
+  #  THIS CURRENTLY IS USING A WRONG PATH. ONCE THE FILE IS CONVERTED, SWITCH BACK TO TO CORRECT ONE !!!!!!
+  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_clustered_re_arranged.parquet",
+  memory = FALSE
+)
+
+no_network <- spark_read_parquet(
+  sc, "no_network",
+  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network_re_arranged.parquet",
+  memory = FALSE
+)
+
+```
+
+# Are always the same teams receiving funding?
+```{r}
+# we did not store whether a given team was funded, and it is quite 
+# time-consuming to re-run everything. We can compute this (with quite some
+# effort) by checking if their total funding increased or not.
+
+# check funding progress
+funding_status <- fragmented %>% 
+  filter(sharingincentive == .4,
+         # we can restrict this to steps above 2000, since we are interested in
+         # the equilibrium state here
+         step >= 2000) %>% 
+  arrange(run_number, who, step) %>% 
+  mutate(funded = total_funding > lag(total_funding),
+         funded_lag = lag(funded))
+
+sdf_register(funding_status, "funding_status")
+
+funding_status_reshuffled <- funding_status %>% 
+  sdf_repartition(100) %>% 
+  filter(!is.na(funded)) %>% 
+  mutate(previous_funded = as.integer(funded_lag))
+
+sdf_register(funding_status_reshuffled, "funding_status_reshuffled")
+tbl_cache(sc, "funding_status_reshuffled")
+```
+
+
+```{r, eval=FALSE}
+# lagged model for funding
+
+regression_results <- funding_status_reshuffled %>% 
+  # THE VARIABLE HERE IS WRONG; BUT THIS WILL BE FIXED UPSTREAM. NEED TO THEN
+  # CHANGE THIS HERE TO initial_resources
+  # it also fails currently, no idea why
+  ml_logistic_regression(funded ~ resources + previous_funded) 
+```
+
+```{r, eval=FALSE}
+regression_results
+```
+
+
+```{r}
+correlations <- funding_status_reshuffled %>% 
+  group_by(maxinitialutility, fundedshare) %>% 
+  summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
+            # this should be initial_resources instead, once the data is corrected
+            cor_init_resources = cor(as.numeric(funded), as.numeric(resources))) %>% 
+  collect()
+```
+
+```{r}
+correlations %>% 
+  arrange(maxinitialutility, fundedshare) %>% 
+  knitr::kable()
+```
+
+
+```{r}
+correlations %>% 
+  ggplot(aes(fundedshare, cor_funding, 
+             colour = as.factor(maxinitialutility))) +
+  geom_line() +
+  geom_point()
+```
+
+
+In terms of general funding, there is substantial path dependency: funding leads
+to further funding in most cases. This is also reflected in the overall high
+Gini in this case. Interestingly, there is only a weak correlation with initial
+resources - in this particular instance, initial resources don't play a big role.
+
+## No network
+
+
+
+# Are those that are being funded also those that share data?
+
+
+```{r}
+spark_disconnect(sc)
+```
