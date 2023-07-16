@@ -20,25 +20,38 @@ Approach:
 3. Analyse inequality/how takes up sharing with lagged regression or similar
 
 ```{r, echo=FALSE, message=FALSE}
+library(sparklyr)
 library(patchwork)
-library(tidyverse)
-library(targets)
+library(dplyr)
+library(ineq)
 library(arrow)
+library(here)
 
-source("R/functions.R")
-
-extrafont::loadfonts(device = "win")
+extrafont::loadfonts()
 theme_set(theme_bw(base_family = "Hind"))
 
-options(dplyr.summarise.inform = FALSE)
+source(here("R/functions.R"))
 
-df_all <- open_dataset(tar_read(selectivity_file),
-                   format = "csv", schema = schema_funder_selectivity, skip = 1,
-                   convert_options = CsvConvertOptions$create(
-                     null_values = "<RuntimePrimitiveException>")
-                   )
+Sys.setenv(SPARK_HOME = "/home/tklebel/spark-3.4.0-bin-hadoop3/")
+Sys.setenv(HADOOP_HOME = "/home/hadoop/hadoop-3.3.1")
+Sys.setenv(HADOOP_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
+Sys.setenv(YARN_HOME = "/home/hadoop/hadoop-3.3.1")
+Sys.setenv(YARN_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
+Sys.setenv(JAVA_HOME="/usr/lib/jvm/java-1.11.0-openjdk-amd64")
 
-df <- select_funder_selectivity(df_all)
+config <- spark_config()
+config$spark.executor.cores <- 5
+config$spark.executor.instances <- 20
+config$spark.executor.memory <- "20G"
+
+sc <- spark_connect(master = "yarn", config = config,
+                    app_name = "analyse_data")
+
+no_network <- spark_read_parquet(
+  sc, "no_network",
+  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network_re_arranged.parquet",
+  memory = TRUE
+)
 
 ```
 
@@ -49,11 +62,65 @@ df <- select_funder_selectivity(df_all)
 #| fig-cap: Gini index and % of groups sharing data dependent on grant size
 
 
-pdata <- df %>% 
-  # remove this value. it was mainly kept for compatibility with prior analyses,
-  # but results are very similar to the run with setting -4, so no additional
-  # value to show it here
-  filter(max_initial_utility != -3, step > 0) %>% 
+
+small_sample <- no_network %>% 
+  filter(run_number %in% c(1:5), step %in% c(1:5)) %>% 
+  group_by(run_number, step, maxinitialutility, fundedshare, sharingincentive)
+
+test2 <- small_sample %>% 
+  spark_apply(aggregate_stats,
+              group_by = c("run_number", "step")
+              columns = list(
+                step = "integer",
+    resources_gini = "double",
+    total_funding_gini = "double",
+    perc_sharing = "double"
+  ))
+
+test2
+
+```
+
+
+```{r fig.width=7, fig.height=9}
+aggregate_stats <- function(grouped_df) {
+    
+  # convert gini to local_function from inequ::Gini
+  gini <- function (x, corr = FALSE, na.rm = TRUE) {
+      if (!na.rm && any(is.na(x))) 
+          return(NA_real_)
+      x <- as.numeric(na.omit(x))
+      n <- length(x)
+      x <- sort(x)
+      G <- sum(x * 1L:n)
+      G <- 2 * G/sum(x) - (n + 1L)
+      if (corr) 
+          G/(n - 1L)
+      else G/n
+  }
+    
+      dplyr::summarise(grouped_df, resources_gini = gini(resources),
+            total_funding_gini = gini(total_funding),
+            perc_sharing = mean(as.numeric(shared_data)))
+}
+
+
+no_network %>% 
+  sdf_nrow()
+
+
+summarised_data <- no_network %>% 
+  spark_apply(nrow, 
+              group_by = c("run_number"),
+              memory = FALSE)
+  
+
+test_res <- summarised_data %>% 
+  head(200) %>% 
+  collect()
+
+
+  filter(step > 0) %>% 
   group_by(step, funded_share, max_initial_utility) %>% 
   summarise(mean_gini = mean(resources_gini),
             mean_cumulative_gini = mean(total_funding_gini),
@@ -92,4 +159,7 @@ p3 / p1 / p2 +
   plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
 
+```{r}
+spark_disconnect(sc)
+```
 
