@@ -20,6 +20,7 @@ Approach:
 
 ```{r, echo=FALSE, message=FALSE}
 library(sparklyr)
+library(ggplot2)
 library(patchwork)
 library(dplyr)
 library(arrow)
@@ -54,9 +55,8 @@ df <- spark_read_csv(
 ```
 
 
-# Effect of grant size
 ```{r fig.width=7, fig.height=9}
-pdata <- df %>% 
+summarised_data <- df %>% 
   filter(step > 0, sharingincentive == .4) %>% 
   group_by(step, fundedshare, maxinitialutility, network) %>% 
   summarise(mean_gini = mean(gini_resources_of_turtles),
@@ -68,13 +68,13 @@ pdata <- df %>%
          fundedshare = scales::percent(fundedshare, accuracy = 1))
 ```
 
-
+# No network
 ```{r fig.width=7, fig.height=9}
-#| label: fig-funder-selectivity
+#| label: fig-no-network
 #| fig-cap: Gini index and % of groups sharing data dependent on grant size with no network.
 n_row <- 1
 
-no_network <- pdata %>% 
+no_network <- summarised_data %>% 
   filter(network == "none")
 
 p1 <- no_network %>%  
@@ -104,4 +104,120 @@ p3 / p1 / p2 +
   plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
 
+
+# Random network
+```{r fig.width=7, fig.height=9}
+#| label: fig-random network
+#| fig-cap: Gini index and % of groups sharing data dependent on grant size with random network.
+n_row <- 1
+
+pdata <- summarised_data %>% 
+  filter(network == "random")
+
+p1 <- pdata %>%  
+  ggplot(aes(step, mean_gini, colour = as.factor(fundedshare))) +
+  geom_line() +
+  facet_wrap(vars(maxinitialutility), nrow = n_row) +
+  labs(colour = "% of teams receiving funding",
+       y = "Gini of current resources", x = NULL)
+
+p2 <- pdata %>%  
+  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(fundedshare))) +
+  geom_line() +
+    facet_wrap(vars(maxinitialutility), nrow = n_row) +
+    labs(colour = "% of teams receiving funding",
+       y = "Gini of total resources",
+       x = "Step")
+
+p3 <- pdata %>%  
+  ggplot(aes(step, mean_sharing, colour = as.factor(fundedshare))) +
+  geom_line() +
+  facet_wrap(vars(maxinitialutility), nrow = n_row) +
+  labs(colour = "% of teams receiving funding",
+       y = "% of teams sharing data", x = NULL) 
+
+p3 / p1 / p2 +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+```
+
+
+
+# Clustered network
+```{r fig.width=7, fig.height=9}
+#| label: fig-clustered-network
+#| fig-cap: Gini index and % of groups sharing data dependent on grant size with clustered network.
+n_row <- 1
+
+pdata <- summarised_data %>% 
+  filter(network == "clustered")
+
+p1 <- pdata %>%  
+  ggplot(aes(step, mean_gini, colour = as.factor(fundedshare))) +
+  geom_line() +
+  facet_wrap(vars(maxinitialutility), nrow = n_row) +
+  labs(colour = "% of teams receiving funding",
+       y = "Gini of current resources", x = NULL)
+
+p2 <- pdata %>%  
+  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(fundedshare))) +
+  geom_line() +
+    facet_wrap(vars(maxinitialutility), nrow = n_row) +
+    labs(colour = "% of teams receiving funding",
+       y = "Gini of total resources",
+       x = "Step")
+
+p3 <- pdata %>%  
+  ggplot(aes(step, mean_sharing, colour = as.factor(fundedshare))) +
+  geom_line() +
+  facet_wrap(vars(maxinitialutility), nrow = n_row) +
+  labs(colour = "% of teams receiving funding",
+       y = "% of teams sharing data", x = NULL) 
+
+p3 / p1 / p2 +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+```
+
+
+# fragmented network
+```{r fig.width=7, fig.height=9}
+#| label: fig-fragmented
+#| fig-cap: Gini index and % of groups sharing data dependent on grant size with fragmented network.
+n_row <- 1
+
+pdata <- summarised_data %>% 
+  filter(network == "fragmented")
+
+p1 <- pdata %>%  
+  ggplot(aes(step, mean_gini, colour = as.factor(fundedshare))) +
+  geom_line() +
+  facet_wrap(vars(maxinitialutility), nrow = n_row) +
+  labs(colour = "% of teams receiving funding",
+       y = "Gini of current resources", x = NULL)
+
+p2 <- pdata %>%  
+  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(fundedshare))) +
+  geom_line() +
+    facet_wrap(vars(maxinitialutility), nrow = n_row) +
+    labs(colour = "% of teams receiving funding",
+       y = "Gini of total resources",
+       x = "Step")
+
+p3 <- pdata %>%  
+  ggplot(aes(step, mean_sharing, colour = as.factor(fundedshare))) +
+  geom_line() +
+  facet_wrap(vars(maxinitialutility), nrow = n_row) +
+  labs(colour = "% of teams receiving funding",
+       y = "% of teams sharing data", x = NULL) 
+
+p3 / p1 / p2 +
+  plot_layout(guides = "collect") +
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+```
+
+
+```{r}
+spark_disconnect(sc)
+```
 
