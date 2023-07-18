@@ -18,7 +18,9 @@ turtles-own [
   individual-utility
   descriptive-norm
   shared-data?
+  shared-data-previous-round?
   funded? ;whether they got funding in this round
+  funded-previous-round? ;storing this here, because computing a lag in spark is inefficient
   sharing-dividend-pool
   initial-resources
 ]
@@ -88,7 +90,9 @@ to update-indices
   ask turtles [
     set color 60 + 10 * (1 - inv_effort) ; dark colour represent high effort
     set resources-last-round resources
+    set funded-previous-round? funded?
     set funded? false
+    set shared-data-previous-round? shared-data?
   ]
 end
 
@@ -239,9 +243,11 @@ to-report mean-funding-within [ agentset ]
   report precision mean [ total-funding ] of agentset 2
 end
 
+
+
 to-report individual-data
   ; this should be simplified with map or foreach, but don't know how
-  report [(list who turtleid precision initial-resources 3 precision resources 3 precision total-funding 3 precision effort 3 shared-data?)] of turtles
+  report [(list read-from-string turtleid precision initial-resources 3 precision resources 3 precision total-funding 3 precision effort 3 shared-data? shared-data-previous-round? funded? funded-previous-round?)] of turtles
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -561,7 +567,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.7
+0.4
 .01
 1
 NIL
@@ -575,7 +581,7 @@ CHOOSER
 network
 network
 "none" "random" "clustered" "fragmented"
-0
+3
 
 SLIDER
 236
@@ -711,7 +717,7 @@ funded-share
 funded-share
 0
 1
-0.3
+0.1
 0.05
 1
 NIL
