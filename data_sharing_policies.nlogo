@@ -21,7 +21,6 @@ turtles-own [
   shared-data-previous-round?
   funded? ;whether they got funding in this round
   funded-previous-round? ;storing this here, because computing a lag in spark is inefficient
-  sharing-dividend-pool
   initial-resources
 ]
 
