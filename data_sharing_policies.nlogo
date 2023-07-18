@@ -57,6 +57,9 @@ to setup
     set individual-utility ( random-float (max-initial-utility + 4 )) - 4
     set descriptive-norm initial-norm
     set shared-data? false
+    set shared-data-previous-round? false
+    set funded? false
+    set funded-previous-round? false
   ]
 
   ; assign to quantiles
