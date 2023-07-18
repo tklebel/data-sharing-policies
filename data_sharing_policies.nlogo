@@ -246,7 +246,7 @@ end
 
 to-report individual-data
   ; this should be simplified with map or foreach, but don't know how
-  report [(list read-from-string turtleid precision initial-resources 3 precision resources 3 precision total-funding 3 precision effort 3 shared-data? shared-data-previous-round? funded? funded-previous-round?)] of turtles
+  report [(list who precision initial-resources 3 precision resources 3 precision total-funding 3 precision effort 3 shared-data? shared-data-previous-round? funded? funded-previous-round?)] of turtles
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -580,7 +580,7 @@ CHOOSER
 network
 network
 "none" "random" "clustered" "fragmented"
-3
+0
 
 SLIDER
 236
