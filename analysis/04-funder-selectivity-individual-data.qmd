@@ -12,7 +12,8 @@ Research questions:
 
 -   Are always the same teams receiving funding?
 -   Are those that are being funded also those that share data?
--   Are those that share data / receive funding more or less central in the network?
+-   Are those that share data / receive funding more or less central in the
+    network?
 
 ```{r, echo=FALSE, message=FALSE}
 library(sparklyr)
@@ -84,7 +85,8 @@ regression_results <- funding_status %>%
 regression_results
 ```
 
-There seems to be a massive effect of the lagged funding status, if we take a global look at all funding incentive settings.
+There seems to be a massive effect of the lagged funding status, if we take a
+global look at all funding incentive settings.
 
 ```{r}
 correlations <- funding_status %>% 
@@ -108,7 +110,9 @@ correlations %>%
   geom_point()
 ```
 
-The correlation between current and previous funding status is very high - there seems to be almost complete path dependency, once the simulation has entered the equilibrium state.
+The correlation between current and previous funding status is very high - there
+seems to be almost complete path dependency, once the simulation has entered the
+equilibrium state.
 
 ```{r}
 correlations %>% 
@@ -118,9 +122,13 @@ correlations %>%
   geom_point()
 ```
 
-Interestingly, the correlation with initial resources is much lower. For uniform initial utility, it is relatively low across all funding selectivity settings.
+Interestingly, the correlation with initial resources is much lower. For uniform
+initial utility, it is relatively low across all funding selectivity settings.
 
-For low initial utility, this is not true, and there is actually a negative correlation. This lends credence to our initial hypothesis: teams with initially higher resources (presumably, to be confirmed below) share less data, and thus are less successful under the incentive regime.
+For low initial utility, this is not true, and there is actually a negative
+correlation. This lends credence to our initial hypothesis: teams with initially
+higher resources (presumably, to be confirmed below) share less data, and thus
+are less successful under the incentive regime.
 
 ## No network
 
@@ -142,7 +150,9 @@ regression_results <- funding_status_no_network %>%
 regression_results
 ```
 
-With the baseline without a network, there is equally a strong influence of path dependency. Initial resources have a slightly stronger role than in the case of the fragmented network.
+With the baseline without a network, there is equally a strong influence of path
+dependency. Initial resources have a slightly stronger role than in the case of
+the fragmented network.
 
 ```{r}
 correlations_no_network <- funding_status_no_network %>% 
@@ -166,7 +176,10 @@ correlations_no_network %>%
   geom_point()
 ```
 
-Correlations for funding lag are similarly very high. However, behaviour is different between max-initial-utility, comparing to the case of the fragmented network. Here, correlations are higher for maxinitalutility = 4, but lower otherwise.
+Correlations for funding lag are similarly very high. However, behaviour is
+different between max-initial-utility, comparing to the case of the fragmented
+network. Here, correlations are higher for maxinitalutility = 4, but lower
+otherwise.
 
 ```{r}
 correlations_no_network %>% 
@@ -176,7 +189,9 @@ correlations_no_network %>%
   geom_point()
 ```
 
-These correlations are stronger, i.e., more positive, as indicated by the regression: without networks, initial resources play a stronger role in who getes funded, especially if funding is very selective.
+These correlations are stronger, i.e., more positive, as indicated by the
+regression: without networks, initial resources play a stronger role in who
+getes funded, especially if funding is very selective.
 
 # Are those that are being funded also those that share data?
 
@@ -196,7 +211,15 @@ funding_vs_sharing %>%
   geom_point()
 ```
 
-Generally speaking, those that are being funded are also those that share data, in this instance. The correlation is stronger for less selective regimes. What does this indicate? Maybe the broader reach of the funding agency, if many teams are being funded? But wouldn't it be the case that if funding is more selective, only those that are funded also share data, because it is too costly otherwise? But maybe it is the opposite: if funding is very selective, not many teams can afford to share data, and thus not many do. If funding is less selective, more teams share data, and thus, generally, those being funded are also more often those which share data. Does this make sense?
+Generally speaking, those that are being funded are also those that share data,
+in this instance. The correlation is stronger for less selective regimes. What
+does this indicate? Maybe the broader reach of the funding agency, if many teams
+are being funded? But wouldn't it be the case that if funding is more selective,
+only those that are funded also share data, because it is too costly otherwise?
+But maybe it is the opposite: if funding is very selective, not many teams can
+afford to share data, and thus not many do. If funding is less selective, more
+teams share data, and thus, generally, those being funded are also more often
+those which share data. Does this make sense?
 
 ```{r}
 funding_vs_sharing %>% 
@@ -206,13 +229,26 @@ funding_vs_sharing %>%
   geom_point()
 ```
 
-The correlation between sharing, and the shared lag (whether teams keep sharing data) is also quite high, and the graph looks very similar to the one right above. This implies that there is path dependency around sharing, where teams share data and receive funding, while others do neither.
+The correlation between sharing, and the shared lag (whether teams keep sharing
+data) is also quite high, and the graph looks very similar to the one right
+above. This implies that there is path dependency around sharing, where teams
+share data and receive funding, while others do neither.
 
 # Are those that share data / receive funding more or less central in the network?
 
-HIGHLY INTERESTING OBSERVATION: in the fragmented network, it is mostly those teams which are not well-connected that keep sharing data (in line with the general finding that no network leads to more sharing than having a network. Those that are closer to having no network (low degree) are thus more likely to share). Is it then also those that receive more funding? Need to compare with centrality measures.
+HIGHLY INTERESTING OBSERVATION: in the fragmented network, it is mostly those
+teams which are not well-connected that keep sharing data (in line with the
+general finding that no network leads to more sharing than having a network.
+Those that are closer to having no network (low degree) are thus more likely to
+share). Is it then also those that receive more funding? Need to compare with
+centrality measures.
 
-This might be the reason, why the means that we show are much smoother for the fragmented network, compared to the clustered, and especially the random network: in the fragmented network, the types of nodes sharing data are quite similar across runs, because there is a strong difference in degree between the nodes. In the clustered, and more so in the random network, there are not so big differences in degree, and thus there is more variability in who shares.
+This might be the reason, why the means that we show are much smoother for the
+fragmented network, compared to the clustered, and especially the random
+network: in the fragmented network, the types of nodes sharing data are quite
+similar across runs, because there is a strong difference in degree between the
+nodes. In the clustered, and more so in the random network, there are not so big
+differences in degree, and thus there is more variability in who shares.
 
 ```{r}
 spark_disconnect(sc)
