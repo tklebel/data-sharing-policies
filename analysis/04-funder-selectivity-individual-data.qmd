@@ -82,7 +82,7 @@ regression_results <- funding_status %>%
 ```
 
 ```{r, eval=FALSE}
-regression_results
+print(regression_results)
 ```
 
 There seems to be a massive effect of the lagged funding status, if we take a
@@ -147,7 +147,7 @@ regression_results <- funding_status_no_network %>%
 ```
 
 ```{r, eval=FALSE}
-regression_results
+print(regression_results)
 ```
 
 With the baseline without a network, there is equally a strong influence of path
