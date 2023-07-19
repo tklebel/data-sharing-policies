@@ -8,13 +8,6 @@ execute:
   keep-md: true
 ---
 
-
-
-
-HIGHLY INTERESTING OBSERVATION: in the fragmented network, it is mostly those teams which are not well-connected that keep sharing data (in line with the general finding that no network leads to more sharing than having a network. Those that are closer to having no network (low degree) are thus more likely to share). Is it then also those that receive more funding? Need to compare with centrality measures.
-
-This might be the reason, why the means that we show are much smoother for the fragmented network, compared to the clustered, and especially the random network: in the fragmented network, the types of nodes sharing data are quite similar across runs, because there is a strong difference in degree between the nodes. In the clustered, and more so in the random network, there are not so big differences in degree, and thus there is more variability in who shares.
-
 Research questions:
 
 -   Are always the same teams receiving funding?
@@ -52,20 +45,20 @@ sc <- spark_connect(master = "yarn", config = config,
 
 fragmented <- spark_read_parquet(
   sc, "fragmented",
-  #  THIS CURRENTLY IS USING A WRONG PATH. ONCE THE FILE IS CONVERTED, SWITCH BACK TO TO CORRECT ONE !!!!!!
-  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_clustered_re_arranged.parquet",
-  memory = FALSE
+  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_fragmented_re_arranged.parquet",
+  memory = TRUE
 )
 
 no_network <- spark_read_parquet(
   sc, "no_network",
   path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network_re_arranged.parquet",
-  memory = FALSE
+  memory = TRUE
 )
 
 ```
 
 # Are always the same teams receiving funding?
+
 ```{r}
 # we did not store whether a given team was funded, and it is quite 
 # time-consuming to re-run everything. We can compute this (with quite some
@@ -76,44 +69,28 @@ funding_status <- fragmented %>%
   filter(sharingincentive == .4,
          # we can restrict this to steps above 2000, since we are interested in
          # the equilibrium state here
-         step >= 2000) %>% 
-  arrange(run_number, who, step) %>% 
-  mutate(funded = total_funding > lag(total_funding),
-         funded_lag = lag(funded))
-
-sdf_register(funding_status, "funding_status")
-
-funding_status_reshuffled <- funding_status %>% 
-  sdf_repartition(100) %>% 
-  filter(!is.na(funded)) %>% 
-  mutate(previous_funded = as.integer(funded_lag))
-
-sdf_register(funding_status_reshuffled, "funding_status_reshuffled")
-tbl_cache(sc, "funding_status_reshuffled")
+         step >= 2000)
 ```
-
 
 ```{r, eval=FALSE}
 # lagged model for funding
 
-regression_results <- funding_status_reshuffled %>% 
-  # THE VARIABLE HERE IS WRONG; BUT THIS WILL BE FIXED UPSTREAM. NEED TO THEN
-  # CHANGE THIS HERE TO initial_resources
+regression_results <- funding_status %>% 
   # it also fails currently, no idea why
-  ml_logistic_regression(funded ~ resources + previous_funded) 
+  ml_logistic_regression(funded ~ initial_resources + funded_lag) 
 ```
 
 ```{r, eval=FALSE}
 regression_results
 ```
 
+There seems to be a massive effect of the lagged funding status, if we take a global look at all funding incentive settings.
 
 ```{r}
-correlations <- funding_status_reshuffled %>% 
+correlations <- funding_status %>% 
   group_by(maxinitialutility, fundedshare) %>% 
   summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
-            # this should be initial_resources instead, once the data is corrected
-            cor_init_resources = cor(as.numeric(funded), as.numeric(resources))) %>% 
+            cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
   collect()
 ```
 
@@ -123,7 +100,6 @@ correlations %>%
   knitr::kable()
 ```
 
-
 ```{r}
 correlations %>% 
   ggplot(aes(fundedshare, cor_funding, 
@@ -132,18 +108,111 @@ correlations %>%
   geom_point()
 ```
 
+The correlation between current and previous funding status is very high - there seems to be almost complete path dependency, once the simulation has entered the equilibrium state.
 
-In terms of general funding, there is substantial path dependency: funding leads
-to further funding in most cases. This is also reflected in the overall high
-Gini in this case. Interestingly, there is only a weak correlation with initial
-resources - in this particular instance, initial resources don't play a big role.
+```{r}
+correlations %>% 
+  ggplot(aes(fundedshare, cor_init_resources, 
+             colour = as.factor(maxinitialutility))) +
+  geom_line() +
+  geom_point()
+```
+
+Interestingly, the correlation with initial resources is much lower. For uniform initial utility, it is relatively low across all funding selectivity settings.
+
+For low initial utility, this is not true, and there is actually a negative correlation. This lends credence to our initial hypothesis: teams with initially higher resources (presumably, to be confirmed below) share less data, and thus are less successful under the incentive regime.
 
 ## No network
 
+```{r}
+funding_status_no_network <- no_network %>% 
+  filter(sharingincentive == .4,
+         # we can restrict this to steps above 2000, since we are interested in
+         # the equilibrium state here
+         step >= 2000)
+```
 
+```{r, eval=FALSE}
+regression_results <- funding_status_no_network %>% 
+  # it also fails currently, no idea why
+  ml_logistic_regression(funded ~ initial_resources + funded_lag) 
+```
+
+```{r, eval=FALSE}
+regression_results
+```
+
+With the baseline without a network, there is equally a strong influence of path dependency. Initial resources have a slightly stronger role than in the case of the fragmented network.
+
+```{r}
+correlations_no_network <- funding_status_no_network %>% 
+  group_by(maxinitialutility, fundedshare) %>% 
+  summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
+            cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
+  collect()
+```
+
+```{r}
+correlations_no_network %>% 
+  arrange(maxinitialutility, fundedshare) %>% 
+  knitr::kable()
+```
+
+```{r}
+correlations_no_network %>% 
+  ggplot(aes(fundedshare, cor_funding, 
+             colour = as.factor(maxinitialutility))) +
+  geom_line() +
+  geom_point()
+```
+
+Correlations for funding lag are similarly very high. However, behaviour is different between max-initial-utility, comparing to the case of the fragmented network. Here, correlations are higher for maxinitalutility = 4, but lower otherwise.
+
+```{r}
+correlations_no_network %>% 
+  ggplot(aes(fundedshare, cor_init_resources, 
+             colour = as.factor(maxinitialutility))) +
+  geom_line() +
+  geom_point()
+```
+
+These correlations are stronger, i.e., more positive, as indicated by the regression: without networks, initial resources play a stronger role in who getes funded, especially if funding is very selective.
 
 # Are those that are being funded also those that share data?
 
+```{r}
+funding_vs_sharing <- funding_status %>% 
+  group_by(maxinitialutility, fundedshare) %>% 
+  summarise(cor_funding_sharing = cor(as.numeric(funded), as.numeric(shared_data)),
+            cor_sharing_lag = cor(as.numeric(shared_data), as.numeric(shared_data_lag))) %>% 
+  collect()
+```
+
+```{r}
+funding_vs_sharing %>% 
+  ggplot(aes(fundedshare, cor_funding_sharing, 
+             colour = as.factor(maxinitialutility))) +
+  geom_line() +
+  geom_point()
+```
+
+Generally speaking, those that are being funded are also those that share data, in this instance. The correlation is stronger for less selective regimes. What does this indicate? Maybe the broader reach of the funding agency, if many teams are being funded? But wouldn't it be the case that if funding is more selective, only those that are funded also share data, because it is too costly otherwise? But maybe it is the opposite: if funding is very selective, not many teams can afford to share data, and thus not many do. If funding is less selective, more teams share data, and thus, generally, those being funded are also more often those which share data. Does this make sense?
+
+```{r}
+funding_vs_sharing %>% 
+  ggplot(aes(fundedshare, cor_sharing_lag, 
+             colour = as.factor(maxinitialutility))) +
+  geom_line() +
+  geom_point()
+```
+
+The correlation between sharing, and the shared lag (whether teams keep sharing data) is also quite high, and the graph looks very similar to the one right above. This implies that there is path dependency around sharing, where teams share data and receive funding, while others do neither.
+
+# Are those that share data / receive funding more or less central in the network?
+
+HIGHLY INTERESTING OBSERVATION: in the fragmented network, it is mostly those teams which are not well-connected that keep sharing data (in line with the general finding that no network leads to more sharing than having a network. Those that are closer to having no network (low degree) are thus more likely to share). Is it then also those that receive more funding? Need to compare with centrality measures.
+
+This might be the reason, why the means that we show are much smoother for the fragmented network, compared to the clustered, and especially the random network: in the fragmented network, the types of nodes sharing data are quite similar across runs, because there is a strong difference in degree between the nodes. In the clustered, and more so in the random network, there are not so big differences in degree, and thus there is more variability in who shares.
 
 ```{r}
 spark_disconnect(sc)
