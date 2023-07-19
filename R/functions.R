@@ -128,9 +128,9 @@ unnest_individual_data <- function(df, col = `individual-data`) {
 
 
 re_arrange <- function(df) {
-  num_cols <- c("who", "turtleid", "initial_resources", "resources", 
+  num_cols <- c("who", "initial_resources", "resources", 
                 "total_funding", "effort")
-  logi_col <- "shared_data"
+  logi_col <- c("shared_data", "shared_data_lag", "funded", "funded_lag")
   all_cols <- c(num_cols, logi_col)
   
   df <- dplyr::mutate(df, ind_data = stringr::str_remove_all(individualdata, "(^\\[\\[)|(\\]\\]$)"))
