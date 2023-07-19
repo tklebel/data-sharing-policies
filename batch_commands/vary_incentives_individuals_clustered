@@ -1,5 +1,5 @@
 ../NetLogo\ 6.3.0/NetLogo_Console --headless \
-  --threads 16 \
+  --threads 2 \
   --model "data_sharing_policies.nlogo" \
   --experiment "vary_incentives_individuals_clustered" \
   --table outputs/vary_incentives_individuals_clustered.csv
