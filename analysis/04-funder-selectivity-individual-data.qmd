@@ -22,6 +22,7 @@ library(patchwork)
 library(dplyr)
 library(arrow)
 library(here)
+library(tidygraph)
 
 extrafont::loadfonts()
 theme_set(theme_bw(base_family = "Hind"))
@@ -249,6 +250,17 @@ network: in the fragmented network, the types of nodes sharing data are quite
 similar across runs, because there is a strong difference in degree between the
 nodes. In the clustered, and more so in the random network, there are not so big
 differences in degree, and thus there is more variability in who shares.
+
+```{r}
+# get network data
+fragmented_network <- igraph::read_graph(here("network_generation/data/fragmented_network.gml"), format = "gml")
+
+# calculate centrality
+fragmented_network %>% as_tbl_graph()
+
+# then load into spark
+# who = turtleid - 1
+```
 
 ```{r}
 spark_disconnect(sc)
