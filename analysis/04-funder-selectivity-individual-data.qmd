@@ -38,7 +38,7 @@ Sys.setenv(JAVA_HOME="/usr/lib/jvm/java-1.11.0-openjdk-amd64")
 
 config <- spark_config()
 config$spark.executor.cores <- 5
-config$spark.executor.instances <- 20
+config$spark.executor.instances <- 38
 config$spark.executor.memory <- "20G"
 config$spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version <- 2
 
@@ -191,8 +191,8 @@ correlations_no_network %>%
 ```
 
 These correlations are stronger, i.e., more positive, as indicated by the
-regression: without networks, initial resources play a stronger role in who
-getes funded, especially if funding is very selective.
+regression: without networks, initial resources play a stronger role in who gets
+funded, especially if funding is very selective.
 
 # Are those that are being funded also those that share data?
 
@@ -222,6 +222,8 @@ afford to share data, and thus not many do. If funding is less selective, more
 teams share data, and thus, generally, those being funded are also more often
 those which share data. Does this make sense?
 
+## No network
+
 ```{r}
 funding_vs_sharing %>% 
   ggplot(aes(fundedshare, cor_sharing_lag, 
@@ -234,6 +236,38 @@ The correlation between sharing, and the shared lag (whether teams keep sharing
 data) is also quite high, and the graph looks very similar to the one right
 above. This implies that there is path dependency around sharing, where teams
 share data and receive funding, while others do neither.
+
+```{r}
+funding_vs_sharing_no_network <- funding_status_no_network %>% 
+  group_by(maxinitialutility, fundedshare) %>% 
+  summarise(cor_funding_sharing = cor(as.numeric(funded), as.numeric(shared_data)),
+            cor_sharing_lag = cor(as.numeric(shared_data), as.numeric(shared_data_lag))) %>% 
+  collect()
+```
+
+```{r}
+funding_vs_sharing_no_network %>% 
+  ggplot(aes(fundedshare, cor_funding_sharing, 
+             colour = as.factor(maxinitialutility))) +
+  geom_line() +
+  geom_point()
+```
+
+```{r}
+funding_vs_sharing_no_network %>% 
+  ggplot(aes(fundedshare, cor_sharing_lag, 
+             colour = as.factor(maxinitialutility))) +
+  geom_line() +
+  geom_point()
+```
+
+Again, we see that the correlation between funding and sharing seems to be
+largely driven by previous sharing - the correlations between sharing and
+sharing lag are essentially the same, just slightly lower.
+
+We can thus conclude, that generally speaking, those who share data are also
+those who receive funding. However, in the case of no networks, this correlation
+is weaker, and especially weaker in case of low initial utility.
 
 # Are those that share data / receive funding more or less central in the network?
 
@@ -256,10 +290,109 @@ differences in degree, and thus there is more variability in who shares.
 fragmented_network <- igraph::read_graph(here("network_generation/data/fragmented_network.gml"), format = "gml")
 
 # calculate centrality
-fragmented_network %>% as_tbl_graph()
+fragmented_centrality_local <- fragmented_network %>% 
+  as_tbl_graph() %>% 
+  mutate(degree = centrality_degree(),
+         mean_degree = median(degree),
+         is_low_degree = degree < mean_degree) %>% 
+  select(who = id, degree, is_low_degree) %>% 
+  as_tibble()
 
-# then load into spark
-# who = turtleid - 1
+fragmented_centrality_local %>% 
+  copy_to(sc, ., name = "fragmented_centrality", overwrite = TRUE)
+
+fragmented_centrality <- tbl(sc, "fragmented_centrality")
+
+fragmented_centrality
+```
+
+```{r}
+degree_stats <- funding_status %>% 
+  left_join(fragmented_centrality, by = "who") %>% 
+  group_by(maxinitialutility, fundedshare) %>% 
+  summarise(cor_degree_sharing = cor(as.numeric(degree), as.numeric(shared_data)),
+            cor_degree_funding = cor(as.numeric(degree), as.numeric(funded))) %>% 
+  collect()
+```
+
+```{r}
+degree_stats %>% 
+  ggplot(aes(fundedshare, cor_degree_sharing, 
+             colour = as.factor(maxinitialutility))) +
+  geom_line() +
+  geom_point()
+```
+
+Correlations are negative, but not very strong. The negative correlation means
+that teams with a lower degree share more. This is apparently the case. The
+correlation is weak, since not all low-degree teams share data, simply because
+not all teams are being funded. Once more teams are being funded, of course also
+higher-degree teams are being funded, because there are only so few low-degree
+teams.
+
+How can we show this better? We can compute what the fraction of funded teams
+which are low-degree is.
+
+```{r}
+# compute the share of teams being funded that are low-degree
+low_degree_hypothesis <- funding_status %>% 
+  left_join(fragmented_centrality, by = "who") %>% 
+  group_by(maxinitialutility, fundedshare, run_number, step, funded) %>% 
+  count(is_low_degree) %>% 
+  mutate(fraction = n / sum(n)) %>% 
+  filter(funded, is_low_degree) %>% 
+  group_by(maxinitialutility, fundedshare) %>% 
+  summarise(mean_frac_low_degree_funded = mean(fraction)) %>% 
+  collect()
+```
+
+```{r}
+#| label: fig-low-degree-frac
+#| fig-cap: "Representation of low-degree teams among funded teams. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams."
+# what is the actual fraction of low degree teams?
+true_fraction <- fragmented_centrality_local %>% 
+  count(is_low_degree) %>% 
+  mutate(n = n / 100) %>% 
+  filter(is_low_degree) %>% 
+  pull(n)
+
+low_degree_hypothesis %>% 
+  ggplot(aes(fundedshare, mean_frac_low_degree_funded, 
+             colour = as.factor(maxinitialutility))) +
+  geom_line() +
+  geom_point() +
+  geom_hline(yintercept = true_fraction, linetype = 2) +
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .55, by = .05)))
+```
+
+We see that for high selectivity (funded share is low), low-degree teams are
+over-represented among the funded teams. The analytical approach mirrors that of
+a Chisquare test.
+
+```{r, eval=FALSE}
+# THE CODE BELOW DOES NOT WORK CURRENTLY
+# we cannot do a grouped chisquare in spark directly, therefore using spark_apply
+test_fun <- function(df) {
+  res <- chisq.test(df$funded, df$is_low_degree)
+  broom::tidy(res)
+}
+
+chisquare_res <- funding_status %>% 
+  # head(1000) %>%
+  left_join(fragmented_centrality, by = "who") %>% 
+  spark_apply(test_fun, 
+              columns = c("maxinitialutility", "fundedshare", "run_number", 
+                          "step")) %>% 
+  group_by(maxinitialutility, fundedshare) %>% 
+  summarise(mean_statistic = mean(statistic),
+            mean_p = mean(p.value)) %>% 
+  collect()
+
+# We could also run it like this, but it does not do grouped tests, only executes on everything
+#   group_by(maxinitialutility, fundedshare, run_number, step) %>% 
+#   mutate(is_low_degree = as.character(is_low_degree),
+#          funded = as.character(funded)) %>% 
+#   ml_chisquare_test(features = "is_low_degree", label = "funded")
 ```
 
 ```{r}
