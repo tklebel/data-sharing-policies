@@ -194,6 +194,13 @@ These correlations are stronger, i.e., more positive, as indicated by the
 regression: without networks, initial resources play a stronger role in who gets
 funded, especially if funding is very selective.
 
+To our initial question for the difference between utility settings: path
+dependency is much lower for low initial utility. There is even a slight
+negative correlation between initial resources and funding: initially
+lower-resourced teams are funded more than those with higher initial resources,
+simply because they start sharing data. If utility is uniform, initial resources
+play a stronger role - there is more path dependency.
+
 # Are those that are being funded also those that share data?
 
 ```{r}
@@ -366,8 +373,8 @@ low_degree_hypothesis %>%
 ```
 
 We see that for high selectivity (funded share is low), low-degree teams are
-over-represented among the funded teams. The analytical approach mirrors that of
-a Chisquare test.
+over-represented among the funded teams. The analytic approach mirrors that of a
+Chisquare test.
 
 ```{r, eval=FALSE}
 # THE CODE BELOW DOES NOT WORK CURRENTLY
