@@ -14,3 +14,7 @@ sample models/*
 
 network_generation/01*
 network_generation/data/ssk_dois.csv
+
+*/metastore_db
+*/derby.log
+*/nohup.out
