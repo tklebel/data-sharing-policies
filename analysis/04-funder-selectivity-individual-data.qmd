@@ -376,6 +376,32 @@ We see that for high selectivity (funded share is low), low-degree teams are
 over-represented among the funded teams. The analytic approach mirrors that of a
 Chisquare test.
 
+*The same with sharing*
+```{r}
+# compute the share of teams sharing data that are low-degree
+low_degree_hypothesis_sharing <- funding_status %>% 
+  left_join(fragmented_centrality, by = "who") %>% 
+  group_by(maxinitialutility, fundedshare, run_number, step, shared_data) %>% 
+  count(is_low_degree) %>% 
+  mutate(fraction = n / sum(n)) %>% 
+  filter(shared_data, is_low_degree) %>% 
+  group_by(maxinitialutility, fundedshare) %>% 
+  summarise(mean_frac_low_degree_sharing = mean(fraction)) %>% 
+  collect()
+```
+
+```{r}
+#| label: fig-low-degree-frac-sharing
+#| fig-cap: "Representation of low-degree teams among teams sharing data. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams."
+low_degree_hypothesis_sharing %>% 
+  ggplot(aes(fundedshare, mean_frac_low_degree_sharing, 
+             colour = as.factor(maxinitialutility))) +
+  geom_line() +
+  geom_point() +
+  geom_hline(yintercept = true_fraction, linetype = 2) +
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .55, by = .05)))
+```
+
 ```{r, eval=FALSE}
 # THE CODE BELOW DOES NOT WORK CURRENTLY
 # we cannot do a grouped chisquare in spark directly, therefore using spark_apply
