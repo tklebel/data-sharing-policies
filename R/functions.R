@@ -160,7 +160,8 @@ plot_graph <- function(graph, layout = "stress", groups = TRUE,
       geom_node_point(aes(colour = as.factor(group),
                           size = .data[[size]])) +
       theme_graph(base_family = "Arial") +
-      theme(legend.position = "none")
+      theme(legend.position = "none") +
+      colorspace::scale_colour_discrete_qualitative()
   } else {
     graph %>% 
       activate(nodes) %>% 
