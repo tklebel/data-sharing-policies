@@ -68,40 +68,46 @@ summarised_data <- df %>%
          fundedshare = scales::percent(fundedshare, accuracy = 1))
 ```
 
+```{r}
+n_row <- 1
+
+plot_skeleton <- function(df, var) {
+  df %>%  
+    ggplot(aes(step, {{ var }}, colour = as.factor(fundedshare))) +
+    geom_line() +
+    facet_wrap(vars(maxinitialutility), nrow = n_row) +
+    colorspace::scale_colour_discrete_qualitative()
+}
+
+summary_plot <- function(df) {
+  p1 <- plot_skeleton(df, mean_gini) +
+  labs(colour = "% of teams receiving funding",
+       y = "Gini of current resources", x = NULL)
+
+  p2 <- plot_skeleton(df, mean_cumulative_gini) +
+    labs(colour = "% of teams receiving funding",
+         y = "Gini of total resources",
+         x = "Step")
+  
+  p3 <- plot_skeleton(df, mean_sharing) +
+    labs(colour = "% of teams receiving funding",
+         y = "% of teams sharing data", x = NULL) 
+  
+  p3 / p1 / p2 +
+    plot_layout(guides = "collect") +
+    plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+}
+```
+
+
 # No network
 ```{r fig.width=7, fig.height=9}
 #| label: fig-no-network
 #| fig-cap: Gini index and % of groups sharing data dependent on grant size with no network.
-n_row <- 1
 
-no_network <- summarised_data %>% 
-  filter(network == "none")
-
-p1 <- no_network %>%  
-  ggplot(aes(step, mean_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "Gini of current resources", x = NULL)
-
-p2 <- no_network %>%  
-  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-    facet_wrap(vars(maxinitialutility), nrow = n_row) +
-    labs(colour = "% of teams receiving funding",
-       y = "Gini of total resources",
-       x = "Step")
-
-p3 <- no_network %>%  
-  ggplot(aes(step, mean_sharing, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "% of teams sharing data", x = NULL) 
-
-p3 / p1 / p2 +
-  plot_layout(guides = "collect") +
-  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+summarised_data %>% 
+  filter(network == "none") %>% 
+  summary_plot()
 ```
 
 
@@ -109,36 +115,10 @@ p3 / p1 / p2 +
 ```{r fig.width=7, fig.height=9}
 #| label: fig-random-network
 #| fig-cap: Gini index and % of groups sharing data dependent on grant size with random network.
-n_row <- 1
 
-pdata <- summarised_data %>% 
-  filter(network == "random")
-
-p1 <- pdata %>%  
-  ggplot(aes(step, mean_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "Gini of current resources", x = NULL)
-
-p2 <- pdata %>%  
-  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-    facet_wrap(vars(maxinitialutility), nrow = n_row) +
-    labs(colour = "% of teams receiving funding",
-       y = "Gini of total resources",
-       x = "Step")
-
-p3 <- pdata %>%  
-  ggplot(aes(step, mean_sharing, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "% of teams sharing data", x = NULL) 
-
-p3 / p1 / p2 +
-  plot_layout(guides = "collect") +
-  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+summarised_data %>% 
+  filter(network == "random") %>% 
+  summary_plot()
 ```
 
 
@@ -147,36 +127,10 @@ p3 / p1 / p2 +
 ```{r fig.width=7, fig.height=9}
 #| label: fig-clustered-network
 #| fig-cap: Gini index and % of groups sharing data dependent on grant size with clustered network.
-n_row <- 1
 
-pdata <- summarised_data %>% 
-  filter(network == "clustered")
-
-p1 <- pdata %>%  
-  ggplot(aes(step, mean_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "Gini of current resources", x = NULL)
-
-p2 <- pdata %>%  
-  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-    facet_wrap(vars(maxinitialutility), nrow = n_row) +
-    labs(colour = "% of teams receiving funding",
-       y = "Gini of total resources",
-       x = "Step")
-
-p3 <- pdata %>%  
-  ggplot(aes(step, mean_sharing, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "% of teams sharing data", x = NULL) 
-
-p3 / p1 / p2 +
-  plot_layout(guides = "collect") +
-  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+summarised_data %>% 
+  filter(network == "clustered") %>% 
+  summary_plot()
 ```
 
 
@@ -184,36 +138,10 @@ p3 / p1 / p2 +
 ```{r fig.width=7, fig.height=9}
 #| label: fig-fragmented
 #| fig-cap: Gini index and % of groups sharing data dependent on grant size with fragmented network.
-n_row <- 1
 
-pdata <- summarised_data %>% 
-  filter(network == "fragmented")
-
-p1 <- pdata %>%  
-  ggplot(aes(step, mean_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "Gini of current resources", x = NULL)
-
-p2 <- pdata %>%  
-  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-    facet_wrap(vars(maxinitialutility), nrow = n_row) +
-    labs(colour = "% of teams receiving funding",
-       y = "Gini of total resources",
-       x = "Step")
-
-p3 <- pdata %>%  
-  ggplot(aes(step, mean_sharing, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "% of teams sharing data", x = NULL) 
-
-p3 / p1 / p2 +
-  plot_layout(guides = "collect") +
-  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+summarised_data %>% 
+  filter(network == "fragmented") %>% 
+  summary_plot()
 ```
 
 
