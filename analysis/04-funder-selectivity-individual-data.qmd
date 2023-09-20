@@ -34,7 +34,7 @@ Sys.setenv(HADOOP_HOME = "/home/hadoop/hadoop-3.3.1")
 Sys.setenv(HADOOP_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
 Sys.setenv(YARN_HOME = "/home/hadoop/hadoop-3.3.1")
 Sys.setenv(YARN_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
-Sys.setenv(JAVA_HOME="/usr/lib/jvm/java-1.11.0-openjdk-amd64")
+Sys.setenv(JAVA_HOME = "/usr/lib/jvm/java-1.11.0-openjdk-amd64")
 
 config <- spark_config()
 config$spark.executor.cores <- 5
