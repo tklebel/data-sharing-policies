@@ -6,6 +6,7 @@ author: Thomas Klebel
 date-modified: today
 date: today
 bibliography: references.bib
+fig-dpi: 300
 ---
 
 # Rationale
@@ -325,7 +326,7 @@ degree, high clustering, and relatively short average paths. Hubs are present
 and connect the different communities, but are more similar to other nodes in
 terms of their degree than in the case of network (B).
 
-```{r, fig.height=12, fig.width=5, echo=FALSE, warning=FALSE}
+```{r, fig.height=5, fig.width=12, echo=FALSE, warning=FALSE}
 #| label: fig-network-overview
 #| fig-cap: "Overview of network topologies. (A) Random network. (B) Network with low clustering. (C) Network with high clustering. Colours represent groups optained via the Louvain algorithm. The size of nodes refers to their total degree."
 
@@ -336,7 +337,7 @@ p_clustered <- plot_graph(final_clustered)
 p_random +
   p_fragemented +
   p_clustered +
-  plot_layout(nrow = 3) +
+  plot_layout(nrow = 1) +
   plot_annotation(tag_levels = "A", 
                   theme = theme_graph(base_family = "Arial")) 
 ```
