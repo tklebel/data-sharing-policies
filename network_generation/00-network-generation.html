@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Thomas Klebel">
-<meta name="dcterms.date" content="2023-07-09">
+<meta name="dcterms.date" content="2023-09-20">
 
 <title>Network generation</title>
 <style>
@@ -85,14 +85,14 @@ div.csl-indent {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">July 9, 2023</p>
+      <p class="date">September 20, 2023</p>
     </div>
   </div>
   
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">July 9, 2023</p>
+      <p class="date-modified">September 20, 2023</p>
     </div>
   </div>
     
@@ -117,11 +117,25 @@ div.csl-indent {
 <div class="cell-output-display">
 <div id="fig-random-graph" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="00-network-generation_files/figure-html/fig-random-graph-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="00-network-generation_files/figure-html/fig-random-graph-1.png" class="img-fluid figure-img" width="2100"></p>
 <figcaption class="figure-caption">Figure&nbsp;1: Random network. Node size corresponds to the node’s degree.</figcaption>
 </figure>
 </div>
 </div>
+</div>
+<div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: There was 1 warning in `mutate()`.
+ℹ In argument: `across(everything(), round, 3)`.
+Caused by warning:
+! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
+Supply arguments directly to `.fns` through an anonymous function instead.
+
+  # Previously
+  across(a:b, mean, na.rm = TRUE)
+
+  # Now
+  across(a:b, \(x) mean(x, na.rm = TRUE))</code></pre>
 </div>
 <div id="tbl-random" class="cell tbl-parent quarto-layout-panel anchored">
 <div class="panel-caption table-caption">
@@ -157,6 +171,7 @@ div.csl-indent {
 </div>
 </div>
 </div>
+</div>
 </section>
 <section id="case-1-low-clustering" class="level1">
 <h1>Case 1: Low clustering</h1>
@@ -177,7 +192,7 @@ div.csl-indent {
 <p>The fragmented communities are generated using the small-world algorithm proposed by <span class="citation" data-cites="watts1998">Watts and Strogatz (<a href="#ref-watts1998" role="doc-biblioref">1998</a>)</span>. We obtain low clustering by using small neighbourhood sizes (1-2), and a moderate rewiring probability (0.2-0.3).</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="00-network-generation_files/figure-html/fragmented-initial-1.png" class="img-fluid" width="768"></p>
+<p><img src="00-network-generation_files/figure-html/fragmented-initial-1.png" class="img-fluid" width="2400"></p>
 </div>
 </div>
 <div class="cell">
@@ -213,7 +228,7 @@ div.csl-indent {
 <h2 class="anchored" data-anchor-id="step-2-add-hubs">Step 2: add hubs</h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="00-network-generation_files/figure-html/fragmented-hubs-1.png" class="img-fluid" width="672"></p>
+<p><img src="00-network-generation_files/figure-html/fragmented-hubs-1.png" class="img-fluid" width="2100"></p>
 </div>
 </div>
 <div class="cell">
@@ -265,7 +280,7 @@ div.csl-indent {
 <h2 class="anchored" data-anchor-id="step-4-retain-main-component">Step 4: Retain main component</h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="00-network-generation_files/figure-html/fragmented-final-1.png" class="img-fluid" width="672"></p>
+<p><img src="00-network-generation_files/figure-html/fragmented-final-1.png" class="img-fluid" width="2100"></p>
 </div>
 </div>
 <div class="cell">
@@ -298,7 +313,7 @@ div.csl-indent {
 </div>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="00-network-generation_files/figure-html/fragmented-degree-dist-1.png" class="img-fluid" width="672"></p>
+<p><img src="00-network-generation_files/figure-html/fragmented-degree-dist-1.png" class="img-fluid" width="2100"></p>
 </div>
 </div>
 </section>
@@ -321,7 +336,7 @@ div.csl-indent {
 <p>Highly clustered communities are obtained by using a larger neighbourhood size (3-6) for the clusters of 10-30 nodes, and setting a low rewire probability (0.01-0.05).</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="00-network-generation_files/figure-html/clustered-initial-1.png" class="img-fluid" width="768"></p>
+<p><img src="00-network-generation_files/figure-html/clustered-initial-1.png" class="img-fluid" width="2400"></p>
 </div>
 </div>
 <div class="cell">
@@ -357,7 +372,7 @@ div.csl-indent {
 <h2 class="anchored" data-anchor-id="step-2-add-hubs-1">Step 2: add hubs</h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="00-network-generation_files/figure-html/clustered-hubs-1.png" class="img-fluid" width="672"></p>
+<p><img src="00-network-generation_files/figure-html/clustered-hubs-1.png" class="img-fluid" width="2100"></p>
 </div>
 </div>
 <div class="cell">
@@ -393,7 +408,7 @@ div.csl-indent {
 <h2 class="anchored" data-anchor-id="step-3-add-nodes-and-edges-1">Step 3: Add nodes and edges</h2>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="00-network-generation_files/figure-html/clustered-final-1.png" class="img-fluid" width="672"></p>
+<p><img src="00-network-generation_files/figure-html/clustered-final-1.png" class="img-fluid" width="2100"></p>
 </div>
 </div>
 <div class="cell">
@@ -426,7 +441,7 @@ div.csl-indent {
 </div>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="00-network-generation_files/figure-html/clustered-degree-dist-1.png" class="img-fluid" width="672"></p>
+<p><img src="00-network-generation_files/figure-html/clustered-degree-dist-1.png" class="img-fluid" width="2100"></p>
 </div>
 </div>
 </section>
@@ -440,7 +455,7 @@ div.csl-indent {
 <div class="cell-output-display">
 <div id="fig-network-overview" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="00-network-generation_files/figure-html/fig-network-overview-1.png" class="img-fluid figure-img" width="480"></p>
+<p><img src="00-network-generation_files/figure-html/fig-network-overview-1.png" class="img-fluid figure-img" width="3600"></p>
 <figcaption class="figure-caption">Figure&nbsp;2: Overview of network topologies. (A) Random network. (B) Network with low clustering. (C) Network with high clustering. Colours represent groups optained via the Louvain algorithm. The size of nodes refers to their total degree.</figcaption>
 </figure>
 </div>
