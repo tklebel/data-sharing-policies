@@ -56,42 +56,50 @@ This warning is displayed once every 8 hours.
 :::
 :::
 
+::: {.cell}
+
+```{.r .cell-code}
+n_row <- 1
+
+plot_skeleton <- function(df, var) {
+  df %>%  
+    ggplot(aes(step, {{ var }}, colour = as.factor(fundedshare))) +
+    geom_line() +
+    facet_wrap(vars(maxinitialutility), nrow = n_row) +
+    colorspace::scale_colour_discrete_qualitative()
+}
+
+summary_plot <- function(df) {
+  p1 <- plot_skeleton(df, mean_gini) +
+  labs(colour = "% of teams receiving funding",
+       y = "Gini of current resources", x = NULL)
+
+  p2 <- plot_skeleton(df, mean_cumulative_gini) +
+    labs(colour = "% of teams receiving funding",
+         y = "Gini of total resources",
+         x = "Step")
+  
+  p3 <- plot_skeleton(df, mean_sharing) +
+    labs(colour = "% of teams receiving funding",
+         y = "% of teams sharing data", x = NULL) 
+  
+  p3 / p1 / p2 +
+    plot_layout(guides = "collect") +
+    plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+}
+```
+:::
+
+
 
 # No network
 
 ::: {.cell}
 
 ```{.r .cell-code}
-n_row <- 1
-
-no_network <- summarised_data %>% 
-  filter(network == "none")
-
-p1 <- no_network %>%  
-  ggplot(aes(step, mean_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "Gini of current resources", x = NULL)
-
-p2 <- no_network %>%  
-  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-    facet_wrap(vars(maxinitialutility), nrow = n_row) +
-    labs(colour = "% of teams receiving funding",
-       y = "Gini of total resources",
-       x = "Step")
-
-p3 <- no_network %>%  
-  ggplot(aes(step, mean_sharing, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "% of teams sharing data", x = NULL) 
-
-p3 / p1 / p2 +
-  plot_layout(guides = "collect") +
-  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+summarised_data %>% 
+  filter(network == "none") %>% 
+  summary_plot()
 ```
 
 ::: {.cell-output-display}
@@ -106,36 +114,9 @@ p3 / p1 / p2 +
 ::: {.cell}
 
 ```{.r .cell-code}
-n_row <- 1
-
-pdata <- summarised_data %>% 
-  filter(network == "random")
-
-p1 <- pdata %>%  
-  ggplot(aes(step, mean_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "Gini of current resources", x = NULL)
-
-p2 <- pdata %>%  
-  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-    facet_wrap(vars(maxinitialutility), nrow = n_row) +
-    labs(colour = "% of teams receiving funding",
-       y = "Gini of total resources",
-       x = "Step")
-
-p3 <- pdata %>%  
-  ggplot(aes(step, mean_sharing, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "% of teams sharing data", x = NULL) 
-
-p3 / p1 / p2 +
-  plot_layout(guides = "collect") +
-  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+summarised_data %>% 
+  filter(network == "random") %>% 
+  summary_plot()
 ```
 
 ::: {.cell-output-display}
@@ -151,36 +132,9 @@ p3 / p1 / p2 +
 ::: {.cell}
 
 ```{.r .cell-code}
-n_row <- 1
-
-pdata <- summarised_data %>% 
-  filter(network == "clustered")
-
-p1 <- pdata %>%  
-  ggplot(aes(step, mean_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "Gini of current resources", x = NULL)
-
-p2 <- pdata %>%  
-  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-    facet_wrap(vars(maxinitialutility), nrow = n_row) +
-    labs(colour = "% of teams receiving funding",
-       y = "Gini of total resources",
-       x = "Step")
-
-p3 <- pdata %>%  
-  ggplot(aes(step, mean_sharing, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "% of teams sharing data", x = NULL) 
-
-p3 / p1 / p2 +
-  plot_layout(guides = "collect") +
-  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+summarised_data %>% 
+  filter(network == "clustered") %>% 
+  summary_plot()
 ```
 
 ::: {.cell-output-display}
@@ -195,36 +149,9 @@ p3 / p1 / p2 +
 ::: {.cell}
 
 ```{.r .cell-code}
-n_row <- 1
-
-pdata <- summarised_data %>% 
-  filter(network == "fragmented")
-
-p1 <- pdata %>%  
-  ggplot(aes(step, mean_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "Gini of current resources", x = NULL)
-
-p2 <- pdata %>%  
-  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(fundedshare))) +
-  geom_line() +
-    facet_wrap(vars(maxinitialutility), nrow = n_row) +
-    labs(colour = "% of teams receiving funding",
-       y = "Gini of total resources",
-       x = "Step")
-
-p3 <- pdata %>%  
-  ggplot(aes(step, mean_sharing, colour = as.factor(fundedshare))) +
-  geom_line() +
-  facet_wrap(vars(maxinitialutility), nrow = n_row) +
-  labs(colour = "% of teams receiving funding",
-       y = "% of teams sharing data", x = NULL) 
-
-p3 / p1 / p2 +
-  plot_layout(guides = "collect") +
-  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+summarised_data %>% 
+  filter(network == "fragmented") %>% 
+  summary_plot()
 ```
 
 ::: {.cell-output-display}
@@ -254,6 +181,18 @@ teams receiving funding, about 25% of teams share data, and so on.
 The same patterns of large initial swings and eventual equilibria hold true for
 the clustered and the fragmented network topology. 
 
+
+HIGHLY INTERESTING OBSERVATION: in the fragmented network, it is mostly those 
+teams which are not well-connected that keep sharing data (in line with the
+general findings). Is it then also those that receive more funding?
+Need to compare with centrality measures.
+
+This might be the reason, why the means that we show are much smoother for the 
+fragmented network, compared to the clustered, and especially the random network:
+in the fragmented network, the types of nodes sharing data are quite similar
+across runs, because there is a strong difference in degree between the nodes.
+In the clustered, and more so in the random network, there are not so big 
+differences in degree, and thus there is more variability in who shares.
 
 
 
