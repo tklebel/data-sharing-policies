@@ -6,6 +6,7 @@ format:
   #pdf: default
 execute:
   keep-md: true
+fig-dpi: 300
 ---
 
 
@@ -24,6 +25,9 @@ Research questions:
 
 
 # Are always the same teams receiving funding?
+## Fragmented (low clustering) network
+Here, we only look at steps equal or above 2000 (steps 2000-3000), since we are
+interested in the long-run dynamics.
 
 
 ::: {.cell}
@@ -112,15 +116,32 @@ correlations %>%
 ::: {.cell}
 
 ```{.r .cell-code}
-correlations %>% 
-  ggplot(aes(fundedshare, cor_funding, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+plot_skeleton <- function(df, var) {
+  df %>% 
+    mutate(maxinitialutility = recode(maxinitialutility, `4` = "Uniform initial sharing effort",
+                                      `-4` = "Low initial sharing effort")) %>% 
+    ggplot(aes(fundedshare, {{ var }}, 
+               colour = as.factor(maxinitialutility))) +
+    geom_line() +
+    geom_point() +
+    colorspace::scale_colour_discrete_qualitative() +
+    scale_x_continuous(labels = scales::label_percent()) +
+    labs(colour = NULL, x = "Share of teams receiving funding") +
+    theme(legend.position = "top")
+}
+```
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+p1 <- plot_skeleton(correlations, cor_funding) +
+  labs(y = "Corr funding & lagged funding")
+p1
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-7-1.png){width=672}
+![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-8-1.png){width=1500}
 :::
 :::
 
@@ -133,15 +154,13 @@ equilibrium state.
 ::: {.cell}
 
 ```{.r .cell-code}
-correlations %>% 
-  ggplot(aes(fundedshare, cor_init_resources, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+p2 <- plot_skeleton(correlations, cor_init_resources) +
+  labs(y = "Corr funding & initial resources")
+p2
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-8-1.png){width=672}
+![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-9-1.png){width=1500}
 :::
 :::
 
@@ -153,6 +172,22 @@ For low initial utility, this is not true, and there is actually a negative
 correlation. This lends credence to our initial hypothesis: teams with initially
 higher resources (presumably, to be confirmed below) share less data, and thus
 are less successful under the incentive regime.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+p1 + p2 +
+  plot_layout(guides = "collect") + 
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+```
+
+::: {.cell-output-display}
+![Path dependency with low clustering network condition. (A) Pearson correlation between current funding status (yes/no) and funding status at t-1. (B) Pearson correlation between current funding status and initial resources.](04-funder-selectivity-individual-data_files/figure-html/corrs-low-clustering-network-1.png){width=2400}
+:::
+:::
+
+
 
 ## No network
 
@@ -237,15 +272,13 @@ correlations_no_network %>%
 ::: {.cell}
 
 ```{.r .cell-code}
-correlations_no_network %>% 
-  ggplot(aes(fundedshare, cor_funding, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+p1 <- plot_skeleton(correlations_no_network, cor_funding) +
+  labs(y = "Corr funding & lagged funding")
+p1
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-14-1.png){width=672}
+![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-16-1.png){width=1500}
 :::
 :::
 
@@ -259,15 +292,13 @@ otherwise.
 ::: {.cell}
 
 ```{.r .cell-code}
-correlations_no_network %>% 
-  ggplot(aes(fundedshare, cor_init_resources, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+p2 <- plot_skeleton(correlations_no_network, cor_init_resources) +
+  labs(y = "Corr funding & initial resources")
+p2
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-15-1.png){width=672}
+![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-17-1.png){width=1500}
 :::
 :::
 
@@ -283,7 +314,25 @@ lower-resourced teams are funded more than those with higher initial resources,
 simply because they start sharing data. If utility is uniform, initial resources
 play a stronger role - there is more path dependency.
 
+
+::: {.cell}
+
+```{.r .cell-code}
+p1 + p2 +
+  plot_layout(guides = "collect") + 
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+```
+
+::: {.cell-output-display}
+![Path dependency under 'no network' condition. (A) Pearson correlation between current funding status (yes/no) and funding status at t-1. (B) Pearson correlation between current funding status and initial resources.](04-funder-selectivity-individual-data_files/figure-html/corrs-no-network-1.png){width=2400}
+:::
+:::
+
+
+
 # Are those that are being funded also those that share data?
+
+## Low clustering
 
 
 ::: {.cell}
@@ -307,15 +356,12 @@ the `.groups` argument.
 ::: {.cell}
 
 ```{.r .cell-code}
-funding_vs_sharing %>% 
-  ggplot(aes(fundedshare, cor_funding_sharing, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+plot_skeleton(funding_vs_sharing, cor_funding_sharing) +
+  labs(y = "Corr funding & data sharing")
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-17-1.png){width=672}
+![Correlation between funding status (yes/no) and data sharing (yes/no)](04-funder-selectivity-individual-data_files/figure-html/corr-funding-sharing-low-clustering-1.png){width=1500}
 :::
 :::
 
@@ -330,21 +376,18 @@ afford to share data, and thus not many do. If funding is less selective, more
 teams share data, and thus, generally, those being funded are also more often
 those which share data. Does this make sense?
 
-## No network
+
 
 
 ::: {.cell}
 
 ```{.r .cell-code}
-funding_vs_sharing %>% 
-  ggplot(aes(fundedshare, cor_sharing_lag, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+plot_skeleton(funding_vs_sharing, cor_sharing_lag) +
+  labs(y = "Corr data sharing & data sharing lag")
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-18-1.png){width=672}
+![Correlation between current sharing status (yes/no) and lagged (t-1) sharing status for the case of low clustering.](04-funder-selectivity-individual-data_files/figure-html/corr-low-cluster-sharing-sharing-lag-1.png){width=1500}
 :::
 :::
 
@@ -353,6 +396,8 @@ The correlation between sharing, and the shared lag (whether teams keep sharing
 data) is also quite high, and the graph looks very similar to the one right
 above. This implies that there is path dependency around sharing, where teams
 share data and receive funding, while others do neither.
+
+## No network
 
 
 ::: {.cell}
@@ -376,30 +421,24 @@ the `.groups` argument.
 ::: {.cell}
 
 ```{.r .cell-code}
-funding_vs_sharing_no_network %>% 
-  ggplot(aes(fundedshare, cor_funding_sharing, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+plot_skeleton(funding_vs_sharing_no_network, cor_funding_sharing) +
+  labs(y = "Corr funding & data sharing")
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-20-1.png){width=672}
+![Correlation between funding status (yes/no) and data sharing (yes/no)](04-funder-selectivity-individual-data_files/figure-html/corr-funding-sharing-no-network-1.png){width=1500}
 :::
 :::
 
 ::: {.cell}
 
 ```{.r .cell-code}
-funding_vs_sharing_no_network %>% 
-  ggplot(aes(fundedshare, cor_sharing_lag, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+plot_skeleton(funding_vs_sharing_no_network, cor_sharing_lag) +
+  labs(y = "Corr data sharing & data sharing lag")
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-21-1.png){width=672}
+![Correlation between current sharing status (yes/no) and lagged (t-1) sharing status for the case of no network.](04-funder-selectivity-individual-data_files/figure-html/corr-no-network-sharing-sharing-lag-1.png){width=1500}
 :::
 :::
 
@@ -523,7 +562,7 @@ degree_stats %>%
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-24-1.png){width=672}
+![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-27-1.png){width=1500}
 :::
 :::
 
@@ -580,17 +619,15 @@ true_fraction <- fragmented_centrality_local %>%
   filter(is_low_degree) %>% 
   pull(n)
 
-low_degree_hypothesis %>% 
-  ggplot(aes(fundedshare, mean_frac_low_degree_funded, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point() +
+plot_skeleton(low_degree_hypothesis, mean_frac_low_degree_funded) +
   geom_hline(yintercept = true_fraction, linetype = 2) +
-  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .55, by = .05)))
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .55, by = .05)),
+                     labels = scales::label_percent()) +
+  labs(y = "Fraction of funded teams with below median degree")
 ```
 
 ::: {.cell-output-display}
-![Representation of low-degree teams among funded teams. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.](04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-frac-1.png){#fig-low-degree-frac width=672}
+![Representation of low-degree teams among funded teams. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.](04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-frac-1.png){#fig-low-degree-frac width=1500}
 :::
 :::
 
@@ -627,24 +664,15 @@ the `.groups` argument.
 ::: {.cell}
 
 ```{.r .cell-code}
-# what is the actual fraction of low degree teams?
-true_fraction <- fragmented_centrality_local %>% 
-  count(is_low_degree) %>% 
-  mutate(n = n / 100) %>% 
-  filter(is_low_degree) %>% 
-  pull(n)
-
-low_degree_hypothesis_sharing %>% 
-  ggplot(aes(fundedshare, mean_frac_low_degree_sharing, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point() +
+plot_skeleton(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) +
   geom_hline(yintercept = true_fraction, linetype = 2) +
-  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .55, by = .05)))
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .55, by = .05)),
+                     labels = scales::label_percent()) +
+  labs(y = "Fraction of teams sharing data\nwith below median degree")
 ```
 
 ::: {.cell-output-display}
-![Representation of low-degree teams among teams sharing data. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.](04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-frac-sharing-1.png){#fig-low-degree-frac-sharing width=672}
+![Representation of low-degree teams among teams sharing data. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.](04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-frac-sharing-1.png){#fig-low-degree-frac-sharing width=1500}
 :::
 :::
 
