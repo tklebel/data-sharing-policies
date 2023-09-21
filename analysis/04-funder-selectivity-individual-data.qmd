@@ -61,6 +61,9 @@ no_network <- spark_read_parquet(
 ```
 
 # Are always the same teams receiving funding?
+## Fragmented (low clustering) network
+Here, we only look at steps equal or above 2000 (steps 2000-3000), since we are
+interested in the long-run dynamics.
 
 ```{r}
 # we did not store whether a given team was funded, and it is quite 
@@ -105,23 +108,35 @@ correlations %>%
 ```
 
 ```{r}
-correlations %>% 
-  ggplot(aes(fundedshare, cor_funding, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+plot_skeleton <- function(df, var) {
+  df %>% 
+    mutate(maxinitialutility = recode(maxinitialutility, `4` = "Uniform initial sharing effort",
+                                      `-4` = "Low initial sharing effort")) %>% 
+    ggplot(aes(fundedshare, {{ var }}, 
+               colour = as.factor(maxinitialutility))) +
+    geom_line() +
+    geom_point() +
+    colorspace::scale_colour_discrete_qualitative() +
+    scale_x_continuous(labels = scales::label_percent()) +
+    labs(colour = NULL, x = "Share of teams receiving funding") +
+    theme(legend.position = "top")
+}
+```
+
+```{r, fig.width=5, fig.height=4}
+p1 <- plot_skeleton(correlations, cor_funding) +
+  labs(y = "Corr funding & lagged funding")
+p1
 ```
 
 The correlation between current and previous funding status is very high - there
 seems to be almost complete path dependency, once the simulation has entered the
 equilibrium state.
 
-```{r}
-correlations %>% 
-  ggplot(aes(fundedshare, cor_init_resources, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+```{r, fig.width=5, fig.height=4}
+p2 <- plot_skeleton(correlations, cor_init_resources) +
+  labs(y = "Corr funding & initial resources")
+p2
 ```
 
 Interestingly, the correlation with initial resources is much lower. For uniform
@@ -131,6 +146,17 @@ For low initial utility, this is not true, and there is actually a negative
 correlation. This lends credence to our initial hypothesis: teams with initially
 higher resources (presumably, to be confirmed below) share less data, and thus
 are less successful under the incentive regime.
+
+```{r, fig.width=8, fig.height=4}
+#| label: corrs-low-clustering-network
+#| fig-cap: "Path dependency with low clustering network condition. (A) Pearson correlation
+#| between current funding status (yes/no) and funding status at t-1. (B) Pearson 
+#| correlation between current funding status and initial resources."
+p1 + p2 +
+  plot_layout(guides = "collect") + 
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+```
+
 
 ## No network
 
@@ -170,12 +196,11 @@ correlations_no_network %>%
   knitr::kable()
 ```
 
-```{r}
-correlations_no_network %>% 
-  ggplot(aes(fundedshare, cor_funding, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+
+```{r, fig.width=5, fig.height=4}
+p1 <- plot_skeleton(correlations_no_network, cor_funding) +
+  labs(y = "Corr funding & lagged funding")
+p1
 ```
 
 Correlations for funding lag are similarly very high. However, behaviour is
@@ -183,12 +208,10 @@ different between max-initial-utility, comparing to the case of the fragmented
 network. Here, correlations are higher for maxinitalutility = 4, but lower
 otherwise.
 
-```{r}
-correlations_no_network %>% 
-  ggplot(aes(fundedshare, cor_init_resources, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+```{r, fig.width=5, fig.height=4}
+p2 <- plot_skeleton(correlations_no_network, cor_init_resources) +
+  labs(y = "Corr funding & initial resources")
+p2
 ```
 
 These correlations are stronger, i.e., more positive, as indicated by the
@@ -202,7 +225,20 @@ lower-resourced teams are funded more than those with higher initial resources,
 simply because they start sharing data. If utility is uniform, initial resources
 play a stronger role - there is more path dependency.
 
+```{r, fig.width=8, fig.height=4}
+#| label: corrs-no-network
+#| fig-cap: "Path dependency under 'no network' condition. (A) Pearson correlation
+#| between current funding status (yes/no) and funding status at t-1. (B) Pearson 
+#| correlation between current funding status and initial resources."
+p1 + p2 +
+  plot_layout(guides = "collect") + 
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+```
+
+
 # Are those that are being funded also those that share data?
+
+## Low clustering
 
 ```{r}
 funding_vs_sharing <- funding_status %>% 
@@ -212,12 +248,11 @@ funding_vs_sharing <- funding_status %>%
   collect()
 ```
 
-```{r}
-funding_vs_sharing %>% 
-  ggplot(aes(fundedshare, cor_funding_sharing, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+```{r, fig.width=5, fig.height=4}
+#| label: corr-funding-sharing-low-clustering
+#| fig-cap: "Correlation between funding status (yes/no) and data sharing (yes/no)"
+plot_skeleton(funding_vs_sharing, cor_funding_sharing) +
+  labs(y = "Corr funding & data sharing")
 ```
 
 Generally speaking, those that are being funded are also those that share data,
@@ -230,20 +265,22 @@ afford to share data, and thus not many do. If funding is less selective, more
 teams share data, and thus, generally, those being funded are also more often
 those which share data. Does this make sense?
 
-## No network
 
-```{r}
-funding_vs_sharing %>% 
-  ggplot(aes(fundedshare, cor_sharing_lag, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+
+```{r, fig.width=5, fig.height=4}
+#| label: corr-low-cluster-sharing-sharing-lag
+#| fig-cap: "Correlation between current sharing status (yes/no) and lagged (t-1)
+#| sharing status for the case of low clustering."
+plot_skeleton(funding_vs_sharing, cor_sharing_lag) +
+  labs(y = "Corr data sharing & data sharing lag")
 ```
 
 The correlation between sharing, and the shared lag (whether teams keep sharing
 data) is also quite high, and the graph looks very similar to the one right
 above. This implies that there is path dependency around sharing, where teams
 share data and receive funding, while others do neither.
+
+## No network
 
 ```{r}
 funding_vs_sharing_no_network <- funding_status_no_network %>% 
@@ -253,20 +290,21 @@ funding_vs_sharing_no_network <- funding_status_no_network %>%
   collect()
 ```
 
-```{r}
-funding_vs_sharing_no_network %>% 
-  ggplot(aes(fundedshare, cor_funding_sharing, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+```{r, fig.width=5, fig.height=4}
+#| label: corr-funding-sharing-no-network
+#| fig-cap: "Correlation between funding status (yes/no) and data sharing (yes/no)"
+plot_skeleton(funding_vs_sharing_no_network, cor_funding_sharing) +
+  labs(y = "Corr funding & data sharing")
 ```
 
-```{r}
-funding_vs_sharing_no_network %>% 
-  ggplot(aes(fundedshare, cor_sharing_lag, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point()
+
+
+```{r, fig.width=5, fig.height=4}
+#| label: corr-no-network-sharing-sharing-lag
+#| fig-cap: "Correlation between current sharing status (yes/no) and lagged (t-1)
+#| sharing status for the case of no network."
+plot_skeleton(funding_vs_sharing_no_network, cor_sharing_lag) +
+  labs(y = "Corr data sharing & data sharing lag")
 ```
 
 Again, we see that the correlation between funding and sharing seems to be
@@ -323,7 +361,7 @@ degree_stats <- funding_status %>%
   collect()
 ```
 
-```{r}
+```{r, fig.width=5, fig.height=4}
 degree_stats %>% 
   ggplot(aes(fundedshare, cor_degree_sharing, 
              colour = as.factor(maxinitialutility))) +
@@ -354,7 +392,7 @@ low_degree_hypothesis <- funding_status %>%
   collect()
 ```
 
-```{r}
+```{r, fig.width=5, fig.height=4}
 #| label: fig-low-degree-frac
 #| fig-cap: "Representation of low-degree teams among funded teams. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams."
 # what is the actual fraction of low degree teams?
@@ -364,13 +402,11 @@ true_fraction <- fragmented_centrality_local %>%
   filter(is_low_degree) %>% 
   pull(n)
 
-low_degree_hypothesis %>% 
-  ggplot(aes(fundedshare, mean_frac_low_degree_funded, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point() +
+plot_skeleton(low_degree_hypothesis, mean_frac_low_degree_funded) +
   geom_hline(yintercept = true_fraction, linetype = 2) +
-  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .55, by = .05)))
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .55, by = .05)),
+                     labels = scales::label_percent()) +
+  labs(y = "Fraction of funded teams with below median degree")
 ```
 
 We see that for high selectivity (funded share is low), low-degree teams are
@@ -391,16 +427,14 @@ low_degree_hypothesis_sharing <- funding_status %>%
   collect()
 ```
 
-```{r}
+```{r, fig.width=5, fig.height=4}
 #| label: fig-low-degree-frac-sharing
 #| fig-cap: "Representation of low-degree teams among teams sharing data. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams."
-low_degree_hypothesis_sharing %>% 
-  ggplot(aes(fundedshare, mean_frac_low_degree_sharing, 
-             colour = as.factor(maxinitialutility))) +
-  geom_line() +
-  geom_point() +
+plot_skeleton(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) +
   geom_hline(yintercept = true_fraction, linetype = 2) +
-  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .55, by = .05)))
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .55, by = .05)),
+                     labels = scales::label_percent()) +
+  labs(y = "Fraction of teams sharing data\nwith below median degree")
 ```
 
 ```{r, eval=FALSE}
