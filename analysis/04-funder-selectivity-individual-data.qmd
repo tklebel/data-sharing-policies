@@ -148,7 +148,7 @@ higher resources (presumably, to be confirmed below) share less data, and thus
 are less successful under the incentive regime.
 
 ```{r, fig.width=8, fig.height=4}
-#| label: corrs-low-clustering-network
+#| label: fig-corrs-low-clustering-network
 #| fig-cap: "Path dependency with low clustering network condition. (A) Pearson correlation
 #| between current funding status (yes/no) and funding status at t-1. (B) Pearson 
 #| correlation between current funding status and initial resources."
@@ -227,7 +227,7 @@ simply because they start sharing data. If utility is uniform, initial resources
 play a stronger role - there is more path dependency.
 
 ```{r, fig.width=8, fig.height=4}
-#| label: corrs-no-network
+#| label: fig-corrs-no-network
 #| fig-cap: "Path dependency under 'no network' condition. (A) Pearson correlation
 #| between current funding status (yes/no) and funding status at t-1. (B) Pearson 
 #| correlation between current funding status and initial resources."
