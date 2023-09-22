@@ -231,7 +231,8 @@ play a stronger role - there is more path dependency.
 #| fig-cap: "Path dependency under 'no network' condition. (A) Pearson correlation
 #| between current funding status (yes/no) and funding status at t-1. (B) Pearson 
 #| correlation between current funding status and initial resources."
-p1 + p2 +
+p1 + scale_y_continuous(limits = c(-.2, 1)) +
+  p2 + scale_y_continuous(limits = c(-.2, 1)) +
   plot_layout(guides = "collect") + 
   plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
