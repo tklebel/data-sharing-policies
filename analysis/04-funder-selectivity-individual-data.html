@@ -323,15 +323,16 @@ the `.groups` argument.</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> p2 <span class="sc">+</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">"collect"</span>) <span class="sc">+</span> </span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>) <span class="sc">&amp;</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span>.<span class="dv">5</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  p2 <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span>.<span class="dv">5</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">"collect"</span>) <span class="sc">+</span> </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>) <span class="sc">&amp;</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
+<div id="fig-corrs-low-clustering-network" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="04-funder-selectivity-individual-data_files/figure-html/corrs-low-clustering-network-1.png" class="img-fluid figure-img" width="2400"></p>
-<p></p><figcaption class="figure-caption">Path dependency with low clustering network condition. (A) Pearson correlation between current funding status (yes/no) and funding status at t-1. (B) Pearson correlation between current funding status and initial resources.</figcaption><p></p>
+<p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-corrs-low-clustering-network-1.png" class="img-fluid figure-img" width="2400"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: Path dependency with low clustering network condition. (A) Pearson correlation between current funding status (yes/no) and funding status at t-1. (B) Pearson correlation between current funding status and initial resources.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -500,15 +501,16 @@ the `.groups` argument.</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> p2 <span class="sc">+</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">"collect"</span>) <span class="sc">+</span> </span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>) <span class="sc">&amp;</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span>.<span class="dv">2</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  p2 <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span>.<span class="dv">2</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">"collect"</span>) <span class="sc">+</span> </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>) <span class="sc">&amp;</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
+<div id="fig-corrs-no-network" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="04-funder-selectivity-individual-data_files/figure-html/corrs-no-network-1.png" class="img-fluid figure-img" width="2400"></p>
-<p></p><figcaption class="figure-caption">Path dependency under ‘no network’ condition. (A) Pearson correlation between current funding status (yes/no) and funding status at t-1. (B) Pearson correlation between current funding status and initial resources.</figcaption><p></p>
+<p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-corrs-no-network-1.png" class="img-fluid figure-img" width="2400"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2: Path dependency under ‘no network’ condition. (A) Pearson correlation between current funding status (yes/no) and funding status at t-1. (B) Pearson correlation between current funding status and initial resources.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -753,7 +755,7 @@ the `.groups` argument.</code></pre>
 <div id="fig-low-degree-frac" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-frac-1.png" class="img-fluid figure-img" width="1500"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Representation of low-degree teams among funded teams. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3: Representation of low-degree teams among funded teams. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -794,7 +796,7 @@ the `.groups` argument.</code></pre>
 <div id="fig-low-degree-frac-sharing" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-frac-sharing-1.png" class="img-fluid figure-img" width="1500"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;2: Representation of low-degree teams among teams sharing data. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;4: Representation of low-degree teams among teams sharing data. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -811,7 +813,7 @@ the `.groups` argument.</code></pre>
 <div id="fig-low-degree-sharing-and-funding" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-sharing-and-funding-1.png" class="img-fluid figure-img" width="2400"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3: Fractions of low degree teams who (A) are funded, or (B) share data. Low degree teams are defined as teams with below median degree.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5: Fractions of low degree teams who (A) are funded, or (B) share data. Low degree teams are defined as teams with below median degree.</figcaption><p></p>
 </figure>
 </div>
 </div>

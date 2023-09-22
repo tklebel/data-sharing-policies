@@ -177,13 +177,14 @@ are less successful under the incentive regime.
 ::: {.cell}
 
 ```{.r .cell-code}
-p1 + p2 +
+p1 + scale_y_continuous(limits = c(-.5, 1)) +
+  p2 + scale_y_continuous(limits = c(-.5, 1)) +
   plot_layout(guides = "collect") + 
   plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
 
 ::: {.cell-output-display}
-![Path dependency with low clustering network condition. (A) Pearson correlation between current funding status (yes/no) and funding status at t-1. (B) Pearson correlation between current funding status and initial resources.](04-funder-selectivity-individual-data_files/figure-html/corrs-low-clustering-network-1.png){width=2400}
+![Path dependency with low clustering network condition. (A) Pearson correlation between current funding status (yes/no) and funding status at t-1. (B) Pearson correlation between current funding status and initial resources.](04-funder-selectivity-individual-data_files/figure-html/fig-corrs-low-clustering-network-1.png){#fig-corrs-low-clustering-network width=2400}
 :::
 :::
 
@@ -318,13 +319,14 @@ play a stronger role - there is more path dependency.
 ::: {.cell}
 
 ```{.r .cell-code}
-p1 + p2 +
+p1 + scale_y_continuous(limits = c(-.2, 1)) +
+  p2 + scale_y_continuous(limits = c(-.2, 1)) +
   plot_layout(guides = "collect") + 
   plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
 
 ::: {.cell-output-display}
-![Path dependency under 'no network' condition. (A) Pearson correlation between current funding status (yes/no) and funding status at t-1. (B) Pearson correlation between current funding status and initial resources.](04-funder-selectivity-individual-data_files/figure-html/corrs-no-network-1.png){width=2400}
+![Path dependency under 'no network' condition. (A) Pearson correlation between current funding status (yes/no) and funding status at t-1. (B) Pearson correlation between current funding status and initial resources.](04-funder-selectivity-individual-data_files/figure-html/fig-corrs-no-network-1.png){#fig-corrs-no-network width=2400}
 :::
 :::
 
