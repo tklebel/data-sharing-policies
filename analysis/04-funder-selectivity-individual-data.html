@@ -741,11 +741,13 @@ the `.groups` argument.</code></pre>
 <span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(is_low_degree) <span class="sc">%&gt;%</span> </span>
 <span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(n)</span>
 <span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_skeleton</span>(low_degree_hypothesis, mean_frac_low_degree_funded) <span class="sc">+</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">plot_skeleton</span>(low_degree_hypothesis, mean_frac_low_degree_funded) <span class="sc">+</span></span>
 <span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> true_fraction, <span class="at">linetype =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(true_fraction, <span class="fu">seq</span>(.<span class="dv">4</span>, <span class="at">to =</span> .<span class="dv">55</span>, <span class="at">by =</span> .<span class="dv">05</span>)),</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(true_fraction, <span class="fu">seq</span>(.<span class="dv">4</span>, <span class="at">to =</span> .<span class="dv">6</span>, <span class="at">by =</span> .<span class="dv">05</span>)),</span>
 <span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span></span>
-<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Fraction of funded teams with below median degree"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> .<span class="dv">2</span>, <span class="at">y =</span> .<span class="dv">368</span>, <span class="at">label =</span> <span class="st">"Expexted fraction"</span>) <span class="sc">+</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Fraction of funded low-degree teams"</span>)</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-low-degree-frac" class="quarto-figure quarto-figure-center anchored">
@@ -780,11 +782,13 @@ the `.groups` argument.</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_skeleton</span>(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) <span class="sc">+</span></span>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">plot_skeleton</span>(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) <span class="sc">+</span></span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> true_fraction, <span class="at">linetype =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(true_fraction, <span class="fu">seq</span>(.<span class="dv">4</span>, <span class="at">to =</span> .<span class="dv">55</span>, <span class="at">by =</span> .<span class="dv">05</span>)),</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(true_fraction, <span class="fu">seq</span>(.<span class="dv">4</span>, <span class="at">to =</span> .<span class="dv">6</span>, <span class="at">by =</span> .<span class="dv">05</span>)),</span>
 <span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span></span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Fraction of teams sharing data</span><span class="sc">\n</span><span class="st">with below median degree"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> .<span class="dv">2</span>, <span class="at">y =</span> .<span class="dv">368</span>, <span class="at">label =</span> <span class="st">"Expexted fraction"</span>) <span class="sc">+</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Fraction of data sharing low-degree teams"</span>)</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-low-degree-frac-sharing" class="quarto-figure quarto-figure-center anchored">
@@ -798,35 +802,52 @@ the `.groups` argument.</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># THE CODE BELOW DOES NOT WORK CURRENTLY</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="co"># we cannot do a grouped chisquare in spark directly, therefore using spark_apply</span></span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>test_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(df) {</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  res <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(df<span class="sc">$</span>funded, df<span class="sc">$</span>is_low_degree)</span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  broom<span class="sc">::</span><span class="fu">tidy</span>(res)</span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>chisquare_res <span class="ot">&lt;-</span> funding_status <span class="sc">%&gt;%</span> </span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># head(1000) %&gt;%</span></span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(fragmented_centrality, <span class="at">by =</span> <span class="st">"who"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spark_apply</span>(test_fun, </span>
-<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">columns =</span> <span class="fu">c</span>(<span class="st">"maxinitialutility"</span>, <span class="st">"fundedshare"</span>, <span class="st">"run_number"</span>, </span>
-<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"step"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(maxinitialutility, fundedshare) <span class="sc">%&gt;%</span> </span>
-<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_statistic =</span> <span class="fu">mean</span>(statistic),</span>
-<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">mean_p =</span> <span class="fu">mean</span>(p.value)) <span class="sc">%&gt;%</span> </span>
-<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
-<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a><span class="co"># We could also run it like this, but it does not do grouped tests, only executes on everything</span></span>
-<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(maxinitialutility, fundedshare, run_number, step) %&gt;% </span></span>
-<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(is_low_degree = as.character(is_low_degree),</span></span>
-<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a><span class="co">#          funded = as.character(funded)) %&gt;% </span></span>
-<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a><span class="co">#   ml_chisquare_test(features = "is_low_degree", label = "funded")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Funded teams"</span>) <span class="sc">+</span> </span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  p2 <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Sharing teams"</span>) <span class="sc">+</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">"collect"</span>) <span class="sc">+</span> </span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>) <span class="sc">&amp;</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-low-degree-sharing-and-funding" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-sharing-and-funding-1.png" class="img-fluid figure-img" width="2400"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3: Fractions of low degree teams who (A) are funded, or (B) share data. Low degree teams are defined as teams with below median degree.</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># THE CODE BELOW DOES NOT WORK CURRENTLY</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="co"># we cannot do a grouped chisquare in spark directly, therefore using spark_apply</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>test_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(df) {</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  res <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(df<span class="sc">$</span>funded, df<span class="sc">$</span>is_low_degree)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  broom<span class="sc">::</span><span class="fu">tidy</span>(res)</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>chisquare_res <span class="ot">&lt;-</span> funding_status <span class="sc">%&gt;%</span> </span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># head(1000) %&gt;%</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(fragmented_centrality, <span class="at">by =</span> <span class="st">"who"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spark_apply</span>(test_fun, </span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">columns =</span> <span class="fu">c</span>(<span class="st">"maxinitialutility"</span>, <span class="st">"fundedshare"</span>, <span class="st">"run_number"</span>, </span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"step"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(maxinitialutility, fundedshare) <span class="sc">%&gt;%</span> </span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_statistic =</span> <span class="fu">mean</span>(statistic),</span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">mean_p =</span> <span class="fu">mean</span>(p.value)) <span class="sc">%&gt;%</span> </span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a><span class="co"># We could also run it like this, but it does not do grouped tests, only executes on everything</span></span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(maxinitialutility, fundedshare, run_number, step) %&gt;% </span></span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(is_low_degree = as.character(is_low_degree),</span></span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a><span class="co">#          funded = as.character(funded)) %&gt;% </span></span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a><span class="co">#   ml_chisquare_test(features = "is_low_degree", label = "funded")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">spark_disconnect</span>(sc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">spark_disconnect</span>(sc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>

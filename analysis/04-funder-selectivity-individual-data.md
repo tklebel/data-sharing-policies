@@ -619,11 +619,13 @@ true_fraction <- fragmented_centrality_local %>%
   filter(is_low_degree) %>% 
   pull(n)
 
-plot_skeleton(low_degree_hypothesis, mean_frac_low_degree_funded) +
+p1 <- plot_skeleton(low_degree_hypothesis, mean_frac_low_degree_funded) +
   geom_hline(yintercept = true_fraction, linetype = 2) +
-  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .55, by = .05)),
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .6, by = .05)),
                      labels = scales::label_percent()) +
-  labs(y = "Fraction of funded teams with below median degree")
+  annotate("text", x = .2, y = .368, label = "Expexted fraction") +
+  labs(y = "Fraction of funded low-degree teams")
+p1
 ```
 
 ::: {.cell-output-display}
@@ -664,15 +666,31 @@ the `.groups` argument.
 ::: {.cell}
 
 ```{.r .cell-code}
-plot_skeleton(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) +
+p2 <- plot_skeleton(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) +
   geom_hline(yintercept = true_fraction, linetype = 2) +
-  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .55, by = .05)),
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .6, by = .05)),
                      labels = scales::label_percent()) +
-  labs(y = "Fraction of teams sharing data\nwith below median degree")
+  annotate("text", x = .2, y = .368, label = "Expexted fraction") +
+  labs(y = "Fraction of data sharing low-degree teams")
+p2
 ```
 
 ::: {.cell-output-display}
 ![Representation of low-degree teams among teams sharing data. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.](04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-frac-sharing-1.png){#fig-low-degree-frac-sharing width=1500}
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+p1 + labs(y = "Funded teams") + 
+  p2 + labs(y = "Sharing teams") +
+  plot_layout(guides = "collect") + 
+  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+```
+
+::: {.cell-output-display}
+![Fractions of low degree teams who (A) are funded, or (B) share data. Low degree teams are defined as teams with below median degree.](04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-sharing-and-funding-1.png){#fig-low-degree-sharing-and-funding width=2400}
 :::
 :::
 
