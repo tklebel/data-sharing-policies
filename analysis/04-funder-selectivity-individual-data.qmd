@@ -447,8 +447,8 @@ p2
 #| label: fig-low-degree-sharing-and-funding
 #| fig-cap: "Fractions of low degree teams who (A) are funded, or (B) share data.
 #| Low degree teams are defined as teams with below median degree."
-p1 + labs(y = "Funded teams") + 
-  p2 + labs(y = "Sharing teams") +
+p1 + labs(y = "Low-degree teams with funding") + 
+  p2 + labs(y = "Low-degree teams sharing data") +
   plot_layout(guides = "collect") + 
   plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
