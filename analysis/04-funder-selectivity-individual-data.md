@@ -685,8 +685,8 @@ p2
 ::: {.cell}
 
 ```{.r .cell-code}
-p1 + labs(y = "Funded teams") + 
-  p2 + labs(y = "Sharing teams") +
+p1 + labs(y = "Low-degree teams with funding") + 
+  p2 + labs(y = "Low-degree teams sharing data") +
   plot_layout(guides = "collect") + 
   plot_annotation(tag_levels = "A") & theme(legend.position = "top")
 ```
