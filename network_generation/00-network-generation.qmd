@@ -330,9 +330,9 @@ terms of their degree than in the case of network (B).
 #| label: fig-network-overview
 #| fig-cap: "Overview of network topologies. (A) Random network. (B) Network with low clustering. (C) Network with high clustering. Colours represent groups optained via the Louvain algorithm. The size of nodes refers to their total degree."
 
-p_random <- plot_graph(random_network)
-p_fragemented <- plot_graph(final_fragmented)
-p_clustered <- plot_graph(final_clustered)
+p_random <- plot_graph(random_network, groups = FALSE)
+p_fragemented <- plot_graph(final_fragmented, groups = FALSE)
+p_clustered <- plot_graph(final_clustered, groups = FALSE)
 
 p_random +
   p_fragemented +
