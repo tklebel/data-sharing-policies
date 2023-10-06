@@ -43,7 +43,7 @@ to setup
   ask turtles [
     set shape "circle"
     set color 65
-    set size .5
+    set size .8
     ; create resource distribution
     set resources (ifelse-value
       resources-dist = "uniform" [ random-float 1 ]
@@ -82,7 +82,7 @@ to go
   award-grants
   if data-sharing? [
     update-utility
-    update-norms
+    if not (network = "none") [ update-norms ]
   ]
 end
 
@@ -91,6 +91,7 @@ to update-indices
   ; update color to represent effort, and set resources for next round
   ask turtles [
     set color 60 + 10 * (1 - inv_effort) ; dark colour represent high effort
+    set shape ifelse-value funded? ["star"] ["circle"]
     set resources-last-round resources
     set funded-previous-round? funded?
     set funded? false
@@ -186,11 +187,37 @@ to update-utility
 end
 
 to update-norms
-  ask turtles [
-    set descriptive-norm ifelse-value any? link-neighbors
-    [ count link-neighbors with [ shared-data? ] / count link-neighbors - 0.5] [ -0.5 ]
-    ; rescale norm. this is to ensure it is on the same scale as the utility
-    set descriptive-norm descriptive-norm * 10
+  if norm-type = "majority" [
+    ask turtles [
+      set descriptive-norm count link-neighbors with [ shared-data? ] / count link-neighbors - 0.5
+      ; rescale norm. this is to ensure it is on the same scale as the utility
+      set descriptive-norm descriptive-norm * 10
+    ]
+  ]
+
+  if norm-type = "copy-best" [
+    ask turtles [
+      let neighbours link-neighbors
+      set neighbours sort-on [(- resources)] neighbours ; need to invert resources, so that higher values are on top of the list
+      let best-neighbour first neighbours
+
+      if debug-norm? [
+        type "i am team " print who
+        type "my effort is " print effort
+        type "effort of my best neighbour is " print [ effort ] of best-neighbour
+        type "my descriptive norm is " print descriptive-norm
+      ]
+
+      ifelse ([ effort ] of best-neighbour > effort)
+        [
+          set descriptive-norm descriptive-norm + utility-change
+          if descriptive-norm > 5 [ set descriptive-norm 5 ]
+      ]
+      [
+        set descriptive-norm descriptive-norm - utility-change
+        if descriptive-norm < -5 [ set descriptive-norm -5 ]
+      ]
+    ]
   ]
 end
 
@@ -347,10 +374,10 @@ PENS
 "default" 0.05 1 -16777216 false "" "histogram [proposal-strength] of turtles"
 
 PLOT
-569
-199
-769
-349
+570
+197
+770
+347
 resource distribution
 NIL
 NIL
@@ -424,10 +451,10 @@ NIL
 HORIZONTAL
 
 PLOT
-985
-197
-1185
-347
+986
+195
+1186
+345
 Effort (inverse logit)
 NIL
 NIL
@@ -442,9 +469,9 @@ PENS
 "default" 0.05 1 -16777216 true "" "histogram [inv_effort] of turtles"
 
 PLOT
-1064
+1117
 10
-1340
+1436
 198
 % sharing data
 NIL
@@ -454,16 +481,18 @@ NIL
 0.0
 100.0
 true
-false
+true
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot count turtles with [ shared-data? ] / count turtles * 100"
+"funded" 1.0 0 -5298144 true "" "plot data-sharing-within turtles with [funded?]"
+"not funded" 1.0 0 -14070903 true "" "plot data-sharing-within turtles with [not funded?]"
 
 PLOT
-780
-200
-980
-350
+781
+198
+981
+348
 Gini of resources
 NIL
 NIL
@@ -495,7 +524,7 @@ HORIZONTAL
 PLOT
 807
 11
-1061
+1117
 195
 Mean effort
 NIL
@@ -509,6 +538,8 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [effort] of turtles"
+"funded" 1.0 0 -5298144 true "" "plot mean [effort] of turtles with [funded?]"
+"not funded" 1.0 0 -14070903 true "" "plot mean [effort] of turtles with [not funded?]"
 
 SLIDER
 40
@@ -519,7 +550,7 @@ max-initial-utility
 max-initial-utility
 -4
 4
-4.0
+-4.0
 .1
 1
 NIL
@@ -543,10 +574,10 @@ NIL
 1
 
 PLOT
-1188
-199
-1388
-349
+1189
+197
+1389
+347
 sum of resources
 NIL
 NIL
@@ -583,7 +614,7 @@ CHOOSER
 network
 network
 "none" "random" "clustered" "fragmented"
-0
+2
 
 SLIDER
 236
@@ -616,10 +647,10 @@ NIL
 HORIZONTAL
 
 PLOT
-577
-354
-833
-534
+578
+352
+834
+532
 Mean utility
 NIL
 NIL
@@ -649,10 +680,10 @@ NIL
 HORIZONTAL
 
 PLOT
-831
-356
-1101
-536
+832
+354
+1102
+534
 descriptive norms
 NIL
 NIL
@@ -678,10 +709,10 @@ max [effort] of turtles
 11
 
 PLOT
-577
-536
-839
-688
+578
+534
+840
+686
 Individual-utility
 NIL
 NIL
@@ -719,17 +750,17 @@ funded-share
 funded-share
 0
 1
-0.1
+0.15
 0.05
 1
 NIL
 HORIZONTAL
 
 PLOT
-840
-535
-1098
-686
+841
+533
+1099
+684
 SD of utility
 NIL
 NIL
@@ -762,17 +793,17 @@ third-party-funding-ratio
 third-party-funding-ratio
 0
 5
-2.0
+1.9
 .1
 1
 NIL
 HORIZONTAL
 
 PLOT
-1102
-355
-1406
-533
+1103
+353
+1407
+531
 Total-funding
 NIL
 NIL
@@ -790,12 +821,33 @@ PENS
 "q4" 1.0 0 -7858858 true "" "plot mean-funding-within turtles with [initial-resources-quantile = \"q4\"]"
 
 SWITCH
-42
-451
-145
-484
+45
+433
+148
+466
 debug?
 debug?
+1
+1
+-1000
+
+CHOOSER
+38
+522
+176
+567
+norm-type
+norm-type
+"majority" "copy-best"
+1
+
+SWITCH
+38
+479
+162
+512
+debug-norm?
+debug-norm?
 1
 1
 -1000
@@ -1142,7 +1194,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.2
+NetLogo 6.3.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
