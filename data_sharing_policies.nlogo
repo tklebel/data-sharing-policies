@@ -187,7 +187,7 @@ to update-utility
 end
 
 to update-norms
-  if norm-type = "majority" [
+  if learning-mechanism = "majority" [
     ask turtles [
       set descriptive-norm count link-neighbors with [ shared-data? ] / count link-neighbors - 0.5
       ; rescale norm. this is to ensure it is on the same scale as the utility
@@ -195,7 +195,7 @@ to update-norms
     ]
   ]
 
-  if norm-type = "copy-best" [
+  if learning-mechanism = "copy-best" [
     ask turtles [
       let neighbours link-neighbors
       set neighbours sort-on [(- resources)] neighbours ; need to invert resources, so that higher values are on top of the list
@@ -836,8 +836,8 @@ CHOOSER
 522
 176
 567
-norm-type
-norm-type
+learning-mechanism
+learning-mechanism
 "majority" "copy-best"
 1
 
