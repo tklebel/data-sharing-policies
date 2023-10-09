@@ -168,7 +168,7 @@ plot_graph <- function(graph, layout = "stress", groups = TRUE,
       mutate(degree = centrality_degree(),
              page_rank = centrality_pagerank()) %>% 
       ggraph(layout) +
-      geom_edge_link() +
+      geom_edge_link(colour = "grey50") +
       geom_node_point(aes(size = .data[[size]])) +
       theme_graph(base_family = "Arial") +
       theme(legend.position = "none")
