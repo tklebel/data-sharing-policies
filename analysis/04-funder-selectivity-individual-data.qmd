@@ -60,8 +60,83 @@ no_network <- spark_read_parquet(
 
 ```
 
+# Evolution of effort among funded an non-funded teams
+
+
+```{r}
+fragmented_intervention <- fragmented %>% 
+  filter(sharingincentive == .4, maxinitialutility == -4)
+
+fragmented_effort <- fragmented_intervention %>% 
+  group_by(step, fundedshare, funded) %>% 
+  summarise(mean_effort = mean(effort)) %>% 
+  collect()
+```
+
+```{r}
+p1 <- fragmented_effort %>% 
+  ggplot(aes(step, mean_effort, colour = funded)) +
+  geom_line() +
+  facet_wrap(vars(fundedshare), nrow = 2) +
+  colorspace::scale_colour_discrete_qualitative() +
+  theme(legend.position = "top")
+p1
+```
+
+```{r}
+p1 +
+  coord_cartesian(xlim = c(0, 1000))
+```
+
+
+## No network
+```{r}
+no_network_intervention <- no_network %>% 
+  filter(sharingincentive == .4, maxinitialutility == -4)
+
+no_network_effort <- no_network_intervention %>% 
+  group_by(step, fundedshare, funded) %>% 
+  summarise(mean_effort = mean(effort)) %>% 
+  collect()
+```
+
+```{r}
+p1 <- no_network_effort %>% 
+  ggplot(aes(step, mean_effort, colour = funded)) +
+  geom_line() +
+  facet_wrap(vars(fundedshare), nrow = 2) +
+  colorspace::scale_colour_discrete_qualitative() +
+  theme(legend.position = "top")
+p1
+```
+
+```{r}
+p1 +
+  coord_cartesian(xlim = c(0, 1000))
+```
+
+It seems that at first, funded teams keep a low effort, and unfunded teams 
+increase their effort. This also explains the slower uptake. It is thus not 
+actually the selective pressure (teams adapting towards selective funder), but
+rather that the general tendency of increasing effort if unsuccessful or equal
+affects a larger portion of the sample when only few are funded.
+
+But hold on: the slope for the funded teams is also steeper for the more 
+selective versions. Maybe the selective pressure still does work the way we 
+initially described it. Need to check below whether there is this switch in 
+which teams receive funding, and whether this changes over the first 500 steps.
+
+# Effort distributions
+
 # Are always the same teams receiving funding?
+Need to ask a new question here: is there a turnover at the start, at around 
+steps 200, in particular for the no network scenario? In the sense, that those
+who previously had funding lose it?
+
+
 ## Fragmented (low clustering) network
+We look first at the initial stages of the simulation.
+
 Here, we only look at steps equal or above 2000 (steps 2000-3000), since we are
 interested in the long-run dynamics.
 
@@ -248,6 +323,9 @@ funding_vs_sharing <- funding_status %>%
   summarise(cor_funding_sharing = cor(as.numeric(funded), as.numeric(shared_data)),
             cor_sharing_lag = cor(as.numeric(shared_data), as.numeric(shared_data_lag))) %>% 
   collect()
+
+funding_vs_sharing <- funding_vs_sharing %>% 
+  mutate(network = "Low clustering network")
 ```
 
 ```{r, fig.width=5, fig.height=4}
@@ -290,6 +368,9 @@ funding_vs_sharing_no_network <- funding_status_no_network %>%
   summarise(cor_funding_sharing = cor(as.numeric(funded), as.numeric(shared_data)),
             cor_sharing_lag = cor(as.numeric(shared_data), as.numeric(shared_data_lag))) %>% 
   collect()
+
+funding_vs_sharing_no_network <- funding_vs_sharing_no_network %>% 
+  mutate(network = "No network")
 ```
 
 ```{r, fig.width=5, fig.height=4}
