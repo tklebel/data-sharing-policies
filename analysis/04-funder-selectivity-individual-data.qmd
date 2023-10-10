@@ -133,270 +133,200 @@ Need to ask a new question here: is there a turnover at the start, at around
 steps 200, in particular for the no network scenario? In the sense, that those
 who previously had funding lose it?
 
-
-## Fragmented (low clustering) network
-We look first at the initial stages of the simulation.
-
-Here, we only look at steps equal or above 2000 (steps 2000-3000), since we are
-interested in the long-run dynamics.
-
 ```{r}
-# we did not store whether a given team was funded, and it is quite 
-# time-consuming to re-run everything. We can compute this (with quite some
-# effort) by checking if their total funding increased or not.
-
-# check funding progress
-funding_status <- fragmented %>% 
-  filter(sharingincentive == .4,
-         # we can restrict this to steps above 2000, since we are interested in
-         # the equilibrium state here
-         step >= 2000)
-```
-
-```{r, eval=FALSE}
-# lagged model for funding
-
-regression_results <- funding_status %>% 
-  # it also fails currently, no idea why
-  ml_logistic_regression(funded ~ initial_resources + funded_lag) 
-```
-
-```{r, eval=FALSE}
-print(regression_results)
-```
-
-There seems to be a massive effect of the lagged funding status, if we take a
-global look at all funding incentive settings.
-
-```{r}
-correlations <- funding_status %>% 
-  group_by(maxinitialutility, fundedshare) %>% 
-  summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
-            cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
-  collect()
-```
-
-```{r}
-correlations %>% 
-  arrange(maxinitialutility, fundedshare) %>% 
-  knitr::kable()
-```
-
-```{r}
-plot_skeleton <- function(df, var) {
+plot_skeleton <- function(df, variant = "one") {
   df %>% 
-    mutate(maxinitialutility = recode(maxinitialutility, `4` = "Uniform initial sharing effort",
-                                      `-4` = "Low initial sharing effort")) %>% 
-    ggplot(aes(fundedshare, {{ var }}, 
-               colour = as.factor(maxinitialutility))) +
+    pivot_longer(starts_with("mean")) %>% 
+    mutate(fundedshare = scales::percent(fundedshare, accuracy = 1),
+           name = switch(variant,
+                         one = case_match(
+                           name,
+                           "mean_cor_funding" ~ "cor(funding, lag(funding))",
+                           "mean_cor_init_resources" ~ "cor(funding, initial resources)"
+                         ),
+                         two = case_match(
+                           name,
+                           "mean_cor_funding_sharing" ~ "cor(funding, sharing)",
+                           "mean_cor_sharing_lag" ~ "cor(sharing, lag(sharing))"
+                         )
+           )) %>% 
+    ggplot(aes(step, value, colour = fundedshare)) +
     geom_line() +
-    geom_point() +
+    facet_wrap(vars(name), nrow = 2) +
+    theme(legend.position = "top") +
     colorspace::scale_colour_discrete_qualitative() +
-    scale_x_continuous(labels = scales::label_percent()) +
-    labs(colour = NULL, x = "Share of teams receiving funding") +
-    theme(legend.position = "top")
+    labs(colour = "% of teams receiving funding", x = NULL,
+         y = "Correlation (Pearson)")
 }
 ```
 
-```{r, fig.width=5, fig.height=4}
-p1 <- plot_skeleton(correlations, cor_funding) +
-  labs(y = "Corr funding & lagged funding")
-p1
-```
-
-The correlation between current and previous funding status is very high - there
-seems to be almost complete path dependency, once the simulation has entered the
-equilibrium state.
-
-```{r, fig.width=5, fig.height=4}
-p2 <- plot_skeleton(correlations, cor_init_resources) +
-  labs(y = "Corr funding & initial resources")
-p2
-```
-
-Interestingly, the correlation with initial resources is much lower. For uniform
-initial utility, it is relatively low across all funding selectivity settings.
-
-For low initial utility, this is not true, and there is actually a negative
-correlation. This lends credence to our initial hypothesis: teams with initially
-higher resources (presumably, to be confirmed below) share less data, and thus
-are less successful under the incentive regime.
-
-```{r, fig.width=8, fig.height=4}
-#| label: fig-corrs-low-clustering-network
-#| fig-cap: "Path dependency with low clustering network condition. (A) Pearson correlation
-#| between current funding status (yes/no) and funding status at t-1. (B) Pearson 
-#| correlation between current funding status and initial resources."
-p1 + scale_y_continuous(limits = c(-.5, 1)) +
-  p2 + scale_y_continuous(limits = c(-.5, 1)) +
-  plot_layout(guides = "collect") + 
-  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
-```
 
 
-## No network
-
+## Fragmented (low clustering) network
 ```{r}
-funding_status_no_network <- no_network %>% 
-  filter(sharingincentive == .4,
-         # we can restrict this to steps above 2000, since we are interested in
-         # the equilibrium state here
-         step >= 2000)
-```
-
-```{r, eval=FALSE}
-regression_results <- funding_status_no_network %>% 
-  # it also fails currently, no idea why
-  ml_logistic_regression(funded ~ initial_resources + funded_lag) 
-```
-
-```{r, eval=FALSE}
-print(regression_results)
-```
-
-With the baseline without a network, there is equally a strong influence of path
-dependency. Initial resources have a slightly stronger role than in the case of
-the fragmented network.
-
-```{r}
-correlations_no_network <- funding_status_no_network %>% 
-  group_by(maxinitialutility, fundedshare) %>% 
+correlations <- fragmented_intervention %>% 
+  group_by(step, fundedshare, run_number) %>% 
   summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
             cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
+  group_by(step, fundedshare) %>% 
+  summarise(mean_cor_funding = mean(cor_funding),
+            mean_cor_init_resources = mean(cor_init_resources)) %>% 
   collect()
 ```
 
+
+```{r, fig.height=6, fig.width=6}
+p <- correlations %>% 
+  plot_skeleton()
+```
+
+```{r, fig.width=5, fig.height=5}
+p2 <- p +
+  coord_cartesian(xlim = c(0, 500))
+```
+
+
+```{r, fig.width=7, fig.height=5}
+#| label: fig-funding-cor-over-time
+#| fig-cap: "Means of pearson correlation between funding status and initial resources (top), and
+#| between current funding status (yes/no) and funding status at t-1. (bottom). (A) shows
+#| the whole simulation. (B) Shows the first 500 steps in higher resolution.
+p + 
+  p2 + labs(y = NULL) +
+  plot_layout(widths = c(5, 4), guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
+```
+
+This clearly shows: there is some substantial change of events here. Correlation
+with initial resources is stable at first, but plummets just before step 200.
+This is also when effort for funded teams goes up substantially. Therefore, we
+can conclude: teams that do not share data remain successful at first. But once
+the others start to share data, they take over, and correlation with initial 
+resources goes either to 0 or even to negative values.
+The turnover is not complete, of course, otherwise the correlation would be -1.
+
+## No network
 ```{r}
-correlations_no_network %>% 
-  arrange(maxinitialutility, fundedshare) %>% 
-  knitr::kable()
+correlations_no_network <- no_network_intervention %>% 
+  group_by(step, fundedshare, run_number) %>% 
+  summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
+            cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
+  group_by(step, fundedshare) %>% 
+  summarise(mean_cor_funding = mean(cor_funding),
+            mean_cor_init_resources = mean(cor_init_resources)) %>% 
+  collect()
 ```
 
 
-```{r, fig.width=5, fig.height=4}
-p1 <- plot_skeleton(correlations_no_network, cor_funding) +
-  labs(y = "Corr funding & lagged funding")
-p1
+```{r}
+p <- correlations_no_network %>% 
+  plot_skeleton()
 ```
 
-Correlations for funding lag are similarly very high. However, behaviour is
-different between max-initial-utility, comparing to the case of the fragmented
-network. Here, correlations are higher for maxinitalutility = 4, but lower
-otherwise.
 
-```{r, fig.width=5, fig.height=4}
-p2 <- plot_skeleton(correlations_no_network, cor_init_resources) +
-  labs(y = "Corr funding & initial resources")
-p2
+```{r, fig.width=5, fig.height=5}
+p2 <- p +
+  coord_cartesian(xlim = c(0, 1000))
 ```
 
-These correlations are stronger, i.e., more positive, as indicated by the
-regression: without networks, initial resources play a stronger role in who gets
-funded, especially if funding is very selective.
 
-To our initial question for the difference between utility settings: path
-dependency is much lower for low initial utility. There is even a slight
-negative correlation between initial resources and funding: initially
-lower-resourced teams are funded more than those with higher initial resources,
-simply because they start sharing data. If utility is uniform, initial resources
-play a stronger role - there is more path dependency.
-
-```{r, fig.width=8, fig.height=4}
-#| label: fig-corrs-no-network
-#| fig-cap: "Path dependency under 'no network' condition. (A) Pearson correlation
-#| between current funding status (yes/no) and funding status at t-1. (B) Pearson 
-#| correlation between current funding status and initial resources."
-p1 + scale_y_continuous(limits = c(-.2, 1)) +
-  p2 + scale_y_continuous(limits = c(-.2, 1)) +
-  plot_layout(guides = "collect") + 
-  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+```{r, fig.width=7, fig.height=5}
+#| label: fig-funding-cor-over-time
+#| fig-cap: "Means of pearson correlation between funding status and initial resources (top), and
+#| between current funding status (yes/no) and funding status at t-1. (bottom). (A) shows
+#| the whole simulation. (B) Shows the first 1000 steps in higher resolution.
+p + 
+  p2 + labs(y = NULL) +
+  plot_layout(widths = c(5, 4), guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
 ```
-
 
 # Are those that are being funded also those that share data?
 
 ## Low clustering
 
 ```{r}
-funding_vs_sharing <- funding_status %>% 
-  group_by(maxinitialutility, fundedshare) %>% 
+funding_vs_sharing <- fragmented_intervention %>% 
+  group_by(step, fundedshare, run_number) %>% 
   summarise(cor_funding_sharing = cor(as.numeric(funded), as.numeric(shared_data)),
             cor_sharing_lag = cor(as.numeric(shared_data), as.numeric(shared_data_lag))) %>% 
+  group_by(step, fundedshare) %>% 
+  summarise(mean_cor_funding_sharing = mean(cor_funding_sharing),
+            mean_cor_sharing_lag = mean(cor_sharing_lag)) %>% 
   collect()
-
-funding_vs_sharing <- funding_vs_sharing %>% 
-  mutate(network = "Low clustering network")
 ```
-
-```{r, fig.width=5, fig.height=4}
-#| label: corr-funding-sharing-low-clustering
-#| fig-cap: "Correlation between funding status (yes/no) and data sharing (yes/no)"
-plot_skeleton(funding_vs_sharing, cor_funding_sharing) +
-  labs(y = "Corr funding & data sharing")
-```
-
-Generally speaking, those that are being funded are also those that share data,
-in this instance. The correlation is stronger for less selective regimes. What
-does this indicate? Maybe the broader reach of the funding agency, if many teams
-are being funded? But wouldn't it be the case that if funding is more selective,
-only those that are funded also share data, because it is too costly otherwise?
-But maybe it is the opposite: if funding is very selective, not many teams can
-afford to share data, and thus not many do. If funding is less selective, more
-teams share data, and thus, generally, those being funded are also more often
-those which share data. Does this make sense?
-
-
-
-```{r, fig.width=5, fig.height=4}
-#| label: corr-low-cluster-sharing-sharing-lag
-#| fig-cap: "Correlation between current sharing status (yes/no) and lagged (t-1)
-#| sharing status for the case of low clustering."
-plot_skeleton(funding_vs_sharing, cor_sharing_lag) +
-  labs(y = "Corr data sharing & data sharing lag")
-```
-
-The correlation between sharing, and the shared lag (whether teams keep sharing
-data) is also quite high, and the graph looks very similar to the one right
-above. This implies that there is path dependency around sharing, where teams
-share data and receive funding, while others do neither.
-
-## No network
 
 ```{r}
-funding_vs_sharing_no_network <- funding_status_no_network %>% 
-  group_by(maxinitialutility, fundedshare) %>% 
+p1 <- funding_vs_sharing %>% 
+  plot_skeleton(variant = "two")
+```
+
+```{r}
+p2 <- p1 +
+  coord_cartesian(xlim = c(0, 1000))
+p2
+```
+```{r, fig.width=8, fig.height=5}
+#| label: fig-funding-cor-over-time
+#| fig-cap: "Means of pearson correlation between funding status and data sharing (top), and
+#| between current sharing and sharing at t-1. (bottom). (A) shows
+#| the whole simulation. (B) Shows the first 1000 steps in higher resolution.
+p1 + 
+  p2 + labs(y = NULL) +
+  plot_layout(widths = c(5, 5), guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
+```
+
+WHY ARE THERE SO MANY MISSING VALUES AT THE START?
+
+## No network
+```{r}
+funding_vs_sharing_no_network <- no_network_intervention %>% 
+  group_by(step, fundedshare, run_number) %>% 
   summarise(cor_funding_sharing = cor(as.numeric(funded), as.numeric(shared_data)),
             cor_sharing_lag = cor(as.numeric(shared_data), as.numeric(shared_data_lag))) %>% 
+  group_by(step, fundedshare) %>% 
+  summarise(mean_cor_funding_sharing = mean(cor_funding_sharing),
+            mean_cor_sharing_lag = mean(cor_sharing_lag)) %>% 
   collect()
-
-funding_vs_sharing_no_network <- funding_vs_sharing_no_network %>% 
-  mutate(network = "No network")
 ```
 
-```{r, fig.width=5, fig.height=4}
-#| label: corr-funding-sharing-no-network
-#| fig-cap: "Correlation between funding status (yes/no) and data sharing (yes/no)"
-plot_skeleton(funding_vs_sharing_no_network, cor_funding_sharing) +
-  labs(y = "Corr funding & data sharing")
+```{r}
+p1 <- funding_vs_sharing_no_network %>% 
+  plot_skeleton(variant = "two")
 ```
 
-
-
-```{r, fig.width=5, fig.height=4}
-#| label: corr-no-network-sharing-sharing-lag
-#| fig-cap: "Correlation between current sharing status (yes/no) and lagged (t-1)
-#| sharing status for the case of no network."
-plot_skeleton(funding_vs_sharing_no_network, cor_sharing_lag) +
-  labs(y = "Corr data sharing & data sharing lag")
+```{r}
+p2 <- p1 +
+  coord_cartesian(xlim = c(0, 1000))
 ```
 
-Again, we see that the correlation between funding and sharing seems to be
-largely driven by previous sharing - the correlations between sharing and
-sharing lag are essentially the same, just slightly lower.
+```{r, fig.width=8, fig.height=5}
+#| label: fig-funding-cor-over-time
+#| fig-cap: "Means of pearson correlation between funding status and data sharing (top), and
+#| between current sharing and sharing at t-1. (bottom). (A) shows
+#| the whole simulation. (B) Shows the first 1000 steps in higher resolution.
+p1 + 
+  p2 + labs(y = NULL) +
+  plot_layout(widths = c(5, 5), guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
+```
 
-We can thus conclude, that generally speaking, those who share data are also
-those who receive funding. However, in the case of no networks, this correlation
-is weaker, and especially weaker in case of low initial utility.
+This shows quite clearly: at first those who are sharing are not funded (negative
+correlation). Around step 200 this turns around, and correlations rise
+subsequently.
+
+Correlation between sharing and lagged sharing are generally low. There is much
+turnover in which teams are sharing, although funding path dependency is quite
+high. This is thus a substantially different behaviour than in the case of the 
+network.
+
+The analysis of the effort distributions should give us another glimpse at what
+is going on here, and thus be instructive.
 
 # Are those that share data / receive funding more or less central in the network?
 
