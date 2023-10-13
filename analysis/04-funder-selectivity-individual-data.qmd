@@ -394,16 +394,31 @@ which are low-degree is.
 
 ```{r}
 # compute the share of teams being funded that are low-degree
-low_degree_hypothesis <- funding_status %>% 
+low_degree_hypothesis <- fragmented_intervention %>% 
   left_join(fragmented_centrality, by = "who") %>% 
   group_by(maxinitialutility, fundedshare, run_number, step, funded) %>% 
   count(is_low_degree) %>% 
   mutate(fraction = n / sum(n)) %>% 
   filter(funded, is_low_degree) %>% 
-  group_by(maxinitialutility, fundedshare) %>% 
+  group_by(maxinitialutility, fundedshare, step) %>% 
   summarise(mean_frac_low_degree_funded = mean(fraction)) %>% 
   collect()
 ```
+
+
+```{r}
+skeleton_two <- function(df, var) {
+  df %>% 
+    mutate(fundedshare = scales::percent(fundedshare, accuracy = 1)) %>% 
+    ggplot(aes(step, {{ var }}, colour = fundedshare)) +
+    geom_line() +
+    geom_hline(yintercept = true_fraction, linetype = 2) +
+    colorspace::scale_colour_discrete_qualitative() +
+    theme(legend.position = "top") +
+    labs(colour = "% of teams receiving funding", x = NULL)
+}
+```
+
 
 ```{r, fig.width=5, fig.height=4}
 #| label: fig-low-degree-frac
@@ -415,11 +430,10 @@ true_fraction <- fragmented_centrality_local %>%
   filter(is_low_degree) %>% 
   pull(n)
 
-p1 <- plot_skeleton(low_degree_hypothesis, mean_frac_low_degree_funded) +
-  geom_hline(yintercept = true_fraction, linetype = 2) +
+p1 <- skeleton_two(low_degree_hypothesis, mean_frac_low_degree_funded) +
   scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .6, by = .05)),
                      labels = scales::label_percent()) +
-  annotate("text", x = .2, y = .368, label = "Expexted fraction") +
+  annotate("text", x = 2200, y = .35, label = "Expexted fraction") +
   labs(y = "Fraction of funded low-degree teams")
 p1
 ```
@@ -431,13 +445,13 @@ Chisquare test.
 *The same with sharing*
 ```{r}
 # compute the share of teams sharing data that are low-degree
-low_degree_hypothesis_sharing <- funding_status %>% 
+low_degree_hypothesis_sharing <- fragmented_intervention %>% 
   left_join(fragmented_centrality, by = "who") %>% 
   group_by(maxinitialutility, fundedshare, run_number, step, shared_data) %>% 
   count(is_low_degree) %>% 
   mutate(fraction = n / sum(n)) %>% 
   filter(shared_data, is_low_degree) %>% 
-  group_by(maxinitialutility, fundedshare) %>% 
+  group_by(maxinitialutility, fundedshare, step) %>% 
   summarise(mean_frac_low_degree_sharing = mean(fraction)) %>% 
   collect()
 ```
@@ -445,12 +459,11 @@ low_degree_hypothesis_sharing <- funding_status %>%
 ```{r, fig.width=5, fig.height=4}
 #| label: fig-low-degree-frac-sharing
 #| fig-cap: "Representation of low-degree teams among teams sharing data. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams."
-p2 <- plot_skeleton(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) +
-  geom_hline(yintercept = true_fraction, linetype = 2) +
-  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .6, by = .05)),
+p2 <- skeleton_two(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) +
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = 1, by = .1)),
                      labels = scales::label_percent()) +
-  annotate("text", x = .2, y = .368, label = "Expexted fraction") +
-  labs(y = "Fraction of data sharing low-degree teams")
+  annotate("text", x = 2200, y = .34, label = "Expexted fraction") +
+  labs(y = "Fraction of data sharing low-degree teams") 
 p2
 ```
 
