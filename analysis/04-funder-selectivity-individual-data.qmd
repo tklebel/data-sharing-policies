@@ -127,6 +127,55 @@ initially described it. Need to check below whether there is this switch in
 which teams receive funding, and whether this changes over the first 500 steps.
 
 # Effort distributions
+We want to investigate the distribution of effort over time. Need to bin steps
+and effort.
+
+```{r}
+effort_plot <- function(df, palette = "viridis") {
+  df %>% 
+    mutate(effort = (as.integer(effort_group) - 20) / 2) %>% 
+    ggplot(aes(as.integer(step_group) * 100, effort, fill = n)) +
+    geom_tile() +
+    scale_fill_viridis_c(option = palette) +
+    facet_wrap(vars(fundedshare)) +
+    theme(legend.position = "top")
+}
+```
+
+
+```{r}
+effort_breaks <- seq(-10, 10, .5)
+step_breaks <- seq(0, 3000, 100)
+
+binned_effort_no_network <- no_network_intervention %>% 
+  mutate(effort_group = cut(effort, breaks = effort_breaks, labels = FALSE,
+                            include.lowest = TRUE),
+         step_group = cut(step, breaks = step_breaks, labels = FALSE,
+                          include.lowest = TRUE)) %>% 
+  group_by(fundedshare, step_group) %>% 
+  count(effort_group) %>% 
+  collect()
+```
+
+```{r, fig.width=10, fig.height=7}
+effort_plot(binned_effort_no_network, "turbo")
+```
+
+```{r}
+binned_effort_low_clustering <- fragmented_intervention %>% 
+  mutate(effort_group = cut(effort, breaks = effort_breaks, labels = FALSE,
+                            include.lowest = TRUE),
+         step_group = cut(step, breaks = step_breaks, labels = FALSE,
+                          include.lowest = TRUE)) %>% 
+  group_by(fundedshare, step_group) %>% 
+  count(effort_group) %>% 
+  collect()
+```
+
+```{r, fig.width=10, fig.height=7}
+effort_plot(binned_effort_low_clustering, "turbo")
+```
+
 
 # Are always the same teams receiving funding?
 Need to ask a new question here: is there a turnover at the start, at around 
