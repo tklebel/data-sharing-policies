@@ -236,10 +236,10 @@ p2 <- p +
 
 
 ```{r, fig.width=7, fig.height=5}
-#| label: fig-funding-cor-over-time
+#| label: fig-funding-cor-over-time-low-clustering
 #| fig-cap: "Means of pearson correlation between funding status and initial resources (top), and
 #| between current funding status (yes/no) and funding status at t-1. (bottom). (A) shows
-#| the whole simulation. (B) Shows the first 500 steps in higher resolution.
+#| the whole simulation. (B) Shows the first 500 steps in higher resolution."
 p + 
   p2 + labs(y = NULL) +
   plot_layout(widths = c(5, 4), guides = "collect") +
@@ -281,10 +281,10 @@ p2 <- p +
 
 
 ```{r, fig.width=7, fig.height=5}
-#| label: fig-funding-cor-over-time
+#| label: fig-funding-cor-over-time-no-network
 #| fig-cap: "Means of pearson correlation between funding status and initial resources (top), and
 #| between current funding status (yes/no) and funding status at t-1. (bottom). (A) shows
-#| the whole simulation. (B) Shows the first 1000 steps in higher resolution.
+#| the whole simulation. (B) Shows the first 1000 steps in higher resolution."
 p + 
   p2 + labs(y = NULL) +
   plot_layout(widths = c(5, 4), guides = "collect") +
@@ -318,10 +318,10 @@ p2 <- p1 +
 p2
 ```
 ```{r, fig.width=8, fig.height=5}
-#| label: fig-funding-cor-over-time
+#| label: fig-funding-sharing-cor-over-time-low-clustering
 #| fig-cap: "Means of pearson correlation between funding status and data sharing (top), and
 #| between current sharing and sharing at t-1. (bottom). (A) shows
-#| the whole simulation. (B) Shows the first 1000 steps in higher resolution.
+#| the whole simulation. (B) Shows the first 1000 steps in higher resolution."
 p1 + 
   p2 + labs(y = NULL) +
   plot_layout(widths = c(5, 5), guides = "collect") +
@@ -354,10 +354,10 @@ p2 <- p1 +
 ```
 
 ```{r, fig.width=8, fig.height=5}
-#| label: fig-funding-cor-over-time
+#| label: fig-funding-sharing-cor-over-time-no-network
 #| fig-cap: "Means of pearson correlation between funding status and data sharing (top), and
 #| between current sharing and sharing at t-1. (bottom). (A) shows
-#| the whole simulation. (B) Shows the first 1000 steps in higher resolution.
+#| the whole simulation. (B) Shows the first 1000 steps in higher resolution."
 p1 + 
   p2 + labs(y = NULL) +
   plot_layout(widths = c(5, 5), guides = "collect") +
