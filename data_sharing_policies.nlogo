@@ -1427,9 +1427,6 @@ NetLogo 6.3.0
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="b_norm">
-      <value value="1"/>
-    </enumeratedValueSet>
     <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
     <enumeratedValueSet variable="application-penalty">
       <value value="0.05"/>
@@ -1448,9 +1445,6 @@ NetLogo 6.3.0
     </enumeratedValueSet>
     <enumeratedValueSet variable="utility-change">
       <value value="0.03"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="b_utility">
-      <value value="1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="network">
       <value value="&quot;none&quot;"/>
@@ -1472,9 +1466,6 @@ NetLogo 6.3.0
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="b_norm">
-      <value value="1"/>
-    </enumeratedValueSet>
     <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
     <enumeratedValueSet variable="application-penalty">
       <value value="0.05"/>
@@ -1493,9 +1484,6 @@ NetLogo 6.3.0
     </enumeratedValueSet>
     <enumeratedValueSet variable="utility-change">
       <value value="0.03"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="b_utility">
-      <value value="1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="network">
       <value value="&quot;random&quot;"/>
@@ -1517,9 +1505,6 @@ NetLogo 6.3.0
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="b_norm">
-      <value value="1"/>
-    </enumeratedValueSet>
     <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
     <enumeratedValueSet variable="application-penalty">
       <value value="0.05"/>
@@ -1538,9 +1523,6 @@ NetLogo 6.3.0
     </enumeratedValueSet>
     <enumeratedValueSet variable="utility-change">
       <value value="0.03"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="b_utility">
-      <value value="1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="network">
       <value value="&quot;clustered&quot;"/>
@@ -1562,9 +1544,6 @@ NetLogo 6.3.0
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="b_norm">
-      <value value="1"/>
-    </enumeratedValueSet>
     <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
     <enumeratedValueSet variable="application-penalty">
       <value value="0.05"/>
@@ -1583,9 +1562,6 @@ NetLogo 6.3.0
     </enumeratedValueSet>
     <enumeratedValueSet variable="utility-change">
       <value value="0.03"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="b_utility">
-      <value value="1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="network">
       <value value="&quot;fragmented&quot;"/>
