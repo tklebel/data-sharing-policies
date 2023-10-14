@@ -100,7 +100,11 @@ end
 
 to share-data
   ask turtles [
-    set effort b_utility * individual-utility + ifelse-value network = "none" [ 0 ] [ b_norm * descriptive-norm ]
+    set effort ifelse-value network = "none" [
+      individual-utility
+    ] [
+      .5 * individual-utility + .5 * descriptive-norm
+    ]
     set inv_effort 1 / (1 + exp ( - effort ))
     set shared-data? random-float 1 > 1 - inv_effort
 
@@ -519,7 +523,7 @@ max-initial-utility
 max-initial-utility
 -4
 4
-4.0
+-4.0
 .1
 1
 NIL
@@ -583,37 +587,7 @@ CHOOSER
 network
 network
 "none" "random" "clustered" "fragmented"
-0
-
-SLIDER
-236
-499
-408
-532
-b_utility
-b_utility
-0
-1
-1.0
-.01
-1
-NIL
-HORIZONTAL
-
-SLIDER
-235
-535
-407
-568
-b_norm
-b_norm
-0
-1
-1.0
-0.01
-1
-NIL
-HORIZONTAL
+2
 
 PLOT
 577
@@ -1142,7 +1116,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.2
+NetLogo 6.3.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
