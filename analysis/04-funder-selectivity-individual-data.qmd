@@ -415,7 +415,8 @@ fragmented_centrality
 ```
 
 ```{r}
-degree_stats <- funding_status %>% 
+degree_stats <- fragmented_intervention %>%
+  filter(step > 2000) %>% 
   left_join(fragmented_centrality, by = "who") %>% 
   group_by(maxinitialutility, fundedshare) %>% 
   summarise(cor_degree_sharing = cor(as.numeric(degree), as.numeric(shared_data)),
