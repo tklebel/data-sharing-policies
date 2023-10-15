@@ -487,8 +487,9 @@ true_fraction <- fragmented_centrality_local %>%
   pull(n)
 
 p1 <- skeleton_two(low_degree_hypothesis, mean_frac_low_degree_funded) +
-  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = 1, by = .1)),
-                     labels = scales::label_percent()) +
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .8, by = .1)),
+                     labels = scales::label_percent(),
+                     limits = c(.33, .85)) +
   annotate("text", x = 2200, y = .34, label = "Expexted fraction") +
   labs(y = "Fraction of funded low-degree teams")
 p1
@@ -517,7 +518,8 @@ low_degree_hypothesis_sharing <- fragmented_intervention %>%
 #| fig-cap: "Representation of low-degree teams among teams sharing data. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams."
 p2 <- skeleton_two(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) +
   scale_y_continuous(breaks = c(true_fraction, seq(.4, to = 1, by = .1)),
-                     labels = scales::label_percent()) +
+                     labels = scales::label_percent(),
+                     limits = c(.33, .85)) +
   annotate("text", x = 2200, y = .34, label = "Expexted fraction") +
   labs(y = "Fraction of data sharing low-degree teams") 
 p2
