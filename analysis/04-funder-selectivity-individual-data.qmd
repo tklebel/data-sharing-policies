@@ -74,6 +74,7 @@ fragmented_effort <- fragmented_intervention %>%
 ```
 
 ```{r}
+#| label: fig-effort-low-clustering
 p1 <- fragmented_effort %>% 
   ggplot(aes(step, mean_effort, colour = funded)) +
   geom_line() +
@@ -84,6 +85,7 @@ p1
 ```
 
 ```{r}
+#| label: fig-effort-low-clustering-init-phase
 p1 +
   coord_cartesian(xlim = c(0, 1000))
 ```
@@ -101,6 +103,7 @@ no_network_effort <- no_network_intervention %>%
 ```
 
 ```{r}
+#| label: fig-effort-no-network
 p1 <- no_network_effort %>% 
   ggplot(aes(step, mean_effort, colour = funded)) +
   geom_line() +
@@ -111,6 +114,7 @@ p1
 ```
 
 ```{r}
+#| label: fig-effort-no-network-init-phase
 p1 +
   coord_cartesian(xlim = c(0, 1000))
 ```
@@ -158,6 +162,7 @@ binned_effort_no_network <- no_network_intervention %>%
 ```
 
 ```{r, fig.width=10, fig.height=7}
+#| label: fig-effort-over-time-no-network
 effort_plot(binned_effort_no_network, "turbo")
 ```
 
@@ -173,6 +178,7 @@ binned_effort_low_clustering <- fragmented_intervention %>%
 ```
 
 ```{r, fig.width=10, fig.height=7}
+#| label: fig-effort-over-time-low-clustering
 effort_plot(binned_effort_low_clustering, "turbo")
 ```
 
@@ -481,9 +487,9 @@ true_fraction <- fragmented_centrality_local %>%
   pull(n)
 
 p1 <- skeleton_two(low_degree_hypothesis, mean_frac_low_degree_funded) +
-  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .6, by = .05)),
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = 1, by = .1)),
                      labels = scales::label_percent()) +
-  annotate("text", x = 2200, y = .35, label = "Expexted fraction") +
+  annotate("text", x = 2200, y = .34, label = "Expexted fraction") +
   labs(y = "Fraction of funded low-degree teams")
 p1
 ```
