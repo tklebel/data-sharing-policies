@@ -167,7 +167,12 @@ This warning is displayed once every 8 hours.</code></pre>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="2100"></p>
+<div id="fig-effort-low-clustering" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-effort-low-clustering-1.png" class="img-fluid figure-img" width="2100"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: <strong>?(caption)</strong></figcaption><p></p>
+</figure>
+</div>
 </div>
 </div>
 <div class="cell">
@@ -177,7 +182,12 @@ This warning is displayed once every 8 hours.</code></pre>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1000</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="2100"></p>
+<div id="fig-effort-low-clustering-init-phase" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-effort-low-clustering-init-phase-1.png" class="img-fluid figure-img" width="2100"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2: <strong>?(caption)</strong></figcaption><p></p>
+</figure>
+</div>
 </div>
 </div>
 <section id="no-network" class="level2">
@@ -210,7 +220,12 @@ using the `.groups` argument.</code></pre>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="2100"></p>
+<div id="fig-effort-no-network" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-effort-no-network-1.png" class="img-fluid figure-img" width="2100"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3: <strong>?(caption)</strong></figcaption><p></p>
+</figure>
+</div>
 </div>
 </div>
 <div class="cell">
@@ -220,7 +235,12 @@ using the `.groups` argument.</code></pre>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1000</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="2100"></p>
+<div id="fig-effort-no-network-init-phase" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-effort-no-network-init-phase-1.png" class="img-fluid figure-img" width="2100"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;4: <strong>?(caption)</strong></figcaption><p></p>
+</figure>
+</div>
 </div>
 </div>
 <p>It seems that at first, funded teams keep a low effort, and unfunded teams increase their effort. This also explains the slower uptake. It is thus not actually the selective pressure (teams adapting towards selective funder), but rather that the general tendency of increasing effort if unsuccessful or equal affects a larger portion of the sample when only few are funded.</p>
@@ -266,7 +286,12 @@ using the `.groups` argument.</code></pre>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">effort_plot</span>(binned_effort_no_network, <span class="st">"turbo"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="3000"></p>
+<div id="fig-effort-over-time-no-network" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-effort-over-time-no-network-1.png" class="img-fluid figure-img" width="3000"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5: <strong>?(caption)</strong></figcaption><p></p>
+</figure>
+</div>
 </div>
 </div>
 <div class="cell">
@@ -288,7 +313,12 @@ using the `.groups` argument.</code></pre>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">effort_plot</span>(binned_effort_low_clustering, <span class="st">"turbo"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="3000"></p>
+<div id="fig-effort-over-time-low-clustering" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-effort-over-time-low-clustering-1.png" class="img-fluid figure-img" width="3000"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;6: <strong>?(caption)</strong></figcaption><p></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -378,7 +408,7 @@ Removed 6 rows containing missing values (`geom_line()`).</code></pre>
 <div id="fig-funding-cor-over-time-low-clustering" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-funding-cor-over-time-low-clustering-1.png" class="img-fluid figure-img" width="2100"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Means of pearson correlation between funding status and initial resources (top), and between current funding status (yes/no) and funding status at t-1. (bottom). (A) shows the whole simulation. (B) Shows the first 500 steps in higher resolution.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;7: Means of pearson correlation between funding status and initial resources (top), and between current funding status (yes/no) and funding status at t-1. (bottom). (A) shows the whole simulation. (B) Shows the first 500 steps in higher resolution.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -439,7 +469,7 @@ Removed 6 rows containing missing values (`geom_line()`).</code></pre>
 <div id="fig-funding-cor-over-time-no-network" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-funding-cor-over-time-no-network-1.png" class="img-fluid figure-img" width="2100"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;2: Means of pearson correlation between funding status and initial resources (top), and between current funding status (yes/no) and funding status at t-1. (bottom). (A) shows the whole simulation. (B) Shows the first 1000 steps in higher resolution.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8: Means of pearson correlation between funding status and initial resources (top), and between current funding status (yes/no) and funding status at t-1. (bottom). (A) shows the whole simulation. (B) Shows the first 1000 steps in higher resolution.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -509,7 +539,7 @@ Removed 6 rows containing missing values (`geom_line()`).</code></pre>
 <div id="fig-funding-sharing-cor-over-time-low-clustering" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-funding-sharing-cor-over-time-low-clustering-1.png" class="img-fluid figure-img" width="2400"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3: Means of pearson correlation between funding status and data sharing (top), and between current sharing and sharing at t-1. (bottom). (A) shows the whole simulation. (B) Shows the first 1000 steps in higher resolution.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9: Means of pearson correlation between funding status and data sharing (top), and between current sharing and sharing at t-1. (bottom). (A) shows the whole simulation. (B) Shows the first 1000 steps in higher resolution.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -570,7 +600,7 @@ Removed 6 rows containing missing values (`geom_line()`).</code></pre>
 <div id="fig-funding-sharing-cor-over-time-no-network" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-funding-sharing-cor-over-time-no-network-1.png" class="img-fluid figure-img" width="2400"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;4: Means of pearson correlation between funding status and data sharing (top), and between current sharing and sharing at t-1. (bottom). (A) shows the whole simulation. (B) Shows the first 1000 steps in higher resolution.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;10: Means of pearson correlation between funding status and data sharing (top), and between current sharing and sharing at t-1. (bottom). (A) shows the whole simulation. (B) Shows the first 1000 steps in higher resolution.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -717,17 +747,18 @@ can override using the `.groups` argument.</code></pre>
 <span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(n)</span>
 <span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">skeleton_two</span>(low_degree_hypothesis, mean_frac_low_degree_funded) <span class="sc">+</span></span>
-<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(true_fraction, <span class="fu">seq</span>(.<span class="dv">4</span>, <span class="at">to =</span> .<span class="dv">6</span>, <span class="at">by =</span> .<span class="dv">05</span>)),</span>
-<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span></span>
-<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2200</span>, <span class="at">y =</span> .<span class="dv">35</span>, <span class="at">label =</span> <span class="st">"Expexted fraction"</span>) <span class="sc">+</span></span>
-<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Fraction of funded low-degree teams"</span>)</span>
-<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(true_fraction, <span class="fu">seq</span>(.<span class="dv">4</span>, <span class="at">to =</span> .<span class="dv">8</span>, <span class="at">by =</span> .<span class="dv">1</span>)),</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>(),</span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>                     <span class="at">limits =</span> <span class="fu">c</span>(.<span class="dv">33</span>, .<span class="dv">85</span>)) <span class="sc">+</span></span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2200</span>, <span class="at">y =</span> .<span class="dv">34</span>, <span class="at">label =</span> <span class="st">"Expexted fraction"</span>) <span class="sc">+</span></span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Fraction of funded low-degree teams"</span>)</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-low-degree-frac" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-frac-1.png" class="img-fluid figure-img" width="1500"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;5: Representation of low-degree teams among funded teams. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;11: Representation of low-degree teams among funded teams. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -758,16 +789,17 @@ can override using the `.groups` argument.</code></pre>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">skeleton_two</span>(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) <span class="sc">+</span></span>
 <span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(true_fraction, <span class="fu">seq</span>(.<span class="dv">4</span>, <span class="at">to =</span> <span class="dv">1</span>, <span class="at">by =</span> .<span class="dv">1</span>)),</span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span></span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2200</span>, <span class="at">y =</span> .<span class="dv">34</span>, <span class="at">label =</span> <span class="st">"Expexted fraction"</span>) <span class="sc">+</span></span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Fraction of data sharing low-degree teams"</span>) </span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>(),</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">limits =</span> <span class="fu">c</span>(.<span class="dv">33</span>, .<span class="dv">85</span>)) <span class="sc">+</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2200</span>, <span class="at">y =</span> .<span class="dv">34</span>, <span class="at">label =</span> <span class="st">"Expexted fraction"</span>) <span class="sc">+</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Fraction of data sharing low-degree teams"</span>) </span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-low-degree-frac-sharing" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-frac-sharing-1.png" class="img-fluid figure-img" width="1500"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;6: Representation of low-degree teams among teams sharing data. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;12: Representation of low-degree teams among teams sharing data. The dashed line indicates the share of teams with low degree in the sample. Values above the dashed line thus signal an over-representation of low-degree teams.</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -784,7 +816,7 @@ can override using the `.groups` argument.</code></pre>
 <div id="fig-low-degree-sharing-and-funding" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="04-funder-selectivity-individual-data_files/figure-html/fig-low-degree-sharing-and-funding-1.png" class="img-fluid figure-img" width="2400"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;7: Fractions of low degree teams who (A) are funded, or (B) share data. Low degree teams are defined as teams with below median degree.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;13: Fractions of low degree teams who (A) are funded, or (B) share data. Low degree teams are defined as teams with below median degree.</figcaption><p></p>
 </figure>
 </div>
 </div>

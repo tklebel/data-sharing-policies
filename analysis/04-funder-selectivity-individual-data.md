@@ -69,7 +69,7 @@ p1
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-3-1.png){width=2100}
+![](04-funder-selectivity-individual-data_files/figure-html/fig-effort-low-clustering-1.png){#fig-effort-low-clustering width=2100}
 :::
 :::
 
@@ -81,7 +81,7 @@ p1 +
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-4-1.png){width=2100}
+![](04-funder-selectivity-individual-data_files/figure-html/fig-effort-low-clustering-init-phase-1.png){#fig-effort-low-clustering-init-phase width=2100}
 :::
 :::
 
@@ -122,7 +122,7 @@ p1
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-6-1.png){width=2100}
+![](04-funder-selectivity-individual-data_files/figure-html/fig-effort-no-network-1.png){#fig-effort-no-network width=2100}
 :::
 :::
 
@@ -134,7 +134,7 @@ p1 +
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-7-1.png){width=2100}
+![](04-funder-selectivity-individual-data_files/figure-html/fig-effort-no-network-init-phase-1.png){#fig-effort-no-network-init-phase width=2100}
 :::
 :::
 
@@ -194,7 +194,7 @@ effort_plot(binned_effort_no_network, "turbo")
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-10-1.png){width=3000}
+![](04-funder-selectivity-individual-data_files/figure-html/fig-effort-over-time-no-network-1.png){#fig-effort-over-time-no-network width=3000}
 :::
 :::
 
@@ -219,7 +219,7 @@ effort_plot(binned_effort_low_clustering, "turbo")
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-12-1.png){width=3000}
+![](04-funder-selectivity-individual-data_files/figure-html/fig-effort-over-time-low-clustering-1.png){#fig-effort-over-time-low-clustering width=3000}
 :::
 :::
 
@@ -742,9 +742,10 @@ true_fraction <- fragmented_centrality_local %>%
   pull(n)
 
 p1 <- skeleton_two(low_degree_hypothesis, mean_frac_low_degree_funded) +
-  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .6, by = .05)),
-                     labels = scales::label_percent()) +
-  annotate("text", x = 2200, y = .35, label = "Expexted fraction") +
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .8, by = .1)),
+                     labels = scales::label_percent(),
+                     limits = c(.33, .85)) +
+  annotate("text", x = 2200, y = .34, label = "Expexted fraction") +
   labs(y = "Fraction of funded low-degree teams")
 p1
 ```
@@ -789,7 +790,8 @@ can override using the `.groups` argument.
 ```{.r .cell-code}
 p2 <- skeleton_two(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) +
   scale_y_continuous(breaks = c(true_fraction, seq(.4, to = 1, by = .1)),
-                     labels = scales::label_percent()) +
+                     labels = scales::label_percent(),
+                     limits = c(.33, .85)) +
   annotate("text", x = 2200, y = .34, label = "Expexted fraction") +
   labs(y = "Fraction of data sharing low-degree teams") 
 p2
