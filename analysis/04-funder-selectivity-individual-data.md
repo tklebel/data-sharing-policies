@@ -24,65 +24,34 @@ Research questions:
 :::
 
 
-# Are always the same teams receiving funding?
-## Fragmented (low clustering) network
-Here, we only look at steps equal or above 2000 (steps 2000-3000), since we are
-interested in the long-run dynamics.
+# Evolution of effort among funded an non-funded teams
+
 
 
 ::: {.cell}
 
 ```{.r .cell-code}
-# we did not store whether a given team was funded, and it is quite 
-# time-consuming to re-run everything. We can compute this (with quite some
-# effort) by checking if their total funding increased or not.
+fragmented_intervention <- fragmented %>% 
+  filter(sharingincentive == .4, maxinitialutility == -4)
 
-# check funding progress
-funding_status <- fragmented %>% 
-  filter(sharingincentive == .4,
-         # we can restrict this to steps above 2000, since we are interested in
-         # the equilibrium state here
-         step >= 2000)
-```
-:::
-
-::: {.cell}
-
-```{.r .cell-code}
-# lagged model for funding
-
-regression_results <- funding_status %>% 
-  # it also fails currently, no idea why
-  ml_logistic_regression(funded ~ initial_resources + funded_lag) 
-```
-:::
-
-::: {.cell}
-
-```{.r .cell-code}
-print(regression_results)
-```
-:::
-
-
-There seems to be a massive effect of the lagged funding status, if we take a
-global look at all funding incentive settings.
-
-
-::: {.cell}
-
-```{.r .cell-code}
-correlations <- funding_status %>% 
-  group_by(maxinitialutility, fundedshare) %>% 
-  summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
-            cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
+fragmented_effort <- fragmented_intervention %>% 
+  group_by(step, fundedshare, funded) %>% 
+  summarise(mean_effort = mean(effort)) %>% 
   collect()
 ```
 
 ::: {.cell-output .cell-output-stderr}
 ```
-`summarise()` has grouped output by "maxinitialutility". You can override using
-the `.groups` argument.
+`summarise()` has grouped output by "step" and "fundedshare". You can override
+using the `.groups` argument.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Missing values are always removed in SQL aggregation functions.
+Use `na.rm = TRUE` to silence this warning
+This warning is displayed once every 8 hours.
 ```
 :::
 :::
@@ -90,43 +59,112 @@ the `.groups` argument.
 ::: {.cell}
 
 ```{.r .cell-code}
-correlations %>% 
-  arrange(maxinitialutility, fundedshare) %>% 
-  knitr::kable()
+p1 <- fragmented_effort %>% 
+  ggplot(aes(step, mean_effort, colour = funded)) +
+  geom_line() +
+  facet_wrap(vars(fundedshare), nrow = 2) +
+  colorspace::scale_colour_discrete_qualitative() +
+  theme(legend.position = "top")
+p1
 ```
 
 ::: {.cell-output-display}
-| maxinitialutility| fundedshare| cor_funding| cor_init_resources|
-|-----------------:|-----------:|-----------:|------------------:|
-|                -4|         0.1|   0.9542113|          0.0106203|
-|                -4|         0.2|   0.9588905|         -0.0576242|
-|                -4|         0.3|   0.9528467|         -0.1407019|
-|                -4|         0.4|   0.9544672|         -0.2778403|
-|                -4|         0.5|   0.9525710|         -0.3824903|
-|                -4|         0.6|   0.9507971|         -0.2691963|
-|                 4|         0.1|   0.9442191|          0.0844402|
-|                 4|         0.2|   0.9535090|          0.1629669|
-|                 4|         0.3|   0.9560221|          0.1500305|
-|                 4|         0.4|   0.9551332|          0.1648794|
-|                 4|         0.5|   0.9543237|          0.1068485|
-|                 4|         0.6|   0.9516042|          0.0736735|
+![](04-funder-selectivity-individual-data_files/figure-html/fig-effort-low-clustering-1.png){#fig-effort-low-clustering width=2100}
 :::
 :::
 
 ::: {.cell}
 
 ```{.r .cell-code}
-plot_skeleton <- function(df, var) {
+p1 +
+  coord_cartesian(xlim = c(0, 1000))
+```
+
+::: {.cell-output-display}
+![](04-funder-selectivity-individual-data_files/figure-html/fig-effort-low-clustering-init-phase-1.png){#fig-effort-low-clustering-init-phase width=2100}
+:::
+:::
+
+
+
+## No network
+
+::: {.cell}
+
+```{.r .cell-code}
+no_network_intervention <- no_network %>% 
+  filter(sharingincentive == .4, maxinitialutility == -4)
+
+no_network_effort <- no_network_intervention %>% 
+  group_by(step, fundedshare, funded) %>% 
+  summarise(mean_effort = mean(effort)) %>% 
+  collect()
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+`summarise()` has grouped output by "step" and "fundedshare". You can override
+using the `.groups` argument.
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+p1 <- no_network_effort %>% 
+  ggplot(aes(step, mean_effort, colour = funded)) +
+  geom_line() +
+  facet_wrap(vars(fundedshare), nrow = 2) +
+  colorspace::scale_colour_discrete_qualitative() +
+  theme(legend.position = "top")
+p1
+```
+
+::: {.cell-output-display}
+![](04-funder-selectivity-individual-data_files/figure-html/fig-effort-no-network-1.png){#fig-effort-no-network width=2100}
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+p1 +
+  coord_cartesian(xlim = c(0, 1000))
+```
+
+::: {.cell-output-display}
+![](04-funder-selectivity-individual-data_files/figure-html/fig-effort-no-network-init-phase-1.png){#fig-effort-no-network-init-phase width=2100}
+:::
+:::
+
+
+It seems that at first, funded teams keep a low effort, and unfunded teams 
+increase their effort. This also explains the slower uptake. It is thus not 
+actually the selective pressure (teams adapting towards selective funder), but
+rather that the general tendency of increasing effort if unsuccessful or equal
+affects a larger portion of the sample when only few are funded.
+
+But hold on: the slope for the funded teams is also steeper for the more 
+selective versions. Maybe the selective pressure still does work the way we 
+initially described it. Need to check below whether there is this switch in 
+which teams receive funding, and whether this changes over the first 500 steps.
+
+# Effort distributions
+We want to investigate the distribution of effort over time. Need to bin steps
+and effort.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+effort_plot <- function(df, palette = "viridis") {
   df %>% 
-    mutate(maxinitialutility = recode(maxinitialutility, `4` = "Uniform initial sharing effort",
-                                      `-4` = "Low initial sharing effort")) %>% 
-    ggplot(aes(fundedshare, {{ var }}, 
-               colour = as.factor(maxinitialutility))) +
-    geom_line() +
-    geom_point() +
-    colorspace::scale_colour_discrete_qualitative() +
-    scale_x_continuous(labels = scales::label_percent()) +
-    labs(colour = NULL, x = "Share of teams receiving funding") +
+    mutate(effort = (as.integer(effort_group) - 20) / 2) %>% 
+    ggplot(aes(as.integer(step_group) * 100, effort, fill = n)) +
+    geom_tile() +
+    scale_fill_viridis_c(option = palette) +
+    facet_wrap(vars(fundedshare)) +
     theme(legend.position = "top")
 }
 ```
@@ -135,111 +173,120 @@ plot_skeleton <- function(df, var) {
 ::: {.cell}
 
 ```{.r .cell-code}
-p1 <- plot_skeleton(correlations, cor_funding) +
-  labs(y = "Corr funding & lagged funding")
-p1
+effort_breaks <- seq(-10, 10, .5)
+step_breaks <- seq(0, 3000, 100)
+
+binned_effort_no_network <- no_network_intervention %>% 
+  mutate(effort_group = cut(effort, breaks = effort_breaks, labels = FALSE,
+                            include.lowest = TRUE),
+         step_group = cut(step, breaks = step_breaks, labels = FALSE,
+                          include.lowest = TRUE)) %>% 
+  group_by(fundedshare, step_group) %>% 
+  count(effort_group) %>% 
+  collect()
+```
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+effort_plot(binned_effort_no_network, "turbo")
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-8-1.png){width=1500}
+![](04-funder-selectivity-individual-data_files/figure-html/fig-effort-over-time-no-network-1.png){#fig-effort-over-time-no-network width=3000}
 :::
 :::
-
-
-The correlation between current and previous funding status is very high - there
-seems to be almost complete path dependency, once the simulation has entered the
-equilibrium state.
-
 
 ::: {.cell}
 
 ```{.r .cell-code}
-p2 <- plot_skeleton(correlations, cor_init_resources) +
-  labs(y = "Corr funding & initial resources")
-p2
+binned_effort_low_clustering <- fragmented_intervention %>% 
+  mutate(effort_group = cut(effort, breaks = effort_breaks, labels = FALSE,
+                            include.lowest = TRUE),
+         step_group = cut(step, breaks = step_breaks, labels = FALSE,
+                          include.lowest = TRUE)) %>% 
+  group_by(fundedshare, step_group) %>% 
+  count(effort_group) %>% 
+  collect()
+```
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+effort_plot(binned_effort_low_clustering, "turbo")
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-9-1.png){width=1500}
+![](04-funder-selectivity-individual-data_files/figure-html/fig-effort-over-time-low-clustering-1.png){#fig-effort-over-time-low-clustering width=3000}
 :::
 :::
 
 
-Interestingly, the correlation with initial resources is much lower. For uniform
-initial utility, it is relatively low across all funding selectivity settings.
 
-For low initial utility, this is not true, and there is actually a negative
-correlation. This lends credence to our initial hypothesis: teams with initially
-higher resources (presumably, to be confirmed below) share less data, and thus
-are less successful under the incentive regime.
+# Are always the same teams receiving funding?
+Need to ask a new question here: is there a turnover at the start, at around 
+steps 200, in particular for the no network scenario? In the sense, that those
+who previously had funding lose it?
 
 
 ::: {.cell}
 
 ```{.r .cell-code}
-p1 + scale_y_continuous(limits = c(-.5, 1)) +
-  p2 + scale_y_continuous(limits = c(-.5, 1)) +
-  plot_layout(guides = "collect") + 
-  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
-```
-
-::: {.cell-output-display}
-![Path dependency with low clustering network condition. (A) Pearson correlation between current funding status (yes/no) and funding status at t-1. (B) Pearson correlation between current funding status and initial resources.](04-funder-selectivity-individual-data_files/figure-html/fig-corrs-low-clustering-network-1.png){#fig-corrs-low-clustering-network width=2400}
-:::
-:::
-
-
-
-## No network
-
-
-::: {.cell}
-
-```{.r .cell-code}
-funding_status_no_network <- no_network %>% 
-  filter(sharingincentive == .4,
-         # we can restrict this to steps above 2000, since we are interested in
-         # the equilibrium state here
-         step >= 2000)
-```
-:::
-
-::: {.cell}
-
-```{.r .cell-code}
-regression_results <- funding_status_no_network %>% 
-  # it also fails currently, no idea why
-  ml_logistic_regression(funded ~ initial_resources + funded_lag) 
-```
-:::
-
-::: {.cell}
-
-```{.r .cell-code}
-print(regression_results)
+plot_skeleton <- function(df, variant = "one") {
+  df %>% 
+    pivot_longer(starts_with("mean")) %>% 
+    mutate(fundedshare = scales::percent(fundedshare, accuracy = 1),
+           name = switch(variant,
+                         one = case_match(
+                           name,
+                           "mean_cor_funding" ~ "cor(funding, lag(funding))",
+                           "mean_cor_init_resources" ~ "cor(funding, initial resources)"
+                         ),
+                         two = case_match(
+                           name,
+                           "mean_cor_funding_sharing" ~ "cor(funding, sharing)",
+                           "mean_cor_sharing_lag" ~ "cor(sharing, lag(sharing))"
+                         )
+           )) %>% 
+    ggplot(aes(step, value, colour = fundedshare)) +
+    geom_line() +
+    facet_wrap(vars(name), nrow = 2) +
+    theme(legend.position = "top") +
+    colorspace::scale_colour_discrete_qualitative() +
+    labs(colour = "% of teams receiving funding", x = NULL,
+         y = "Correlation (Pearson)")
+}
 ```
 :::
 
 
-With the baseline without a network, there is equally a strong influence of path
-dependency. Initial resources have a slightly stronger role than in the case of
-the fragmented network.
 
+
+## Fragmented (low clustering) network
 
 ::: {.cell}
 
 ```{.r .cell-code}
-correlations_no_network <- funding_status_no_network %>% 
-  group_by(maxinitialutility, fundedshare) %>% 
+correlations <- fragmented_intervention %>% 
+  group_by(step, fundedshare, run_number) %>% 
   summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
             cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
+  group_by(step, fundedshare) %>% 
+  summarise(mean_cor_funding = mean(cor_funding),
+            mean_cor_init_resources = mean(cor_init_resources)) %>% 
   collect()
 ```
 
 ::: {.cell-output .cell-output-stderr}
 ```
-`summarise()` has grouped output by "maxinitialutility". You can override using
-the `.groups` argument.
+`summarise()` has grouped output by "step" and "fundedshare". You can override
+using the `.groups` argument.
+`summarise()` has grouped output by "step". You can override using the
+`.groups` argument.
+`summarise()` has grouped output by "step" and "fundedshare". You can override
+using the `.groups` argument.
 ```
 :::
 :::
@@ -247,89 +294,114 @@ the `.groups` argument.
 ::: {.cell}
 
 ```{.r .cell-code}
-correlations_no_network %>% 
-  arrange(maxinitialutility, fundedshare) %>% 
-  knitr::kable()
+p <- correlations %>% 
+  plot_skeleton()
+```
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+p2 <- p +
+  coord_cartesian(xlim = c(0, 500))
+```
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+p + 
+  p2 + labs(y = NULL) +
+  plot_layout(widths = c(5, 4), guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
 ```
 
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Removed 6 rows containing missing values (`geom_line()`).
+Removed 6 rows containing missing values (`geom_line()`).
+```
+:::
+
 ::: {.cell-output-display}
-| maxinitialutility| fundedshare| cor_funding| cor_init_resources|
-|-----------------:|-----------:|-----------:|------------------:|
-|                -4|         0.1|   0.8121845|          0.0065602|
-|                -4|         0.2|   0.9023002|         -0.0471462|
-|                -4|         0.3|   0.9373384|         -0.1178397|
-|                -4|         0.4|   0.9501977|         -0.0499509|
-|                -4|         0.5|   0.9527413|         -0.0145661|
-|                -4|         0.6|   0.8737687|         -0.0212698|
-|                 4|         0.1|   0.9861305|          0.3249158|
-|                 4|         0.2|   0.9906219|          0.3626612|
-|                 4|         0.3|   0.9908658|          0.2900537|
-|                 4|         0.4|   0.9783700|          0.1799073|
-|                 4|         0.5|   0.9671437|          0.0382707|
-|                 4|         0.6|   0.9707301|         -0.0082824|
+![Means of pearson correlation between funding status and initial resources (top), and between current funding status (yes/no) and funding status at t-1. (bottom). (A) shows the whole simulation. (B) Shows the first 500 steps in higher resolution.](04-funder-selectivity-individual-data_files/figure-html/fig-funding-cor-over-time-low-clustering-1.png){#fig-funding-cor-over-time-low-clustering width=2100}
+:::
+:::
+
+
+This clearly shows: there is some substantial change of events here. Correlation
+with initial resources is stable at first, but plummets just before step 200.
+This is also when effort for funded teams goes up substantially. Therefore, we
+can conclude: teams that do not share data remain successful at first. But once
+the others start to share data, they take over, and correlation with initial 
+resources goes either to 0 or even to negative values.
+The turnover is not complete, of course, otherwise the correlation would be -1.
+
+## No network
+
+::: {.cell}
+
+```{.r .cell-code}
+correlations_no_network <- no_network_intervention %>% 
+  group_by(step, fundedshare, run_number) %>% 
+  summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
+            cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
+  group_by(step, fundedshare) %>% 
+  summarise(mean_cor_funding = mean(cor_funding),
+            mean_cor_init_resources = mean(cor_init_resources)) %>% 
+  collect()
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+`summarise()` has grouped output by "step" and "fundedshare". You can override
+using the `.groups` argument.
+`summarise()` has grouped output by "step". You can override using the
+`.groups` argument.
+`summarise()` has grouped output by "step" and "fundedshare". You can override
+using the `.groups` argument.
+```
 :::
 :::
 
 ::: {.cell}
 
 ```{.r .cell-code}
-p1 <- plot_skeleton(correlations_no_network, cor_funding) +
-  labs(y = "Corr funding & lagged funding")
-p1
+p <- correlations_no_network %>% 
+  plot_skeleton()
 ```
-
-::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-16-1.png){width=1500}
 :::
-:::
-
-
-Correlations for funding lag are similarly very high. However, behaviour is
-different between max-initial-utility, comparing to the case of the fragmented
-network. Here, correlations are higher for maxinitalutility = 4, but lower
-otherwise.
-
 
 ::: {.cell}
 
 ```{.r .cell-code}
-p2 <- plot_skeleton(correlations_no_network, cor_init_resources) +
-  labs(y = "Corr funding & initial resources")
-p2
+p2 <- p +
+  coord_cartesian(xlim = c(0, 1000))
 ```
-
-::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-17-1.png){width=1500}
 :::
-:::
-
-
-These correlations are stronger, i.e., more positive, as indicated by the
-regression: without networks, initial resources play a stronger role in who gets
-funded, especially if funding is very selective.
-
-To our initial question for the difference between utility settings: path
-dependency is much lower for low initial utility. There is even a slight
-negative correlation between initial resources and funding: initially
-lower-resourced teams are funded more than those with higher initial resources,
-simply because they start sharing data. If utility is uniform, initial resources
-play a stronger role - there is more path dependency.
-
 
 ::: {.cell}
 
 ```{.r .cell-code}
-p1 + scale_y_continuous(limits = c(-.2, 1)) +
-  p2 + scale_y_continuous(limits = c(-.2, 1)) +
-  plot_layout(guides = "collect") + 
-  plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+p + 
+  p2 + labs(y = NULL) +
+  plot_layout(widths = c(5, 4), guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
 ```
 
-::: {.cell-output-display}
-![Path dependency under 'no network' condition. (A) Pearson correlation between current funding status (yes/no) and funding status at t-1. (B) Pearson correlation between current funding status and initial resources.](04-funder-selectivity-individual-data_files/figure-html/fig-corrs-no-network-1.png){#fig-corrs-no-network width=2400}
-:::
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Removed 6 rows containing missing values (`geom_line()`).
+Removed 6 rows containing missing values (`geom_line()`).
+```
 :::
 
+::: {.cell-output-display}
+![Means of pearson correlation between funding status and initial resources (top), and between current funding status (yes/no) and funding status at t-1. (bottom). (A) shows the whole simulation. (B) Shows the first 1000 steps in higher resolution.](04-funder-selectivity-individual-data_files/figure-html/fig-funding-cor-over-time-no-network-1.png){#fig-funding-cor-over-time-no-network width=2100}
+:::
+:::
 
 
 # Are those that are being funded also those that share data?
@@ -340,17 +412,24 @@ p1 + scale_y_continuous(limits = c(-.2, 1)) +
 ::: {.cell}
 
 ```{.r .cell-code}
-funding_vs_sharing <- funding_status %>% 
-  group_by(maxinitialutility, fundedshare) %>% 
+funding_vs_sharing <- fragmented_intervention %>% 
+  group_by(step, fundedshare, run_number) %>% 
   summarise(cor_funding_sharing = cor(as.numeric(funded), as.numeric(shared_data)),
             cor_sharing_lag = cor(as.numeric(shared_data), as.numeric(shared_data_lag))) %>% 
+  group_by(step, fundedshare) %>% 
+  summarise(mean_cor_funding_sharing = mean(cor_funding_sharing),
+            mean_cor_sharing_lag = mean(cor_sharing_lag)) %>% 
   collect()
 ```
 
 ::: {.cell-output .cell-output-stderr}
 ```
-`summarise()` has grouped output by "maxinitialutility". You can override using
-the `.groups` argument.
+`summarise()` has grouped output by "step" and "fundedshare". You can override
+using the `.groups` argument.
+`summarise()` has grouped output by "step". You can override using the
+`.groups` argument.
+`summarise()` has grouped output by "step" and "fundedshare". You can override
+using the `.groups` argument.
 ```
 :::
 :::
@@ -358,64 +437,78 @@ the `.groups` argument.
 ::: {.cell}
 
 ```{.r .cell-code}
-plot_skeleton(funding_vs_sharing, cor_funding_sharing) +
-  labs(y = "Corr funding & data sharing")
+p1 <- funding_vs_sharing %>% 
+  plot_skeleton(variant = "two")
 ```
-
-::: {.cell-output-display}
-![Correlation between funding status (yes/no) and data sharing (yes/no)](04-funder-selectivity-individual-data_files/figure-html/corr-funding-sharing-low-clustering-1.png){width=1500}
 :::
-:::
-
-
-Generally speaking, those that are being funded are also those that share data,
-in this instance. The correlation is stronger for less selective regimes. What
-does this indicate? Maybe the broader reach of the funding agency, if many teams
-are being funded? But wouldn't it be the case that if funding is more selective,
-only those that are funded also share data, because it is too costly otherwise?
-But maybe it is the opposite: if funding is very selective, not many teams can
-afford to share data, and thus not many do. If funding is less selective, more
-teams share data, and thus, generally, those being funded are also more often
-those which share data. Does this make sense?
-
-
-
 
 ::: {.cell}
 
 ```{.r .cell-code}
-plot_skeleton(funding_vs_sharing, cor_sharing_lag) +
-  labs(y = "Corr data sharing & data sharing lag")
+p2 <- p1 +
+  coord_cartesian(xlim = c(0, 1000))
+p2
 ```
 
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Removed 6 rows containing missing values (`geom_line()`).
+```
+:::
+
 ::: {.cell-output-display}
-![Correlation between current sharing status (yes/no) and lagged (t-1) sharing status for the case of low clustering.](04-funder-selectivity-individual-data_files/figure-html/corr-low-cluster-sharing-sharing-lag-1.png){width=1500}
+![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-24-1.png){width=2100}
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+p1 + 
+  p2 + labs(y = NULL) +
+  plot_layout(widths = c(5, 5), guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Removed 6 rows containing missing values (`geom_line()`).
+Removed 6 rows containing missing values (`geom_line()`).
+```
+:::
+
+::: {.cell-output-display}
+![Means of pearson correlation between funding status and data sharing (top), and between current sharing and sharing at t-1. (bottom). (A) shows the whole simulation. (B) Shows the first 1000 steps in higher resolution.](04-funder-selectivity-individual-data_files/figure-html/fig-funding-sharing-cor-over-time-low-clustering-1.png){#fig-funding-sharing-cor-over-time-low-clustering width=2400}
 :::
 :::
 
 
-The correlation between sharing, and the shared lag (whether teams keep sharing
-data) is also quite high, and the graph looks very similar to the one right
-above. This implies that there is path dependency around sharing, where teams
-share data and receive funding, while others do neither.
+WHY ARE THERE SO MANY MISSING VALUES AT THE START?
 
 ## No network
 
-
 ::: {.cell}
 
 ```{.r .cell-code}
-funding_vs_sharing_no_network <- funding_status_no_network %>% 
-  group_by(maxinitialutility, fundedshare) %>% 
+funding_vs_sharing_no_network <- no_network_intervention %>% 
+  group_by(step, fundedshare, run_number) %>% 
   summarise(cor_funding_sharing = cor(as.numeric(funded), as.numeric(shared_data)),
             cor_sharing_lag = cor(as.numeric(shared_data), as.numeric(shared_data_lag))) %>% 
+  group_by(step, fundedshare) %>% 
+  summarise(mean_cor_funding_sharing = mean(cor_funding_sharing),
+            mean_cor_sharing_lag = mean(cor_sharing_lag)) %>% 
   collect()
 ```
 
 ::: {.cell-output .cell-output-stderr}
 ```
-`summarise()` has grouped output by "maxinitialutility". You can override using
-the `.groups` argument.
+`summarise()` has grouped output by "step" and "fundedshare". You can override
+using the `.groups` argument.
+`summarise()` has grouped output by "step". You can override using the
+`.groups` argument.
+`summarise()` has grouped output by "step" and "fundedshare". You can override
+using the `.groups` argument.
 ```
 :::
 :::
@@ -423,35 +516,53 @@ the `.groups` argument.
 ::: {.cell}
 
 ```{.r .cell-code}
-plot_skeleton(funding_vs_sharing_no_network, cor_funding_sharing) +
-  labs(y = "Corr funding & data sharing")
+p1 <- funding_vs_sharing_no_network %>% 
+  plot_skeleton(variant = "two")
 ```
-
-::: {.cell-output-display}
-![Correlation between funding status (yes/no) and data sharing (yes/no)](04-funder-selectivity-individual-data_files/figure-html/corr-funding-sharing-no-network-1.png){width=1500}
-:::
 :::
 
 ::: {.cell}
 
 ```{.r .cell-code}
-plot_skeleton(funding_vs_sharing_no_network, cor_sharing_lag) +
-  labs(y = "Corr data sharing & data sharing lag")
+p2 <- p1 +
+  coord_cartesian(xlim = c(0, 1000))
+```
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+p1 + 
+  p2 + labs(y = NULL) +
+  plot_layout(widths = c(5, 5), guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
 ```
 
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Removed 6 rows containing missing values (`geom_line()`).
+Removed 6 rows containing missing values (`geom_line()`).
+```
+:::
+
 ::: {.cell-output-display}
-![Correlation between current sharing status (yes/no) and lagged (t-1) sharing status for the case of no network.](04-funder-selectivity-individual-data_files/figure-html/corr-no-network-sharing-sharing-lag-1.png){width=1500}
+![Means of pearson correlation between funding status and data sharing (top), and between current sharing and sharing at t-1. (bottom). (A) shows the whole simulation. (B) Shows the first 1000 steps in higher resolution.](04-funder-selectivity-individual-data_files/figure-html/fig-funding-sharing-cor-over-time-no-network-1.png){#fig-funding-sharing-cor-over-time-no-network width=2400}
 :::
 :::
 
 
-Again, we see that the correlation between funding and sharing seems to be
-largely driven by previous sharing - the correlations between sharing and
-sharing lag are essentially the same, just slightly lower.
+This shows quite clearly: at first those who are sharing are not funded (negative
+correlation). Around step 200 this turns around, and correlations rise
+subsequently.
 
-We can thus conclude, that generally speaking, those who share data are also
-those who receive funding. However, in the case of no networks, this correlation
-is weaker, and especially weaker in case of low initial utility.
+Correlation between sharing and lagged sharing are generally low. There is much
+turnover in which teams are sharing, although funding path dependency is quite
+high. This is thus a substantially different behaviour than in the case of the 
+network.
+
+The analysis of the effort distributions should give us another glimpse at what
+is going on here, and thus be instructive.
 
 # Are those that share data / receive funding more or less central in the network?
 
@@ -537,7 +648,8 @@ fragmented_centrality
 ::: {.cell}
 
 ```{.r .cell-code}
-degree_stats <- funding_status %>% 
+degree_stats <- fragmented_intervention %>%
+  filter(step > 2000) %>% 
   left_join(fragmented_centrality, by = "who") %>% 
   group_by(maxinitialutility, fundedshare) %>% 
   summarise(cor_degree_sharing = cor(as.numeric(degree), as.numeric(shared_data)),
@@ -564,7 +676,7 @@ degree_stats %>%
 ```
 
 ::: {.cell-output-display}
-![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-27-1.png){width=1500}
+![](04-funder-selectivity-individual-data_files/figure-html/unnamed-chunk-32-1.png){width=1500}
 :::
 :::
 
@@ -584,31 +696,39 @@ which are low-degree is.
 
 ```{.r .cell-code}
 # compute the share of teams being funded that are low-degree
-low_degree_hypothesis <- funding_status %>% 
+low_degree_hypothesis <- fragmented_intervention %>% 
   left_join(fragmented_centrality, by = "who") %>% 
   group_by(maxinitialutility, fundedshare, run_number, step, funded) %>% 
   count(is_low_degree) %>% 
   mutate(fraction = n / sum(n)) %>% 
   filter(funded, is_low_degree) %>% 
-  group_by(maxinitialutility, fundedshare) %>% 
+  group_by(maxinitialutility, fundedshare, step) %>% 
   summarise(mean_frac_low_degree_funded = mean(fraction)) %>% 
   collect()
 ```
 
 ::: {.cell-output .cell-output-stderr}
 ```
-Warning: Missing values are always removed in SQL aggregation functions.
-Use `na.rm = TRUE` to silence this warning
-This warning is displayed once every 8 hours.
+`summarise()` has grouped output by "maxinitialutility" and "fundedshare". You
+can override using the `.groups` argument.
 ```
+:::
 :::
 
-::: {.cell-output .cell-output-stderr}
+::: {.cell}
+
+```{.r .cell-code}
+skeleton_two <- function(df, var) {
+  df %>% 
+    mutate(fundedshare = scales::percent(fundedshare, accuracy = 1)) %>% 
+    ggplot(aes(step, {{ var }}, colour = fundedshare)) +
+    geom_line() +
+    geom_hline(yintercept = true_fraction, linetype = 2) +
+    colorspace::scale_colour_discrete_qualitative() +
+    theme(legend.position = "top") +
+    labs(colour = "% of teams receiving funding", x = NULL)
+}
 ```
-`summarise()` has grouped output by "maxinitialutility". You can override using
-the `.groups` argument.
-```
-:::
 :::
 
 ::: {.cell}
@@ -621,11 +741,11 @@ true_fraction <- fragmented_centrality_local %>%
   filter(is_low_degree) %>% 
   pull(n)
 
-p1 <- plot_skeleton(low_degree_hypothesis, mean_frac_low_degree_funded) +
-  geom_hline(yintercept = true_fraction, linetype = 2) +
-  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .6, by = .05)),
-                     labels = scales::label_percent()) +
-  annotate("text", x = .2, y = .368, label = "Expexted fraction") +
+p1 <- skeleton_two(low_degree_hypothesis, mean_frac_low_degree_funded) +
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .8, by = .1)),
+                     labels = scales::label_percent(),
+                     limits = c(.33, .85)) +
+  annotate("text", x = 2200, y = .34, label = "Expexted fraction") +
   labs(y = "Fraction of funded low-degree teams")
 p1
 ```
@@ -646,21 +766,21 @@ Chisquare test.
 
 ```{.r .cell-code}
 # compute the share of teams sharing data that are low-degree
-low_degree_hypothesis_sharing <- funding_status %>% 
+low_degree_hypothesis_sharing <- fragmented_intervention %>% 
   left_join(fragmented_centrality, by = "who") %>% 
   group_by(maxinitialutility, fundedshare, run_number, step, shared_data) %>% 
   count(is_low_degree) %>% 
   mutate(fraction = n / sum(n)) %>% 
   filter(shared_data, is_low_degree) %>% 
-  group_by(maxinitialutility, fundedshare) %>% 
+  group_by(maxinitialutility, fundedshare, step) %>% 
   summarise(mean_frac_low_degree_sharing = mean(fraction)) %>% 
   collect()
 ```
 
 ::: {.cell-output .cell-output-stderr}
 ```
-`summarise()` has grouped output by "maxinitialutility". You can override using
-the `.groups` argument.
+`summarise()` has grouped output by "maxinitialutility" and "fundedshare". You
+can override using the `.groups` argument.
 ```
 :::
 :::
@@ -668,12 +788,12 @@ the `.groups` argument.
 ::: {.cell}
 
 ```{.r .cell-code}
-p2 <- plot_skeleton(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) +
-  geom_hline(yintercept = true_fraction, linetype = 2) +
-  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = .6, by = .05)),
-                     labels = scales::label_percent()) +
-  annotate("text", x = .2, y = .368, label = "Expexted fraction") +
-  labs(y = "Fraction of data sharing low-degree teams")
+p2 <- skeleton_two(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing) +
+  scale_y_continuous(breaks = c(true_fraction, seq(.4, to = 1, by = .1)),
+                     labels = scales::label_percent(),
+                     limits = c(.33, .85)) +
+  annotate("text", x = 2200, y = .34, label = "Expexted fraction") +
+  labs(y = "Fraction of data sharing low-degree teams") 
 p2
 ```
 

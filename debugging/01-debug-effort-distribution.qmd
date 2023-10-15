@@ -1,0 +1,73 @@
+---
+title: "Debug effort distribution"
+format: html
+---
+
+I observed that the effort distribution between no network and low clustering
+network were different in their boundaries: the former was in the interval
+[-5,5], as expected, but the latter was at [-10,10]. In my intuition, this was
+incorrect, since this would move effort to much higher/lower levels with the
+network configuration than without. But we should things that are not relevant
+to us stable, so we can observe differences due to the meaningful variations
+we introduce.
+
+Below I explore how the two different parameterisations behave. In the end, I
+updated the parameterisation to have sharing-effort on the same scale [-5,5]
+for both with and without networks
+
+```{r, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+test_df <- tibble(
+  indiv_utility = seq(-5, 5, .2),
+  norm = seq(-5, 5, .2)
+)
+
+pdata <- test_df %>% 
+  complete(indiv_utility, norm) %>% 
+  mutate(effort_old = indiv_utility + norm,
+         effort_new = .5 * indiv_utility + .5 * norm) %>% 
+  pivot_longer(contains("effort"))
+
+
+inv_logit <- function(x) 1 / (1 + exp(-x))
+```
+
+
+```{r, fig.width=8, fig.height=4}
+p <- pdata %>% 
+  ggplot(aes(indiv_utility, norm, fill = inv_logit(value))) +
+  geom_tile() +
+  facet_wrap(vars(name)) +
+  colorspace::scale_fill_continuous_diverging(mid = .5) +
+  theme_minimal() +
+  coord_fixed()
+p
+```
+
+
+```{r}
+plotly::ggplotly(p)
+```
+
+essentially, in the old effort variant, the gradient between the blue and red
+parts is much steeper. When you go from -5/-5 to 0/0, you are close to 0
+for a long time, before the values quickly rise to .5.
+In comparison, with the new effort, the surface is smoother, and the gradient
+not so steep.
+
+the following plot shows this clearly
+```{r, fig.width=8, fig.height=4}
+pdata %>% 
+  ggplot(aes(indiv_utility, inv_logit(value), colour = norm, group = norm)) +
+  geom_line() +
+  facet_wrap(vars(name)) +
+  colorspace::scale_color_continuous_diverging(mid = 0) +
+  theme_dark() 
+```
+
+the old effort parameterisation is the reason, why we got the jagged results:
+agents sticking to not sharing, then rapidly going to sharing, and then back
+down, etc.
