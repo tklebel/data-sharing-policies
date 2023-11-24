@@ -3,10 +3,14 @@ title: "Analysis of funder selectivity"
 format: 
   html:
     code-fold: true
+    self-contained: true
   #pdf: default
-execute:
-  keep-md: true
+params:
+  sharing_incentive: 0.1
 ---
+
+This notebook was rendered with sharing_incentive = `r params$sharing_incentive`.
+
 
 Research questions:
 - What is the effect of a funding agency’s level of selectivity on the uptake of data sharing among research teams which allocate their resources strategically?
@@ -31,6 +35,10 @@ theme_set(theme_bw(base_family = "Hind"))
 
 source(here("R/functions.R"))
 
+# need to evaluate the parameter, to avoid hick-ups with dbplyr
+# (evaluating params$sharing_incentive within `filter` did not work)
+incentive_setting <- params$sharing_incentive
+
 Sys.setenv(SPARK_HOME = "/home/tklebel/spark-3.4.0-bin-hadoop3/")
 Sys.setenv(HADOOP_HOME = "/home/hadoop/hadoop-3.3.1")
 Sys.setenv(HADOOP_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
@@ -44,7 +52,8 @@ config$spark.executor.instances <- 20
 config$spark.executor.memory <- "20G"
 
 sc <- spark_connect(master = "yarn", config = config,
-                    app_name = "funding_selectivity")
+                    app_name = paste0("funding_selectivity_", incentive_setting)
+)
 
 df <- spark_read_csv(
   sc, "vary_incentives",
@@ -57,7 +66,7 @@ df <- spark_read_csv(
 
 ```{r fig.width=7, fig.height=9}
 summarised_data <- df %>% 
-  filter(step > 0, sharingincentive == .4) %>% 
+  filter(step > 0, sharingincentive == incentive_setting) %>% 
   group_by(step, fundedshare, maxinitialutility, network) %>% 
   summarise(mean_gini = mean(gini_resources_of_turtles),
             mean_cumulative_gini = mean(gini_totalfunding_of_turtles),

@@ -3,11 +3,16 @@ title: "Analysis of funder selectivity: individual level data"
 format: 
   html:
     code-fold: true
+    self-contained: true
   #pdf: default
 execute:
   keep-md: true
 fig-dpi: 300
+params:
+  sharing_incentive: 0.4
 ---
+
+This notebook was rendered with sharing_incentive = `r params$sharing_incentive`.
 
 Research questions:
 
@@ -28,6 +33,10 @@ library(tidygraph)
 extrafont::loadfonts()
 theme_set(theme_bw(base_family = "Hind"))
 
+# need to evaluate the parameter, to avoid hick-ups with dbplyr
+# (evaluating params$sharing_incentive within `filter` did not work)
+incentive_setting <- params$sharing_incentive
+
 source(here("R/functions.R"))
 
 Sys.setenv(SPARK_HOME = "/home/tklebel/spark-3.4.0-bin-hadoop3/")
@@ -44,7 +53,9 @@ config$spark.executor.memory <- "20G"
 config$spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version <- 2
 
 sc <- spark_connect(master = "yarn", config = config,
-                    app_name = "funding_selectivity_individual_data")
+                    app_name = paste0("funding_selectivity_individual_data_",
+                                      incentive_setting)
+)
 
 fragmented <- spark_read_parquet(
   sc, "fragmented",
@@ -57,7 +68,6 @@ no_network <- spark_read_parquet(
   path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network_re_arranged.parquet",
   memory = TRUE
 )
-
 ```
 
 # Evolution of effort among funded an non-funded teams
@@ -65,7 +75,7 @@ no_network <- spark_read_parquet(
 
 ```{r}
 fragmented_intervention <- fragmented %>% 
-  filter(sharingincentive == .4, maxinitialutility == -4)
+  filter(sharingincentive == incentive_setting, maxinitialutility == -4)
 
 fragmented_effort <- fragmented_intervention %>% 
   group_by(step, fundedshare, funded) %>% 
@@ -94,7 +104,7 @@ p1 +
 ## No network
 ```{r}
 no_network_intervention <- no_network %>% 
-  filter(sharingincentive == .4, maxinitialutility == -4)
+  filter(sharingincentive == incentive_setting, maxinitialutility == -4)
 
 no_network_effort <- no_network_intervention %>% 
   group_by(step, fundedshare, funded) %>% 
