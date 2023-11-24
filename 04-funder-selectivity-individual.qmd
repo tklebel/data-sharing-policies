@@ -4,9 +4,6 @@ format:
   html:
     code-fold: true
     self-contained: true
-  #pdf: default
-execute:
-  keep-md: true
 fig-dpi: 300
 params:
   sharing_incentive: 0.4

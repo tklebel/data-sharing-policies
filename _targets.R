@@ -8,6 +8,7 @@ source("R/functions.R")
 options(tidyverse.quiet = TRUE)
 #tar_option_set(packages = c("scales", "tidyverse", "hrbrthemes"))
 
+#fs::file_copy("analysis/03-analyse-funder-selectivity.qmd", "03-report.qmd")
 
   # # baseline file -----------
   # tar_target(
@@ -38,16 +39,21 @@ options(tidyverse.quiet = TRUE)
   # )
 funder_selectivity_values <- tibble::tibble(
   sharing_incentive = seq(0, .7, by = .1)
-)
+) %>% 
+  mutate(output_file = paste0("analysis/sensitivity_analysis/funder_selectivity_", 
+                              sharing_incentive, ".html"))
 
 target1 <- tar_quarto_rep(funder_selectivity,
-                          "analysis/03-analyse-funder-selectivity.qmd",
+                          "03-funder-selectivity.qmd",
                           execute_params = funder_selectivity_values)
 
-individual_data_values <- funder_selectivity_values 
+individual_data_values <- funder_selectivity_values %>% 
+  mutate(
+    output_file = paste0("analysis/sensitivity_analysis/funder_selectivity_individual_", 
+                         sharing_incentive, ".html"))
 
 target2 <- tar_quarto_rep(individual_data,
-                          "analysis/04-funder-selectivity-individual-data.qmd",
+                          "04-funder-selectivity-individual.qmd",
                           execute_params = individual_data_values)
 
 

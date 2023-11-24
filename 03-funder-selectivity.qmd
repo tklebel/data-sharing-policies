@@ -2,9 +2,7 @@
 title: "Analysis of funder selectivity"
 format: 
   html:
-    code-fold: true
     self-contained: true
-  #pdf: default
 params:
   sharing_incentive: 0.1
 ---
