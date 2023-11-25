@@ -66,9 +66,13 @@ df <- spark_read_csv(
 summarised_data <- df %>% 
   filter(step > 0, sharingincentive == incentive_setting) %>% 
   group_by(step, fundedshare, maxinitialutility, network) %>% 
-  summarise(mean_gini = mean(gini_resources_of_turtles),
+  summarise(n = n(),
+            mean_gini = mean(gini_resources_of_turtles),
+            sd_gini = sd(gini_resources_of_turtles),
             mean_cumulative_gini = mean(gini_totalfunding_of_turtles),
-            mean_sharing = mean(sharing)) %>% 
+            sd_cumulative_gini = sd(gini_totalfunding_of_turtles),
+            mean_sharing = mean(sharing),
+            sd_sharing = sd(sharing)) %>% 
   collect() %>% 
   mutate(maxinitialutility = recode(maxinitialutility, `4` = "Uniform initial sharing effort",
                                       `-4` = "Low initial sharing effort"),
@@ -78,25 +82,52 @@ summarised_data <- df %>%
 ```{r}
 n_row <- 1
 
-plot_skeleton <- function(df, var) {
+plot_skeleton <- function(df, mean_var, sd_var, interval_type = c("sd", "ci")) {
+  # this is very bad - there is another convention to do this, but can't remember
+  interval_type <- head(interval_type, 1)
+  
+  # get sample ns
+  all_ns <- pull(df, n)
+  n <- unique(all_ns)
+  stopifnot(length(n) == 1)
+  
+
+  df <- if (interval_type == "sd") {
+    df %>% 
+      mutate(segment_offset = {{ sd_var }})
+  } else if (interval_type == "ci") {
+      # code from https://www.geeksforgeeks.org/how-to-find-confidence-intervals-in-r/
+      alpha = 0.05
+      degrees_of_freedom = n - 1
+      t_score = qt(p = alpha/2, df = degrees_of_freedom, lower.tail = F)
+      df %>% 
+        mutate(segment_offset = t_score * {{ sd_var }})
+  } else {
+    stop("Unsupported interval type", call. = FALSE)
+  }
+  
+  
   df %>%  
-    ggplot(aes(step, {{ var }}, colour = as.factor(fundedshare))) +
-    geom_line() +
+    ggplot(aes(step, group = as.factor(fundedshare))) +
+    geom_ribbon(aes(ymin = {{ mean_var }} - segment_offset,
+                    ymax = {{ mean_var }} + segment_offset), 
+                fill = "grey40", alpha = .2, show.legend = FALSE) +
+    geom_line(aes(y = {{ mean_var }}, colour = as.factor(fundedshare))) +
     facet_wrap(vars(maxinitialutility), nrow = n_row) +
     colorspace::scale_colour_discrete_qualitative()
 }
 
-summary_plot <- function(df) {
-  p1 <- plot_skeleton(df, mean_gini) +
+summary_plot <- function(df, ...) {
+  p1 <- plot_skeleton(df, mean_gini, sd_gini, ...) +
   labs(colour = "% of teams receiving funding",
        y = "Gini of current resources", x = NULL)
 
-  p2 <- plot_skeleton(df, mean_cumulative_gini) +
+  p2 <- plot_skeleton(df, mean_cumulative_gini, sd_cumulative_gini, ...) +
     labs(colour = "% of teams receiving funding",
          y = "Gini of total resources",
          x = "Step")
   
-  p3 <- plot_skeleton(df, mean_sharing) +
+  p3 <- plot_skeleton(df, mean_sharing, sd_sharing, ...) +
     labs(colour = "% of teams receiving funding",
          y = "% of teams sharing data", x = NULL) 
   
