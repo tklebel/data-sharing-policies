@@ -511,7 +511,7 @@ p1 <- skeleton_two(low_degree_hypothesis, mean_frac_low_degree_funded,
                    sd_frac_low_degree_funded) +
   scale_y_continuous(breaks = c(true_fraction, seq(.4, to = 1, by = .1)),
                      labels = scales::label_percent()) +
-  annotate("text", x = 2200, y = .34, label = "Expexted fraction") +
+  annotate("text", x = 2200, y = .34, label = "Expected fraction") +
   labs(y = "Fraction of funded low-degree teams")
 p1
 ```
@@ -542,7 +542,7 @@ p2 <- skeleton_two(low_degree_hypothesis_sharing, mean_frac_low_degree_sharing,
                    sd_frac_low_degree_sharing) +
   scale_y_continuous(breaks = c(true_fraction, seq(.4, to = 1, by = .1)),
                      labels = scales::label_percent()) +
-  annotate("text", x = 2200, y = .34, label = "Expexted fraction") +
+  annotate("text", x = 2200, y = .34, label = "Expected fraction") +
   labs(y = "Fraction of data sharing low-degree teams") 
 p2
 ```
