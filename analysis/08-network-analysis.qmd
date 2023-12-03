@@ -1,0 +1,176 @@
+---
+title: "Network analysis"
+format: 
+  html:
+    code-fold: true
+    fig-dpi: 600
+---
+
+
+```{r, echo=FALSE, message=FALSE}
+library(sparklyr)
+library(ggplot2)
+library(patchwork)
+library(dplyr)
+library(arrow)
+library(here)
+
+theme_custom <- function(base_size = 11) {
+  half_line = base_size / 2
+  rel_size <- 0.9
+  theme_light(base_family = "Hind") %+replace%
+            theme(strip.background = element_rect(fill = "grey90", colour = NA),
+                  strip.text = element_text(
+                           colour = "grey10",
+                           size = rel(rel_size),
+                           margin = margin(rel_size * half_line, rel_size * half_line, 
+                                           rel_size * half_line, rel_size * half_line)
+                         ))
+}
+theme_set(theme_custom())
+
+extrafont::loadfonts()
+
+source(here("R/functions.R"))
+
+Sys.setenv(SPARK_HOME = "/home/tklebel/spark-3.4.0-bin-hadoop3/")
+Sys.setenv(HADOOP_HOME = "/home/hadoop/hadoop-3.3.1")
+Sys.setenv(HADOOP_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
+Sys.setenv(YARN_HOME = "/home/hadoop/hadoop-3.3.1")
+Sys.setenv(YARN_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
+Sys.setenv(JAVA_HOME = "/usr/lib/jvm/java-1.11.0-openjdk-amd64")
+
+config <- spark_config()
+config$spark.executor.cores <- 5
+config$spark.executor.instances <- 20
+config$spark.executor.memory <- "20G"
+config$spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version <- 2
+
+sc <- spark_connect(master = "yarn", config = config,
+                    app_name = "sharing_incentive")
+
+df <- spark_read_csv(
+  sc, "vary_incentives",
+  path = "/tklebel/data_sharing_abm/vary_incentives.csv.bz2",
+  memory = TRUE
+)
+```
+
+
+# Funding incentive part
+```{r}
+funding_incentive <- df %>% 
+  filter(step > 0, fundedshare == .1) %>% 
+  group_by(step, sharingincentive, maxinitialutility, network) %>% 
+  summarise(n = n(),
+            mean_sharing = mean(sharing),
+            sd_sharing = sd(sharing)) %>% 
+  collect() %>% 
+  mutate(maxinitialutility = recode(maxinitialutility, `4` = "Uniform initial sharing effort",
+                                      `-4` = "Low initial sharing effort"),
+         sharingincentive = scales::percent(sharingincentive, accuracy = 1))
+```
+
+```{r}
+pdata_funding_incentive <- funding_incentive %>% 
+  filter(maxinitialutility == "Low initial sharing effort") %>% 
+  pivot_longer(cols = contains("mean"),
+               values_to = "y",
+               names_to = "outcome_var",
+               names_pattern = "mean_(.*)") %>% 
+  mutate(
+    ymin = case_when(
+      outcome_var == "sharing" ~ y - sd_sharing
+    ), 
+    ymax = case_when(
+      outcome_var == "sharing" ~ y + sd_sharing
+    )
+  ) %>% 
+  select(-starts_with("sd"))
+```
+
+```{r, fig.width=8, fig.height=5}
+#| label: fig-XX
+
+p1 <- pdata_funding_incentive %>% 
+  mutate(network = factor(
+    network,
+    levels = c("none", "random", "clustered", "fragmented"),
+    labels = c("No network", "Random network",
+               "High clustering", "Low clustering"))) %>% 
+  ggplot(aes(step, group = as.factor(sharingincentive))) +
+  geom_ribbon(aes(ymin = ymin, ymax = ymax),
+              fill = "grey40", alpha = .2, show.legend = FALSE) +
+  geom_line(aes(y = y, colour = as.factor(sharingincentive))) +
+  facet_wrap(vars(network), nrow = 1) +
+  colorspace::scale_colour_discrete_sequential(palette = "Viridis") +
+  theme(legend.position = "top") +
+  labs(y = "% of teams sharing data", colour = "Sharing incentive", x = NULL) 
+```
+
+
+
+# Funding selectivity part
+```{r}
+funding_selectivity <- df %>% 
+  filter(step > 0, sharingincentive == .4) %>% 
+  group_by(step, fundedshare, maxinitialutility, network) %>% 
+  summarise(n = n(),
+            mean_sharing = mean(sharing),
+            sd_sharing = sd(sharing)) %>% 
+  collect() %>% 
+  mutate(maxinitialutility = recode(maxinitialutility, `4` = "Uniform initial sharing effort",
+                                      `-4` = "Low initial sharing effort"),
+         fundedshare = scales::percent(fundedshare, accuracy = 1))
+```
+
+```{r}
+pdata_funding_selectivity <- funding_selectivity %>% 
+  filter(maxinitialutility == "Low initial sharing effort") %>% 
+  pivot_longer(cols = contains("mean"),
+               values_to = "y",
+               names_to = "outcome_var",
+               names_pattern = "mean_(.*)") %>% 
+  mutate(
+    ymin = case_when(
+      outcome_var == "sharing" ~ y - sd_sharing
+    ), 
+    ymax = case_when(
+      outcome_var == "sharing" ~ y + sd_sharing
+    )
+  ) %>% 
+  select(-starts_with("sd"))
+```
+
+```{r, fig.width=8, fig.height=5}
+#| label: fig-YYY
+
+p2 <- pdata_funding_selectivity %>% 
+  mutate(network = factor(
+    network,
+    levels = c("none", "random", "clustered", "fragmented"),
+    labels = c("No network", "Random network",
+               "High clustering", "Low clustering"))) %>% 
+  ggplot(aes(step, group = as.factor(fundedshare))) +
+  geom_ribbon(aes(ymin = ymin, ymax = ymax),
+              fill = "grey40", alpha = .2, show.legend = TRUE) +
+  geom_line(aes(y = y, colour = as.factor(fundedshare))) +
+  facet_wrap(vars(network), nrow = 1) +
+  colorspace::scale_colour_discrete_sequential(palette = "Inferno") +
+  theme(legend.position = "top") +
+  labs(y = "% of teams sharing data", colour = "% of teams receiving funding", 
+       x = NULL) 
+```
+
+
+```{r, fig.width=10, fig.height=8}
+#| label: fig-network-conditions
+#| fig-cap: "Effect of network conditions on sharing uptake. All lines display
+#| the mean across 100 model runs, with the shaded area as +- 1 standard
+#| deviation. (A) Varying levels of sharing incentive assuming funding 
+#| selectivity of 0.1. (B) Varying levels of funding selectivity, assuming 
+#| sharing incentive of 0.4."
+p1 / p2 +
+  plot_annotation(tag_levels = "A")
+```
+
