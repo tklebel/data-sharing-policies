@@ -1,0 +1,258 @@
+---
+title: "Analysis of sharing incentive"
+format: 
+  html:
+    code-fold: true
+    fig-dpi: 600
+---
+
+
+```{r, echo=FALSE, message=FALSE}
+library(sparklyr)
+library(ggplot2)
+library(patchwork)
+library(dplyr)
+library(arrow)
+library(here)
+
+extrafont::loadfonts()
+theme_set(theme_bw(base_family = "Hind"))
+
+source(here("R/functions.R"))
+
+Sys.setenv(SPARK_HOME = "/home/tklebel/spark-3.4.0-bin-hadoop3/")
+Sys.setenv(HADOOP_HOME = "/home/hadoop/hadoop-3.3.1")
+Sys.setenv(HADOOP_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
+Sys.setenv(YARN_HOME = "/home/hadoop/hadoop-3.3.1")
+Sys.setenv(YARN_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
+Sys.setenv(JAVA_HOME="/usr/lib/jvm/java-1.11.0-openjdk-amd64")
+
+config <- spark_config()
+config$spark.executor.cores <- 5
+config$spark.executor.instances <- 38
+config$spark.executor.memory <- "20G"
+config$spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version <- 2
+
+sc <- spark_connect(master = "yarn", config = config,
+                    app_name = "sharing_incentive")
+
+df <- spark_read_csv(
+  sc, "vary_incentives",
+  path = "/tklebel/data_sharing_abm/vary_incentives.csv.bz2",
+  memory = TRUE
+)
+
+no_network <- spark_read_parquet(
+  sc, "no_network",
+  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network_re_arranged.parquet",
+  memory = TRUE
+)
+
+
+```
+
+# Overview part
+```{r}
+summarised_data <- df %>% 
+  filter(step > 0, fundedshare == .1) %>% 
+  group_by(step, sharingincentive, maxinitialutility, network) %>% 
+  summarise(n = n(),
+            mean_gini = mean(gini_resources_of_turtles),
+            sd_gini = sd(gini_resources_of_turtles),
+            mean_cumulative_gini = mean(gini_totalfunding_of_turtles),
+            sd_cumulative_gini = sd(gini_totalfunding_of_turtles),
+            mean_sharing = mean(sharing),
+            sd_sharing = sd(sharing)) %>% 
+  collect() %>% 
+  mutate(maxinitialutility = recode(maxinitialutility, `4` = "Uniform initial sharing effort",
+                                      `-4` = "Low initial sharing effort"),
+         sharingincentive = scales::percent(sharingincentive, accuracy = 1))
+```
+
+```{r}
+n_row <- 1
+
+plot_skeleton <- function(df, mean_var, sd_var, interval_type = c("sd", "ci")) {
+  # this is very bad - there is another convention to do this, but can't remember
+  interval_type <- head(interval_type, 1)
+  
+  # get sample ns
+  all_ns <- pull(df, n)
+  n <- unique(all_ns)
+  stopifnot(length(n) == 1)
+  
+
+  df <- if (interval_type == "sd") {
+    df %>% 
+      mutate(segment_offset = {{ sd_var }})
+  } else if (interval_type == "ci") {
+      # code from https://www.geeksforgeeks.org/how-to-find-confidence-intervals-in-r/
+      alpha = 0.05
+      degrees_of_freedom = n - 1
+      t_score = qt(p = alpha/2, df = degrees_of_freedom, lower.tail = F)
+      df %>% 
+        mutate(segment_offset = t_score * {{ sd_var }})
+  } else {
+    stop("Unsupported interval type", call. = FALSE)
+  }
+  
+  
+  df %>%  
+    ggplot(aes(step, group = as.factor(sharingincentive))) +
+    geom_ribbon(aes(ymin = {{ mean_var }} - segment_offset,
+                    ymax = {{ mean_var }} + segment_offset), 
+                fill = "grey40", alpha = .2, show.legend = FALSE) +
+    geom_line(aes(y = {{ mean_var }}, colour = as.factor(sharingincentive))) +
+    # facet_wrap(vars(maxinitialutility), nrow = n_row) +
+    colorspace::scale_colour_discrete_qualitative()
+}
+
+summary_plot <- function(df, ...) {
+  colour_lab <- "sharing incentive"
+  p1 <- plot_skeleton(df, mean_gini, sd_gini, ...) +
+  labs(colour = colour_lab,
+       y = "Gini of current resources", x = NULL)
+
+  p2 <- plot_skeleton(df, mean_cumulative_gini, sd_cumulative_gini, ...) +
+    labs(colour = colour_lab,
+         y = "Gini of total resources",
+         x = "Step")
+  
+  p3 <- plot_skeleton(df, mean_sharing, sd_sharing, ...) +
+    labs(colour = colour_lab,
+         y = "% of teams sharing data", x = NULL) 
+  
+  p3 / p1 / p2 +
+    plot_layout(guides = "collect") +
+    plot_annotation(tag_levels = "A") & theme(legend.position = "top")
+}
+```
+
+
+```{r fig.width=5, fig.height=9}
+#| label: fig-no-network
+#| fig-cap: Gini index and % of groups sharing data dependent on sharing incentive with no network
+#| and share of funded teams at 10%.
+
+summarised_data %>% 
+  filter(network == "none", maxinitialutility == "Low initial sharing effort") %>% 
+  summary_plot()
+```
+
+
+
+```{r}
+pdata <- summarised_data %>% 
+  filter(network == "none", maxinitialutility == "Low initial sharing effort") %>% 
+  pivot_longer(cols = contains("mean"),
+               values_to = "y",
+               names_to = "outcome_var",
+               names_pattern = "mean_(.*)") %>% 
+  mutate(
+    ymin = case_when(
+      outcome_var == "gini" ~ y - sd_gini,
+      outcome_var == "cumulative_gini" ~ y - sd_cumulative_gini,
+      outcome_var == "sharing" ~ y - sd_sharing
+    ), 
+    ymax = case_when(
+      outcome_var == "gini" ~ y + sd_gini,
+      outcome_var == "cumulative_gini" ~ y + sd_cumulative_gini,
+      outcome_var == "sharing" ~ y + sd_sharing
+    )
+  ) %>% 
+  select(-starts_with("sd"))
+```
+
+```{r, fig.width=4.5, fig.height=7}
+#| label: fig-part-1
+#| fig-cap: Gini index and % of groups sharing data dependent on sharing incentive with no network
+#| and share of funded teams at 10%.
+
+p1 <- pdata %>% 
+  mutate(outcome_var = factor(
+    outcome_var,
+    levels = c("sharing", "gini", "cumulative_gini"),
+    labels = c("% of teams sharing data", "Gini of current resources",
+               "Gini of total resources"))) %>% 
+  # filter(outcome_var == "sharing") %>% 
+  ggplot(aes(step, group = as.factor(sharingincentive))) +
+    geom_ribbon(aes(ymin = ymin, ymax = ymax),
+                fill = "grey40", alpha = .2, show.legend = FALSE) +
+    geom_line(aes(y = y, colour = as.factor(sharingincentive))) +
+    facet_wrap(vars(outcome_var), nrow = 3,
+               scales = "free_y") +
+    colorspace::scale_colour_discrete_qualitative() +
+  theme(legend.position = "top") +
+  labs(y = NULL, colour = "sharing incentive", x = NULL)+
+  guides(colour = guide_legend(nrow = 3, byrow = TRUE))
+p1
+```
+
+# Effort development
+
+
+```{r}
+no_network_intervention <- no_network %>% 
+  filter(fundedshare == .1, maxinitialutility == -4)
+
+no_network_effort <- no_network_intervention %>% 
+  group_by(step, sharingincentive, funded) %>% 
+  summarise(mean_effort = mean(effort),
+            sd_effort = sd(effort)) %>% 
+  collect()
+```
+
+```{r}
+plot_effort <- function(df) {
+  df %>% 
+    ggplot(aes(step, mean_effort, group = funded)) +
+    geom_ribbon(aes(ymin = mean_effort - sd_effort,
+                    ymax = mean_effort + sd_effort), 
+                  fill = "grey40", alpha = .15, show.legend = FALSE) +
+    geom_line(aes(y = mean_effort, colour = funded)) +
+    facet_wrap(vars(sharingincentive), nrow = 2) +
+    colorspace::scale_colour_discrete_qualitative() +
+    theme(legend.position = "top")
+}
+
+```
+
+
+```{r, fig.width=7, fig.height=6}
+#| label: fig-effort-no-network
+#| fig-cap: Effort of teams averaged across 100 runs. 
+p2 <- no_network_effort %>% 
+  mutate(
+    funded = factor(
+      funded, levels = c(TRUE, FALSE),
+      labels = c("Funded teams", "Unfunded teams")
+      ),
+    sharingincentive = paste0(
+      "incentive: ", scales::percent(sharingincentive)
+    )) %>% 
+  ggplot(aes(step, mean_effort, group = funded)) +
+  geom_ribbon(aes(ymin = mean_effort - sd_effort,
+                  ymax = mean_effort + sd_effort), 
+                fill = "grey40", alpha = .15, show.legend = FALSE) +
+  geom_line(aes(y = mean_effort, colour = funded)) +
+  facet_wrap(vars(sharingincentive), nrow = 3) +
+  coord_cartesian(xlim = c(0, 1500)) +
+  colorspace::scale_colour_discrete_qualitative() +
+  theme(legend.position = c(.85, .15)) +
+  labs(y = NULL, x = NULL, colour = NULL)
+p2
+```
+
+
+# Overall figure
+```{r, fig.width=10, fig.height=10}
+design <- "
+  11222
+  11222
+  11###
+"
+p1 + p2 +
+  plot_layout(design = design) +
+  plot_annotation(tag_levels = "A")
+```
+
