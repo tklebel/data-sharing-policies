@@ -113,16 +113,15 @@ p1 <- pdata %>%
     levels = c("sharing", "gini", "cumulative_gini"),
     labels = c("% of teams sharing data", "Gini of current resources",
                "Gini of total resources"))) %>% 
-  # filter(outcome_var == "sharing") %>% 
   ggplot(aes(step, group = as.factor(fundedshare))) +
-    geom_ribbon(aes(ymin = ymin, ymax = ymax),
-                fill = "grey40", alpha = .2, show.legend = TRUE) +
-    geom_line(aes(y = y, colour = as.factor(fundedshare))) +
-    facet_wrap(vars(outcome_var), nrow = 3,
-               scales = "free_y") +
-    colorspace::scale_colour_discrete_sequential(palette = "Inferno") +
-    theme(legend.position = "top") +
-    labs(y = NULL, colour = "% of teams receiving funding", x = NULL) 
+  geom_ribbon(aes(ymin = ymin, ymax = ymax),
+              fill = "grey40", alpha = .2, show.legend = TRUE) +
+  geom_line(aes(y = y, colour = as.factor(fundedshare))) +
+  facet_wrap(vars(outcome_var), nrow = 3,
+             scales = "free_y") +
+  colorspace::scale_colour_discrete_sequential(palette = "Inferno") +
+  theme(legend.position = "top") +
+  labs(y = NULL, colour = "% of teams receiving funding", x = NULL) 
 ```
 
 # Effort development
