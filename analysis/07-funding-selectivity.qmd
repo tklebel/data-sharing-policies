@@ -175,7 +175,6 @@ p2 <- no_network_effort %>%
   scale_colour_manual(values = c(better_pal[2], better_pal[4])) +
   theme(legend.position = c(.85, .15)) +
   labs(y = "Effort of teams", x = NULL, colour = NULL)
-p2
 ```
 
 # Correlations
@@ -221,7 +220,6 @@ p3 <- pdata %>%
     colorspace::scale_colour_discrete_sequential(palette = "Inferno") +
     labs(x = NULL,
          y = "Correlation (Pearson)")
-p3
 ```
 
 
