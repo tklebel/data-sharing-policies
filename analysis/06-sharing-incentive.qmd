@@ -120,7 +120,7 @@ p1 <- pdata %>%
     geom_line(aes(y = y, colour = as.factor(sharingincentive))) +
     facet_wrap(vars(outcome_var), nrow = 3,
                scales = "free_y") +
-    colorspace::scale_colour_discrete_qualitative() +
+    colorspace::scale_colour_discrete_sequential(palette = "Viridis") +
   theme(legend.position = "top") +
   labs(y = NULL, colour = "Sharing incentive", x = NULL) 
   # guides(colour = guide_legend(nrow = 3, byrow = TRUE))
@@ -156,6 +156,8 @@ plot_effort <- function(df) {
 ```{r, fig.width=7, fig.height=6}
 #| label: fig-effort-no-network
 #| fig-cap: Effort of teams averaged across 100 runs. 
+better_pal <- colorspace::sequential_hcl(5, palette = "Viridis")
+
 p2 <- no_network_effort %>% 
   mutate(
     funded = factor(
@@ -163,7 +165,7 @@ p2 <- no_network_effort %>%
       labels = c("Funded teams", "Unfunded teams")
       ),
     sharingincentive = paste0(
-      "incentive: ", scales::percent(sharingincentive)
+      "Incentive: ", scales::percent(sharingincentive)
     )) %>% 
   ggplot(aes(step, mean_effort, group = funded)) +
   geom_ribbon(aes(ymin = mean_effort - sd_effort,
@@ -172,7 +174,7 @@ p2 <- no_network_effort %>%
   geom_line(aes(y = mean_effort, colour = funded)) +
   facet_wrap(vars(sharingincentive), nrow = 3) +
   coord_cartesian(xlim = c(0, 1500)) +
-  colorspace::scale_colour_discrete_qualitative() +
+  scale_colour_manual(values = c(better_pal[2], better_pal[4])) +
   theme(legend.position = c(.85, .15)) +
   labs(y = "Effort of teams", x = NULL, colour = NULL)
 ```
@@ -217,7 +219,7 @@ p3 <- pdata %>%
                 fill = "grey40", alpha = .2, show.legend = FALSE) +
     geom_line(aes(colour = sharingincentive), show.legend = FALSE) +
     facet_wrap(vars(outcome_var), nrow = 2) +
-    colorspace::scale_colour_discrete_qualitative() +
+    colorspace::scale_colour_discrete_sequential(palette = "Viridis") +
     labs(x = NULL,
          y = "Correlation (Pearson)")
 ```
