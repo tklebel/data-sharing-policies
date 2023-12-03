@@ -104,8 +104,8 @@ pdata <- summarised_data %>%
 
 ```{r, fig.width=4.5, fig.height=7}
 #| label: fig-part-1
-#| fig-cap: Gini index and % of groups sharing data dependent on sharing incentive with no network
-#| and share of funded teams at 10%.
+#| fig-cap: "Gini index and % of groups sharing data dependent on sharing incentive with no network
+#| and share of funded teams at 10%."
 
 p1 <- pdata %>% 
   mutate(outcome_var = factor(
