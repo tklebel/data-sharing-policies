@@ -210,7 +210,7 @@ pdata <- correlations_no_network %>%
          outcome_var = case_match(
            outcome_var,
            "cor_funding" ~ "Funding vs. previous funding",
-           "cor_init_resources" ~ "Funding vs. Initial resources"
+           "cor_init_resources" ~ "Funding vs. initial resources"
           ))
 
 p3 <- pdata %>% 
