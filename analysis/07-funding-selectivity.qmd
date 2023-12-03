@@ -1,0 +1,251 @@
+---
+title: "Analysis of funding selectivity"
+format: 
+  html:
+    code-fold: true
+    fig-dpi: 600
+---
+
+
+```{r, echo=FALSE, message=FALSE}
+library(sparklyr)
+library(ggplot2)
+library(patchwork)
+library(dplyr)
+library(arrow)
+library(here)
+
+theme_custom <- function(base_size = 11) {
+  half_line = base_size / 2
+  rel_size <- 0.9
+  theme_light(base_family = "Hind") %+replace%
+            theme(strip.background = element_rect(fill = "grey90", colour = NA),
+                  strip.text = element_text(
+                           colour = "grey10",
+                           size = rel(rel_size),
+                           margin = margin(rel_size * half_line, rel_size * half_line, 
+                                           rel_size * half_line, rel_size * half_line)
+                         ))
+}
+theme_set(theme_custom())
+
+extrafont::loadfonts()
+
+source(here("R/functions.R"))
+
+Sys.setenv(SPARK_HOME = "/home/tklebel/spark-3.4.0-bin-hadoop3/")
+Sys.setenv(HADOOP_HOME = "/home/hadoop/hadoop-3.3.1")
+Sys.setenv(HADOOP_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
+Sys.setenv(YARN_HOME = "/home/hadoop/hadoop-3.3.1")
+Sys.setenv(YARN_CONF_DIR = "/home/hadoop/hadoop-3.3.1/etc/hadoop")
+Sys.setenv(JAVA_HOME = "/usr/lib/jvm/java-1.11.0-openjdk-amd64")
+
+config <- spark_config()
+config$spark.executor.cores <- 5
+config$spark.executor.instances <- 38
+config$spark.executor.memory <- "20G"
+config$spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version <- 2
+
+sc <- spark_connect(master = "yarn", config = config,
+                    app_name = "funding_selectivity")
+
+df <- spark_read_csv(
+  sc, "vary_incentives",
+  path = "/tklebel/data_sharing_abm/vary_incentives.csv.bz2",
+  memory = TRUE
+)
+
+no_network <- spark_read_parquet(
+  sc, "no_network",
+  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_no_network_re_arranged.parquet",
+  memory = TRUE
+)
+```
+
+# Overview part
+```{r}
+summarised_data <- df %>% 
+  filter(step > 0, sharingincentive == .4) %>% 
+  group_by(step, fundedshare, maxinitialutility, network) %>% 
+  summarise(n = n(),
+            mean_gini = mean(gini_resources_of_turtles),
+            sd_gini = sd(gini_resources_of_turtles),
+            mean_cumulative_gini = mean(gini_totalfunding_of_turtles),
+            sd_cumulative_gini = sd(gini_totalfunding_of_turtles),
+            mean_sharing = mean(sharing),
+            sd_sharing = sd(sharing)) %>% 
+  collect() %>% 
+  mutate(maxinitialutility = recode(maxinitialutility, `4` = "Uniform initial sharing effort",
+                                      `-4` = "Low initial sharing effort"),
+         fundedshare = scales::percent(fundedshare, accuracy = 1))
+```
+
+```{r}
+pdata <- summarised_data %>% 
+  filter(network == "none", maxinitialutility == "Low initial sharing effort") %>% 
+  pivot_longer(cols = contains("mean"),
+               values_to = "y",
+               names_to = "outcome_var",
+               names_pattern = "mean_(.*)") %>% 
+  mutate(
+    ymin = case_when(
+      outcome_var == "gini" ~ y - sd_gini,
+      outcome_var == "cumulative_gini" ~ y - sd_cumulative_gini,
+      outcome_var == "sharing" ~ y - sd_sharing
+    ), 
+    ymax = case_when(
+      outcome_var == "gini" ~ y + sd_gini,
+      outcome_var == "cumulative_gini" ~ y + sd_cumulative_gini,
+      outcome_var == "sharing" ~ y + sd_sharing
+    )
+  ) %>% 
+  select(-starts_with("sd"))
+```
+
+```{r, fig.width=4.5, fig.height=7}
+#| label: fig-part-1
+#| fig-cap: Gini index and % of groups sharing data dependent on sharing incentive with no network
+#| and share of funded teams at 10%.
+
+p1 <- pdata %>% 
+  mutate(outcome_var = factor(
+    outcome_var,
+    levels = c("sharing", "gini", "cumulative_gini"),
+    labels = c("% of teams sharing data", "Gini of current resources",
+               "Gini of total resources"))) %>% 
+  # filter(outcome_var == "sharing") %>% 
+  ggplot(aes(step, group = as.factor(fundedshare))) +
+    geom_ribbon(aes(ymin = ymin, ymax = ymax),
+                fill = "grey40", alpha = .2, show.legend = TRUE) +
+    geom_line(aes(y = y, colour = as.factor(fundedshare))) +
+    facet_wrap(vars(outcome_var), nrow = 3,
+               scales = "free_y") +
+    colorspace::scale_colour_discrete_sequential(palette = "Inferno") +
+    theme(legend.position = "top") +
+    labs(y = NULL, colour = "% of teams receiving funding", x = NULL) 
+```
+
+# Effort development
+```{r}
+no_network_intervention <- no_network %>% 
+  filter(sharingincentive == .4, maxinitialutility == -4)
+
+no_network_effort <- no_network_intervention %>% 
+  group_by(step, fundedshare, funded) %>% 
+  summarise(mean_effort = mean(effort),
+            sd_effort = sd(effort)) %>% 
+  collect()
+```
+
+```{r}
+plot_effort <- function(df) {
+  df %>% 
+    ggplot(aes(step, mean_effort, group = funded)) +
+    geom_ribbon(aes(ymin = mean_effort - sd_effort,
+                    ymax = mean_effort + sd_effort), 
+                  fill = "grey40", alpha = .15, show.legend = FALSE) +
+    geom_line(aes(y = mean_effort, colour = funded)) +
+    facet_wrap(vars(fundedshare), nrow = 2) +
+    colorspace::scale_colour_discrete_qualitative() +
+    theme(legend.position = "top")
+}
+```
+
+
+```{r, fig.width=7, fig.height=6}
+#| label: fig-effort-no-network
+#| fig-cap: Effort of teams averaged across 100 runs. 
+better_pal <- colorspace::sequential_hcl(5, palette = "Inferno")
+
+p2 <- no_network_effort %>% 
+  mutate(
+    funded = factor(
+      funded, levels = c(TRUE, FALSE),
+      labels = c("Funded teams", "Unfunded teams")
+      ),
+    fundedshare = paste0(
+      "Funded teams: ", scales::percent(fundedshare)
+    )) %>% 
+  ggplot(aes(step, mean_effort, group = funded)) +
+  geom_ribbon(aes(ymin = mean_effort - sd_effort,
+                  ymax = mean_effort + sd_effort), 
+                fill = "grey40", alpha = .15, show.legend = FALSE) +
+  geom_line(aes(y = mean_effort, colour = funded)) +
+  facet_wrap(vars(fundedshare), nrow = 3) +
+  coord_cartesian(xlim = c(0, 1500)) +
+  scale_colour_manual(values = c(better_pal[2], better_pal[4])) +
+  theme(legend.position = c(.85, .15)) +
+  labs(y = "Effort of teams", x = NULL, colour = NULL)
+p2
+```
+
+# Correlations
+```{r}
+correlations_no_network <- no_network_intervention %>% 
+  group_by(step, fundedshare, run_number) %>% 
+  summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
+            cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
+  group_by(step, fundedshare) %>% 
+  summarise(mean_cor_funding = mean(cor_funding),
+            sd_cor_funding = sd(cor_funding),
+            mean_cor_init_resources = mean(cor_init_resources),
+            sd_cor_init_resources = sd(cor_init_resources)) %>% 
+  collect()
+```
+
+
+```{r}
+pdata <- correlations_no_network %>% 
+  pivot_longer(starts_with("mean"), values_to = "y", names_pattern = "mean_(.*)",
+               names_to = "outcome_var") %>% 
+  mutate(fundedshare = scales::percent(fundedshare, accuracy = 1),
+          ymin = case_when(
+            outcome_var == "cor_funding" ~ y - sd_cor_funding,
+            outcome_var == "cor_init_resources" ~ y - sd_cor_init_resources
+          ), 
+          ymax = case_when(
+            outcome_var == "cor_funding" ~ y + sd_cor_funding,
+            outcome_var == "cor_init_resources" ~ y + sd_cor_init_resources
+          ),
+         outcome_var = case_match(
+           outcome_var,
+           "cor_funding" ~ "Funding vs. previous funding",
+           "cor_init_resources" ~ "Funding vs. initial resources"
+          ))
+
+p3 <- pdata %>% 
+  ggplot(aes(step, y, group = fundedshare)) +
+    geom_ribbon(aes(ymin = ymin, ymax = ymax),
+                fill = "grey40", alpha = .2, show.legend = FALSE) +
+    geom_line(aes(colour = fundedshare), show.legend = FALSE) +
+    facet_wrap(vars(outcome_var), nrow = 2) +
+    colorspace::scale_colour_discrete_sequential(palette = "Inferno") +
+    labs(x = NULL,
+         y = "Correlation (Pearson)")
+p3
+```
+
+
+# Overall figure
+```{r, fig.width=10, fig.height=10}
+#| label: fig-funding-selectivity-total
+#| fig-cap: "Effect of funding selectivity. All lines display the mean across 100 
+#| model runs, with the shaded area as +- 1 standard deviation. (A) Sharing rate
+#| of teams, the Gini coefficient of current resources, and the Gini coefficient
+#| of total resources (across the whole simulation run). (B) Effort setting of 
+#| funded vs. unfunded teams. Effort is bound between -5 and 5. 
+#| (C) Pearson correlations between funding and initial resources (top) and 
+#| between funding at $t_0$ and funding at $t_{-1}$."
+design <- "
+  11222
+  11222
+  11222
+  11333
+  11333
+"
+p1 + p2 + p3 +
+  plot_layout(design = design, guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "top")
+```
+
