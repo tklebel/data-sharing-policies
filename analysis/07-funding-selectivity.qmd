@@ -163,7 +163,7 @@ p2 <- no_network_effort %>%
       labels = c("Funded teams", "Unfunded teams")
       ),
     fundedshare = paste0(
-      "Funded teams: ", scales::percent(fundedshare)
+      scales::percent(fundedshare), " funded teams"
     )) %>% 
   ggplot(aes(step, mean_effort, group = funded)) +
   geom_ribbon(aes(ymin = mean_effort - sd_effort,
