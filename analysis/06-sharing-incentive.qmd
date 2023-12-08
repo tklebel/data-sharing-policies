@@ -247,3 +247,47 @@ p1 + p2 + p3 +
   theme(legend.position = "top")
 ```
 
+# Effort distributions
+Here we investigate the distribution of effort over time.
+
+```{r}
+effort_plot <- function(df, palette = "viridis") {
+  df %>% 
+    mutate(effort = (as.integer(effort_group) - 20) / 2) %>% 
+    ggplot(aes(as.integer(step_group) * 100, effort, fill = n)) +
+    geom_tile() +
+    scale_fill_viridis_c(option = palette) +
+    facet_wrap(vars(sharingincentive)) +
+    theme(legend.position = "top")
+}
+```
+
+
+```{r}
+effort_breaks <- seq(-10, 10, .5)
+step_breaks <- seq(0, 3000, 100)
+
+binned_effort_no_network <- no_network_intervention %>% 
+  mutate(effort_group = cut(effort, breaks = effort_breaks, labels = FALSE,
+                            include.lowest = TRUE),
+         step_group = cut(step, breaks = step_breaks, labels = FALSE,
+                          include.lowest = TRUE)) %>% 
+  group_by(sharingincentive, step_group) %>% 
+  count(effort_group) %>% 
+  # normalise counts by the width of our step interval, as well as the number of
+  # runs, so we get back an average per run on the scale of our sample size
+  mutate(n = n / 10000) %>% 
+  collect()
+```
+
+```{r, fig.width=10, fig.height=10}
+#| label: fig-effort-over-time-no-network
+p <- effort_plot(binned_effort_no_network, "turbo")
+p
+```
+
+
+```{r}
+plotly::ggplotly(p)
+```
+
