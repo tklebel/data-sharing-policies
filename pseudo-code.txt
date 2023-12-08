@@ -1,0 +1,44 @@
+setup:
+  if network:
+    load pre-generated network file with agents
+  else:
+    create n agents 
+
+  for each agent:
+    initialize agent attributes
+
+main simulation:
+  while t < T:
+    increment time
+    update indices
+      
+    # share data
+    for each agent:
+        calculate effort
+        calculate inverse effort
+        calculate shared-data? based on inverse effort
+        decrease resources based on inverse effort
+  
+    # generate proposals
+    for each agent:
+        calculate proposal strength based on normalized resources and inverse effort
+
+    # allocate funding
+    for each agent:
+        increase resources for all agents (base funding)
+        calculate n-grants
+        sort agents based on proposal-strength
+        select top-teams based on n-grants
+        calculate funding-per-team
+        distribute funding to top-teams
+
+    # update utility
+    for each agent:
+        if shared-data? and resources increased or not shared-data? and resources not increased:
+            increase individual-utility
+        else:
+            decrease individual-utility
+    
+    # update network influence
+    for each agent:
+        calculate descriptive-norm based on sharing within link-neighbors
