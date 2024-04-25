@@ -82,7 +82,9 @@ to go
   award-grants
   if data-sharing? [
     update-utility
-    update-norms
+    if not (network = "none") [
+      update-norms
+    ]
   ]
 end
 
@@ -191,8 +193,7 @@ end
 
 to update-norms
   ask turtles [
-    set descriptive-norm ifelse-value any? link-neighbors
-    [ count link-neighbors with [ shared-data? ] / count link-neighbors - 0.5] [ -0.5 ]
+    set descriptive-norm count link-neighbors with [ shared-data? ] / count link-neighbors - 0.5
     ; rescale norm. this is to ensure it is on the same scale as the utility
     set descriptive-norm descriptive-norm * 10
   ]
@@ -587,7 +588,7 @@ CHOOSER
 network
 network
 "none" "random" "clustered" "fragmented"
-2
+3
 
 PLOT
 577
