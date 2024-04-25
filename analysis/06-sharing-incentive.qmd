@@ -294,6 +294,14 @@ p
 plotly::ggplotly(p)
 ```
 
+This is the maximal number of teams (averaged over runs) that reaches max effort:
+```{r}
+binned_effort_no_network %>% 
+  mutate(effort = (as.integer(effort_group) - 20) / 2) %>% 
+  filter(effort == 5) %>% 
+  summarise(n_of_max_effort = max(n))
+```
+
 ```{r}
 spark_disconnect(sc)
 ```
