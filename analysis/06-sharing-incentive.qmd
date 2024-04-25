@@ -253,7 +253,9 @@ Here we investigate the distribution of effort over time.
 ```{r}
 effort_plot <- function(df, palette = "viridis") {
   df %>% 
-    mutate(effort = (as.integer(effort_group) - 20) / 2) %>% 
+    mutate(effort = (as.integer(effort_group) - 20) / 2,
+           sharingincentive = paste0(
+             "Incentive: ", scales::percent(sharingincentive))) %>% 
     ggplot(aes(as.integer(step_group) * 100, effort, fill = n)) +
     geom_tile() +
     scale_fill_viridis_c(option = palette) +
@@ -282,7 +284,8 @@ binned_effort_no_network <- no_network_intervention %>%
 
 ```{r, fig.width=10, fig.height=10}
 #| label: fig-effort-over-time-no-network
-p <- effort_plot(binned_effort_no_network, "turbo")
+p <- effort_plot(binned_effort_no_network, "turbo") +
+  labs(x = NULL, y = "Effort of teams", fill = "Number of teams")
 p
 ```
 
@@ -291,3 +294,6 @@ p
 plotly::ggplotly(p)
 ```
 
+```{r}
+spark_disconnect(sc)
+```
