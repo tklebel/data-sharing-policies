@@ -54,6 +54,14 @@ df <- spark_read_csv(
   path = "/tklebel/data_sharing_abm/vary_incentives.csv.bz2",
   memory = TRUE
 )
+
+
+high_clustering <- spark_read_parquet(
+  sc, "high_clustering",
+  path = "/tklebel/data_sharing_abm/vary_incentives_individuals_clustered_re_arranged.parquet",
+  memory = TRUE
+)
+
 ```
 
 
@@ -174,3 +182,120 @@ p1 / p2 +
   plot_annotation(tag_levels = "A")
 ```
 
+# Sub-analysis for 30% incentive with high clustering
+Question: why is the rate of sharing here much higher than in lower or higher 
+incentives?
+
+## Effort development
+```{r}
+high_clustering_intervention <- high_clustering %>% 
+  filter(fundedshare == .1, maxinitialutility == -4)
+
+high_clustering_effort <- high_clustering_intervention %>% 
+  group_by(step, sharingincentive, funded) %>% 
+  summarise(mean_effort = mean(effort),
+            sd_effort = sd(effort)) %>% 
+  collect()
+```
+
+```{r}
+plot_effort <- function(df) {
+  df %>% 
+    ggplot(aes(step, mean_effort, group = funded)) +
+    geom_ribbon(aes(ymin = mean_effort - sd_effort,
+                    ymax = mean_effort + sd_effort), 
+                  fill = "grey40", alpha = .15, show.legend = FALSE) +
+    geom_line(aes(y = mean_effort, colour = funded)) +
+    facet_wrap(vars(sharingincentive), nrow = 2) +
+    colorspace::scale_colour_discrete_qualitative() +
+    theme(legend.position = "top")
+}
+```
+
+
+```{r, fig.width=7, fig.height=6}
+#| label: fig-effort-no-network
+#| fig-cap: Effort of teams averaged across 100 runs. 
+better_pal <- colorspace::sequential_hcl(5, palette = "Inferno")
+
+p2 <- high_clustering_effort %>% 
+  mutate(
+    funded = factor(
+      funded, levels = c(TRUE, FALSE),
+      labels = c("Funded teams", "Unfunded teams")
+      )) %>% 
+  ggplot(aes(step, mean_effort, group = funded)) +
+  geom_ribbon(aes(ymin = mean_effort - sd_effort,
+                  ymax = mean_effort + sd_effort), 
+                fill = "grey40", alpha = .15, show.legend = FALSE) +
+  geom_line(aes(y = mean_effort, colour = funded)) +
+  facet_wrap(vars(sharingincentive), nrow = 3) +
+  coord_cartesian(xlim = c(0, 1500)) +
+  scale_colour_manual(values = c(better_pal[2], better_pal[4])) +
+  theme(legend.position = c(.85, .15)) +
+  labs(y = "Effort of teams", x = NULL, colour = NULL)
+```
+
+```{r}
+#| label: fig-effort-under-high-clustering
+p2
+```
+
+
+## Correlations
+```{r}
+correlations_high_clustering <- high_clustering_intervention %>% 
+  group_by(step, sharingincentive, run_number) %>% 
+  summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
+            cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
+  group_by(step, sharingincentive) %>% 
+  summarise(mean_cor_funding = mean(cor_funding),
+            sd_cor_funding = sd(cor_funding),
+            mean_cor_init_resources = mean(cor_init_resources),
+            sd_cor_init_resources = sd(cor_init_resources)) %>% 
+  collect()
+```
+
+
+```{r}
+pdata <- correlations_high_clustering %>% 
+  pivot_longer(starts_with("mean"), values_to = "y", names_pattern = "mean_(.*)",
+               names_to = "outcome_var") %>% 
+  mutate(sharingincentive = scales::percent(sharingincentive, accuracy = 1),
+          ymin = case_when(
+            outcome_var == "cor_funding" ~ y - sd_cor_funding,
+            outcome_var == "cor_init_resources" ~ y - sd_cor_init_resources
+          ), 
+          ymax = case_when(
+            outcome_var == "cor_funding" ~ y + sd_cor_funding,
+            outcome_var == "cor_init_resources" ~ y + sd_cor_init_resources
+          ),
+         outcome_var = case_match(
+           outcome_var,
+           "cor_funding" ~ "Funding vs. previous funding",
+           "cor_init_resources" ~ "Funding vs. initial resources"
+          ))
+```
+
+
+```{r, fig.width=10, fig.height=7}
+#| label: fig-path-dependency-under-high-clustering
+pdata %>% 
+  ggplot(aes(step, y, group = sharingincentive)) +
+    geom_ribbon(aes(ymin = ymin, ymax = ymax),
+                fill = "grey40", alpha = .2, show.legend = FALSE) +
+    geom_line(aes(colour = sharingincentive), show.legend = TRUE) +
+    facet_wrap(vars(outcome_var), nrow = 2) +
+    colorspace::scale_colour_discrete_sequential(palette = "Viridis") +
+    labs(x = NULL,
+         y = "Correlation (Pearson)",
+         colour = "Sharing incentive") +
+  theme(legend.position = "top")
+```
+
+Main answer: there seems to be a sweetspot between costs and payoff. There is
+lower short-term path-dependency. It seems to enable a higher portion of teams
+keeping up effort.
+
+Since this is also present for random and low clustering networks, this is 
+unlikely to be an artefact of the network structures themselves.
