@@ -246,3 +246,6 @@ p1 + p2 + p3 +
   theme(legend.position = "top")
 ```
 
+```{r}
+spark_disconnect(sc)
+```
