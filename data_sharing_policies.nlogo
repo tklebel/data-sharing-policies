@@ -117,7 +117,7 @@ to share-data
       type ifelse-value shared-data? [ "i shared data" ] [ "i did NOT share data" ]
     ]
 
-    set resources resources - (1 / (n-teams * 10)) * inv_effort ; costs are up to 10% of base funding budget
+    set resources resources - .1 * (1 / n-teams) * inv_effort ; costs are up to 10% of base funding budget
   ]
 end
 
