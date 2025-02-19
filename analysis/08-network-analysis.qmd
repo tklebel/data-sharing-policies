@@ -299,3 +299,7 @@ keeping up effort.
 
 Since this is also present for random and low clustering networks, this is 
 unlikely to be an artefact of the network structures themselves.
+
+```{r}
+spark_disconnect(sc)
+```
