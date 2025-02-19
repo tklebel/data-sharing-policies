@@ -117,7 +117,7 @@ to share-data
       type ifelse-value shared-data? [ "i shared data" ] [ "i did NOT share data" ]
     ]
 
-    set resources resources - .1 * (1 / n-teams) * inv_effort ; costs are up to 10% of base funding budget
+    set resources resources - sharing-costs-cap * (1 / n-teams) * inv_effort ; costs are up to 10% of base funding budget
   ]
 end
 
@@ -774,6 +774,21 @@ debug?
 1
 1
 -1000
+
+SLIDER
+57
+533
+229
+566
+sharing-costs-cap
+sharing-costs-cap
+0
+.5
+0.1
+.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
