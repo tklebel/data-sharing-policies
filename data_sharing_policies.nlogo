@@ -1561,7 +1561,7 @@ NetLogo 6.3.0
       <value value="4"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="sharing-costs-sensitivity" repetitions="1000" runMetricsEveryStep="true">
+  <experiment name="sharing-costs-sensitivity" repetitions="100" runMetricsEveryStep="true">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
@@ -1569,7 +1569,7 @@ NetLogo 6.3.0
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
-    <steppedValueSet variable="sharing-costs-cap" first="0" step="0.01" last="0.5"/>
+    <steppedValueSet variable="sharing-costs-cap" first="0" step="0.1" last="0.5"/>
     <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
     <enumeratedValueSet variable="application-penalty">
       <value value="0.05"/>
