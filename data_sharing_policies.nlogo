@@ -1603,6 +1603,59 @@ NetLogo 6.3.0
       <value value="-4"/>
     </enumeratedValueSet>
   </experiment>
+  <experiment name="sharing-costs-sensitivity_high_res" repetitions="100" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>%-sharing</metric>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-costs-cap" first="0" step="0.01" last="0.1"/>
+    <enumeratedValueSet variable="sharing-incentive">
+      <value value="0"/>
+      <value value="0.1"/>
+      <value value="0.13"/>
+      <value value="0.16"/>
+      <value value="0.2"/>
+      <value value="0.22"/>
+      <value value="0.24"/>
+      <value value="0.26"/>
+      <value value="0.28"/>
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;clustered&quot;"/>
+      <value value="&quot;fragmented&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+    </enumeratedValueSet>
+  </experiment>
 </experiments>
 @#$#@#$#@
 @#$#@#$#@
