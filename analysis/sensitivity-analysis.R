@@ -114,6 +114,8 @@ summarised_table %>%
   geom_line() +
   facet_grid(rows = vars(fundedshare),
              cols = vars(sharingincentive))
+
+ggsave("analysis/sensitivity_plot.png", width = 15, height = 15)
   
 # only for low incentives (up to .3) there are meaningful differences. 
 # high costs dont really make a difference, but there is more to explore between
