@@ -1,0 +1,11 @@
+../NetLogo-6.4.0-64/NetLogo_Console --headless \
+  --model "data_sharing_policies.nlogo" \
+  --experiment "sharing-costs-sensitivity" \
+  --table outputs/sharing-costs-sensitivity.csv
+  
+sed -i '1,6d' outputs/sharing-costs-sensitivity.csv
+pbzip2 outputs/sharing-costs-sensitivity.csv
+
+
+# Column names
+# "\"[run number]\",\"initial-norm\",\"sharing-costs-cap\",\"sharing-incentive\",\"application-penalty\",\"resources-dist\",\"proposal-sigma\",\"n-teams\",\"third-party-funding-ratio\",\"utility-change\",\"network\",\"funded-share\",\"data-sharing?\",\"max-initial-utility\",\"[step]\",\"%-sharing\""

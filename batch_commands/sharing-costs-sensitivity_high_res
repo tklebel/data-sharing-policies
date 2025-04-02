@@ -1,0 +1,8 @@
+../NetLogo-6.4.0-64/NetLogo_Console --headless \
+  --model "data_sharing_policies.nlogo" \
+  --experiment "sharing-costs-sensitivity_high_res" \
+  --table outputs/sharing-costs-sensitivity_high_res.csv
+  
+sed -i '1,6d' outputs/sharing-costs-sensitivity_high_res.csv
+pbzip2 outputs/sharing-costs-sensitivity_high_res.csv
+
