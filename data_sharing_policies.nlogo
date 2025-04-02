@@ -1656,6 +1656,48 @@ NetLogo 6.3.0
       <value value="-4"/>
     </enumeratedValueSet>
   </experiment>
+  <experiment name="sigma-sensitivity" repetitions="100" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>%-sharing</metric>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sharing-costs-cap">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="proposal-sigma" first="0.05" step="0.05" last="0.3"/>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;clustered&quot;"/>
+      <value value="&quot;fragmented&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+    </enumeratedValueSet>
+  </experiment>
 </experiments>
 @#$#@#$#@
 @#$#@#$#@
