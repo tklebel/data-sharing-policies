@@ -1764,6 +1764,7 @@ NetLogo 6.3.0
     <go>go</go>
     <timeLimit steps="3000"/>
     <metric>individual-data</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
@@ -1806,6 +1807,7 @@ NetLogo 6.3.0
     <go>go</go>
     <timeLimit steps="3000"/>
     <metric>individual-data</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
@@ -1848,6 +1850,7 @@ NetLogo 6.3.0
     <go>go</go>
     <timeLimit steps="3000"/>
     <metric>individual-data</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
