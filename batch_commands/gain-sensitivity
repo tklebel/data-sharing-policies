@@ -1,0 +1,7 @@
+../NetLogo-6.4.0-64/NetLogo_Console --headless \
+  --model "data_sharing_policies.nlogo" \
+  --experiment "gain-sensitivity" \
+  --table outputs/gain-sensitivity.csv
+  
+sed -i '1,6d' outputs/gain-sensitivity.csv
+pbzip2 outputs/gain-sensitivity.csv
