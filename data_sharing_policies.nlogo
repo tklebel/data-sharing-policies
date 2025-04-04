@@ -1758,7 +1758,7 @@ NetLogo 6.3.0
     </enumeratedValueSet>
     <steppedValueSet variable="gain" first="0" step="0.1" last="2"/>
   </experiment>
-  <experiment name="sharing-costs-sensitivity-individuals" repetitions="100" runMetricsEveryStep="true">
+  <experiment name="sharing-costs-sensitivity-individuals" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
@@ -1801,7 +1801,7 @@ NetLogo 6.3.0
       <value value="-4"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="sigma-sensitivity-individuals" repetitions="100" runMetricsEveryStep="true">
+  <experiment name="sigma-sensitivity-individuals" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
@@ -1844,7 +1844,7 @@ NetLogo 6.3.0
       <value value="-4"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="gain-sensitivity-individuals" repetitions="100" runMetricsEveryStep="true">
+  <experiment name="gain-sensitivity-individuals" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
