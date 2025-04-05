@@ -1,0 +1,7 @@
+../NetLogo-6.4.0-64/NetLogo_Console --headless \
+  --model "data_sharing_policies.nlogo" \
+  --experiment "sigma-sensitivity-individuals" \
+  --table outputs/sigma-sensitivity-individuals.csv
+  
+sed -i '1,6d' outputs/sigma-sensitivity-individuals.csv
+pbzip2 outputs/sigma-sensitivity-individuals.csv
