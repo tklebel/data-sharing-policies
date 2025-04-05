@@ -1147,7 +1147,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.3.0
+NetLogo 6.4.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -1576,11 +1576,14 @@ NetLogo 6.3.0
       <value value="4"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="sharing-costs-sensitivity" repetitions="100" runMetricsEveryStep="true">
+  <experiment name="sharing-costs-sensitivity" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
     <metric>%-sharing</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
@@ -1618,11 +1621,14 @@ NetLogo 6.3.0
       <value value="-4"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="sharing-costs-sensitivity_high_res" repetitions="100" runMetricsEveryStep="true">
+  <experiment name="sharing-costs-sensitivity_high_res" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
     <metric>%-sharing</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
@@ -1671,11 +1677,14 @@ NetLogo 6.3.0
       <value value="-4"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="sigma-sensitivity" repetitions="100" runMetricsEveryStep="true">
+  <experiment name="sigma-sensitivity" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
     <metric>%-sharing</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
@@ -1713,11 +1722,14 @@ NetLogo 6.3.0
       <value value="-4"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="gain-sensitivity" repetitions="100" runMetricsEveryStep="true">
+  <experiment name="gain-sensitivity" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="3000"/>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
     <metric>%-sharing</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
     <enumeratedValueSet variable="initial-norm">
       <value value="0"/>
     </enumeratedValueSet>
