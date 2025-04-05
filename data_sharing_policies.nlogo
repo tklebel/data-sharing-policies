@@ -1890,6 +1890,7 @@ NetLogo 6.3.0
     </enumeratedValueSet>
     <enumeratedValueSet variable="gain">
       <value value="0"/>
+      <value value="0.25"/>
       <value value="0.5"/>
       <value value="1"/>
       <value value="1.5"/>
