@@ -4,4 +4,4 @@
   --table outputs/gain-sensitivity.csv
   
 sed -i '1,6d' outputs/gain-sensitivity.csv
-pbzip2 outputs/gain-sensitivity.csv
+# pbzip2 outputs/gain-sensitivity.csv

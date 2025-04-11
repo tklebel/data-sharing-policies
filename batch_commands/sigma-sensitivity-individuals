@@ -4,4 +4,4 @@
   --table outputs/sigma-sensitivity-individuals.csv
   
 sed -i '1,6d' outputs/sigma-sensitivity-individuals.csv
-pbzip2 outputs/sigma-sensitivity-individuals.csv
+# pbzip2 outputs/sigma-sensitivity-individuals.csv
