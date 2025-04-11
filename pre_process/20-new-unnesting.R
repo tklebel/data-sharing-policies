@@ -108,5 +108,110 @@ spark_write_parquet(
 # Print summary to confirm success
 cat("Processing complete! Full dataset transformation finished.\n")
 
+# 
+# ## For sigma ------
+# # Read the full parquet file
+# sigma_df <- spark_read_csv(sc, "sigma_individuals",
+#                                  path = "outputs/sigma-sensitivity-individuals.csv",
+#                                  memory = FALSE)
+# 
+# # Register as a table - using the full dataset
+# sdf_register(sigma_df, "sigma_individuals")
+# 
+# sql <- "
+# WITH cleaned_data AS (
+#   SELECT 
+#     *,
+#     regexp_replace(regexp_replace(individualdata, '^\\\\[\\\\[', ''), '\\\\]\\\\]$', '') AS clean_data
+#   FROM sigma_individuals
+# )
+# SELECT 
+#   t.`run_number`, 
+#   t.`proposalsigma`,
+#   t.`sharingincentive`,
+#   t.`network`,
+#   t.`fundedshare`,
+#   t.`datasharing`,
+#   t.`step`,
+#   cast(split(s.item, ' ')[0] as double) as who,
+#   cast(split(s.item, ' ')[1] as double) as initial_resources,
+#   cast(split(s.item, ' ')[2] as double) as resources,
+#   cast(split(s.item, ' ')[3] as double) as total_funding,
+#   cast(split(s.item, ' ')[4] as double) as effort,
+#   CASE WHEN split(s.item, ' ')[5] = 'true' THEN true ELSE false END as shared_data,
+#   CASE WHEN split(s.item, ' ')[6] = 'true' THEN true ELSE false END as shared_data_lag,
+#   CASE WHEN split(s.item, ' ')[7] = 'true' THEN true ELSE false END as funded,
+#   CASE WHEN split(s.item, ' ')[8] = 'true' THEN true ELSE false END as funded_lag
+# FROM 
+#   cleaned_data t
+# LATERAL VIEW 
+#   explode(split(clean_data, '\\\\] \\\\[')) s AS item
+# "
+# 
+# # Execute SQL using Spark's native SQL interface
+# result <- spark_session(sc) %>%
+#   invoke("sql", sql) %>%
+#   sdf_register("re_arranged")
+# 
+# # Write to production parquet file (not test)
+# spark_write_parquet(
+#   tbl(sc, "re_arranged"),
+#   path = "outputs/sigma-sensitivity-individuals_re_arranged.parquet",
+#   mode = "overwrite"
+# )
+
+
+
+# ## For gain ------
+# # Read the full parquet file
+# gain_df <- spark_read_csv(sc, "gain_individuals",
+#                            path = "outputs/gain-sensitivity-individuals.csv",
+#                            memory = FALSE)
+# 
+# # Register as a table - using the full dataset
+# sdf_register(gain_df, "gain_individuals")
+# 
+# sql <- "
+# WITH cleaned_data AS (
+#   SELECT 
+#     *,
+#     regexp_replace(regexp_replace(individualdata, '^\\\\[\\\\[', ''), '\\\\]\\\\]$', '') AS clean_data
+#   FROM gain_individuals
+# )
+# SELECT 
+#   t.`run_number`, 
+#   t.`gain`,
+#   t.`sharingincentive`,
+#   t.`network`,
+#   t.`fundedshare`,
+#   t.`datasharing`,
+#   t.`step`,
+#   cast(split(s.item, ' ')[0] as double) as who,
+#   cast(split(s.item, ' ')[1] as double) as initial_resources,
+#   cast(split(s.item, ' ')[2] as double) as resources,
+#   cast(split(s.item, ' ')[3] as double) as total_funding,
+#   cast(split(s.item, ' ')[4] as double) as effort,
+#   CASE WHEN split(s.item, ' ')[5] = 'true' THEN true ELSE false END as shared_data,
+#   CASE WHEN split(s.item, ' ')[6] = 'true' THEN true ELSE false END as shared_data_lag,
+#   CASE WHEN split(s.item, ' ')[7] = 'true' THEN true ELSE false END as funded,
+#   CASE WHEN split(s.item, ' ')[8] = 'true' THEN true ELSE false END as funded_lag
+# FROM 
+#   cleaned_data t
+# LATERAL VIEW 
+#   explode(split(clean_data, '\\\\] \\\\[')) s AS item
+# "
+# 
+# # Execute SQL using Spark's native SQL interface
+# result <- spark_session(sc) %>%
+#   invoke("sql", sql) %>%
+#   sdf_register("re_arranged")
+# 
+# # Write to production parquet file (not test)
+# spark_write_parquet(
+#   tbl(sc, "re_arranged"),
+#   path = "outputs/gain-sensitivity-individuals_re_arranged.parquet",
+#   mode = "overwrite",
+#   partition_by = "network"
+# )
 
 spark_disconnect(sc)

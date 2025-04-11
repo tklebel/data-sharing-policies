@@ -3,76 +3,92 @@ library(dplyr)
 library(here)
 library(ggplot2)
 
+source("R/functions.R")
+
 # Port forwarding for better UI access:
 #   ssh -L 4040:localhost:4040 mcmc
 # Then access the UI at http://localhost:4040 on your local machine
 
+
+# Configuration optimized for 36-core, 128GB machine
 options(sparklyr.log.console = TRUE)
 conf <- spark_config()
 
-# Memory allocation - scaled proportionally (75% of available RAM)
-conf$spark.driver.memory <- "96g"                    # From 48g to 96g
-conf$`sparklyr.shell.driver-memory` <- "96g"         # From 48g to 96g
+# Memory settings - optimized for 128GB RAM
+conf$spark.driver.memory <- "110g"
+conf$`sparklyr.shell.driver-memory` <- "110g"
+conf$spark.driver.maxResultSize <- "20g"
 
-# Increase result size limit proportionally
-conf$spark.driver.maxResultSize <- "16g"             # From 8g to 16g
+# Parallelism settings - optimized for 36 cores
+conf$spark.sql.files.maxPartitionBytes <- "256m"
+conf$spark.sql.shuffle.partitions <- 360
+conf$spark.default.parallelism <- 72
 
-# File processing adjustments
-conf$spark.sql.files.maxPartitionBytes <- "256m"     # Keeping same (good balance)
-conf$spark.sql.shuffle.partitions <- 224             # From 112 to 224 (8 × cores)
-
-# Keeping these adaptive settings (they work well)
+# Keep adaptive query execution enabled
 conf$spark.sql.adaptive.enabled <- "true"
 conf$spark.sql.adaptive.coalescePartitions.enabled <- "true"
 conf$spark.sql.adaptive.skewJoin.enabled <- "true"
+conf$spark.sql.adaptive.skewJoin.skewedPartitionFactor <- 5
+conf$spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes <- "512m"
 
-# Keeping disk spillage settings (crucial for large files)
+# Memory and shuffle optimization
 conf$spark.sql.shuffle.spill <- "true"
 conf$spark.shuffle.spill.compress <- "true"
 conf$spark.shuffle.compress <- "true"
 conf$spark.shuffle.file.buffer <- "1m"
+conf$spark.memory.fraction <- 0.8
+conf$spark.memory.storageFraction <- 0.3
 
-# Slightly increased broadcast threshold
-conf$spark.sql.autoBroadcastJoinThreshold <- "128m"  # From 64m to 128m
+# Broadcast join optimization
+conf$spark.sql.autoBroadcastJoinThreshold <- "256m"
 
-# Keeping serialization settings
+# Serialization settings
 conf$spark.serializer <- "org.apache.spark.serializer.KryoSerializer"
+conf$spark.kryo.registrationRequired <- "false"
+conf$spark.kryo.unsafe <- "true"
 
-# Keeping speculative execution settings
+# Speculation settings
 conf$spark.speculation <- "true"
+conf$spark.speculation.multiplier <- 1.5
+conf$spark.speculation.quantile <- 0.9
 conf$spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version <- "2"
 
-# CPU settings - using same proportion of cores but more total
-sc <- spark_connect(master = "local[28]", config = conf, version = "3.5.0")
+# Off-heap memory settings
+conf$spark.memory.offHeap.enabled <- "true"
+conf$spark.memory.offHeap.size <- "20g"
 
-## Initial sensitivity check
+# Connect using 32 cores (leaving 4 for system)
+sc <- spark_connect(master = "local[32]", config = conf, version = "3.5.0")
 
-# sensitive <- spark_read_csv(sc, "sensitivity",
-#                             path = here("outputs/sharing-costs-sensitivity.csv.bz2"),
-#                             memory = FALSE)
-
-# initialnorm = 0
-# resourcedist = uniform
-# applicationpenalty = 0.05
-# proposalsigma ) 0.15
-# nteams = 100
-# thirdpartyfundingratio = 2
+# ## Sharing costs  ------
 # 
-
-# core_set <- sensitive %>% 
-#   select(run_number, step, sharingcostscap, sharingincentive, network, fundedshare, sharing) 
-#   
-
+# sensitive <- spark_read_csv(sc, "sensitivity",
+#                             path = here("outputs/sharing-costs-sensitivity.csv"),
+#                             memory = TRUE)
+# 
+# # initialnorm = 0
+# # resourcedist = uniform
+# # applicationpenalty = 0.05
+# # proposalsigma ) 0.15
+# # nteams = 100
+# # thirdpartyfundingratio = 2
+# #
+# 
+# core_set <- sensitive %>%
+#   select(run_number, step, sharingcostscap, sharingincentive, network, 
+#          fundedshare, sharing, gini_resources_of_turtles, gini_totalfunding_of_turtles)
+# 
+# 
 # spark_write_parquet(core_set, "outputs/sharing-costs-sensitivity.parquet",
 #                     mode = "overwrite",
 #                     partition_by = c("network", "sharingcostscap")
 # )
 
-## Sensitivity high-res
-
+# # Sensitivity high-res ------
+# 
 # sensitive <- spark_read_csv(sc, "sensitivity",
-#                             path = here("outputs/sharing-costs-sensitivity_high_res.csv.bz2"),
-#                             memory = FALSE)
+#                             path = here("outputs/sharing-costs-sensitivity_high_res.csv"),
+#                             memory = TRUE)
 # 
 # # initialnorm = 0
 # # resourcedist = uniform
@@ -80,13 +96,60 @@ sc <- spark_connect(master = "local[28]", config = conf, version = "3.5.0")
 # # proposalsigma = 0.15
 # # nteams = 100
 # # thirdpartyfundingratio = 2
-# # 
+# #
 # 
 # core_set <- sensitive %>%
-#   select(run_number, step, sharingcostscap, sharingincentive, network, fundedshare, sharing)
+#   select(run_number, step, sharingcostscap, sharingincentive, network, 
+#          fundedshare, sharing, gini_resources_of_turtles, gini_totalfunding_of_turtles)
 # 
 # 
 # spark_write_parquet(core_set, "outputs/sharing-costs-sensitivity_high_res.parquet",
+#                     mode = "overwrite",
+#                     partition_by = c("network", "fundedshare")
+# )
+
+# # sigma sensitivity --------------------------
+# sigma <- spark_read_csv(sc, "sigma",
+#                             path = here("outputs/sigma-sensitivity.csv"),
+#                             memory = TRUE)
+# 
+# # initialnorm = 0
+# # resourcedist = uniform
+# # applicationpenalty = 0.05
+# # proposalsigma = 0.15
+# # nteams = 100
+# # thirdpartyfundingratio = 2
+# #
+# 
+# core_set <- sigma %>%
+#   select(run_number, step, proposalsigma, sharingincentive, network, fundedshare,
+#          sharing, gini_resources_of_turtles, gini_totalfunding_of_turtles)
+# 
+# 
+# spark_write_parquet(core_set, "outputs/sigma-sensitivity.parquet",
+#                     mode = "overwrite",
+#                     partition_by = c("network", "fundedshare")
+# )
+# 
+# # gain sensitivity -------------
+# gain <- spark_read_csv(sc, "gain",
+#                             path = here("outputs/gain-sensitivity.csv"),
+#                             memory = TRUE)
+# 
+# # initialnorm = 0
+# # resourcedist = uniform
+# # applicationpenalty = 0.05
+# # proposalsigma = 0.15
+# # nteams = 100
+# # thirdpartyfundingratio = 2
+# #
+# 
+# core_set <- gain %>%
+#   select(run_number, step, gain, sharingincentive, network, fundedshare,
+#          sharing, gini_resources_of_turtles, gini_totalfunding_of_turtles)
+# 
+# 
+# spark_write_parquet(core_set, "outputs/gain-sensitivity.parquet",
 #                     mode = "overwrite",
 #                     partition_by = c("network", "fundedshare")
 # )
