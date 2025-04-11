@@ -1,0 +1,576 @@
+---
+title: "Sensitivity analysis - Figure 1"
+date: today
+author: "Thomas Klebel"
+format: 
+  html:
+    embed-resources: true
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(fig.width = 10, fig.height = 10, dpi = 300, echo = FALSE,
+                      warning = FALSE, message = FALSE)
+```
+
+
+```{r}
+library(sparklyr)
+library(dplyr)
+library(here)
+library(ggplot2)
+# library(arrow)
+
+theme_set(theme_light())
+
+# Port forwarding for better UI access:
+#   ssh -L 4040:localhost:4040 username@your-server
+# Then access the UI at http://localhost:4040 on your local machine
+
+# Configuration optimized for 36-core, 128GB machine
+options(sparklyr.log.console = FALSE)
+conf <- spark_config()
+
+# Memory settings - optimized for 128GB RAM
+conf$spark.driver.memory <- "110g"
+conf$`sparklyr.shell.driver-memory` <- "110g"
+conf$spark.driver.maxResultSize <- "20g"
+
+# Parallelism settings - optimized for 36 cores
+conf$spark.sql.files.maxPartitionBytes <- "256m"
+conf$spark.sql.shuffle.partitions <- 360
+conf$spark.default.parallelism <- 72
+
+# Keep adaptive query execution enabled
+conf$spark.sql.adaptive.enabled <- "true"
+conf$spark.sql.adaptive.coalescePartitions.enabled <- "true"
+conf$spark.sql.adaptive.skewJoin.enabled <- "true"
+conf$spark.sql.adaptive.skewJoin.skewedPartitionFactor <- 5
+conf$spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes <- "512m"
+
+# Memory and shuffle optimization
+conf$spark.sql.shuffle.spill <- "true"
+conf$spark.shuffle.spill.compress <- "true"
+conf$spark.shuffle.compress <- "true"
+conf$spark.shuffle.file.buffer <- "1m"
+conf$spark.memory.fraction <- 0.8
+conf$spark.memory.storageFraction <- 0.3
+
+# Broadcast join optimization
+conf$spark.sql.autoBroadcastJoinThreshold <- "256m"
+
+# Serialization settings
+conf$spark.serializer <- "org.apache.spark.serializer.KryoSerializer"
+conf$spark.kryo.registrationRequired <- "false"
+conf$spark.kryo.unsafe <- "true"
+
+# Speculation settings
+conf$spark.speculation <- "true"
+conf$spark.speculation.multiplier <- 1.5
+conf$spark.speculation.quantile <- 0.9
+conf$spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version <- "2"
+
+# Off-heap memory settings
+conf$spark.memory.offHeap.enabled <- "true"
+conf$spark.memory.offHeap.size <- "20g"
+
+# Connect using 32 cores (leaving 4 for system)
+sc <- spark_connect(master = "local[32]", config = conf, version = "3.5.0")
+
+```
+
+
+# Sharing costs
+## Figure 1 - Panel A
+
+```{r}
+# read the data
+overview_set <- spark_read_parquet(sc, name = "overview_set_costs_cap", 
+                               path = here("outputs/sharing-costs-sensitivity.parquet/"),
+                               memory = FALSE)
+
+summarised_table <- overview_set %>%
+  filter(network == "none") %>% 
+  group_by(sharingcostscap, sharingincentive, network, fundedshare, step) %>%
+  summarise(n = n(),
+            mean_gini = mean(gini_resources_of_turtles),
+            sd_gini = sd(gini_resources_of_turtles),
+            mean_cumulative_gini = mean(gini_totalfunding_of_turtles),
+            sd_cumulative_gini = sd(gini_totalfunding_of_turtles),
+            mean_sharing = mean(sharing),
+            sd_sharing = sd(sharing)) %>% 
+    collect()
+```
+
+### Rate of sharing
+```{r}
+summarised_table %>% 
+  ggplot(aes(step, mean_sharing, colour = as.factor(sharingcostscap), group = sharingcostscap)) +
+  geom_line() +
+  facet_grid(rows = vars(fundedshare),
+             cols = vars(sharingincentive)) +
+  labs(title = "Outcome: mean rate of sharing",
+       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
+       caption = "Network: None") +
+  theme(legend.position = "top")
+```
+
+### Current gini
+```{r}
+summarised_table %>% 
+  ggplot(aes(step, mean_gini, colour = as.factor(sharingcostscap), group = sharingcostscap)) +
+  geom_line() +
+  facet_grid(rows = vars(fundedshare),
+             cols = vars(sharingincentive)) +
+  labs(title = "Outcome: mean current gini",
+       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
+       caption = "Network: None") +
+  theme(legend.position = "top")
+```
+
+### Total Gini
+```{r}
+summarised_table %>% 
+  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(sharingcostscap), group = sharingcostscap)) +
+  geom_line() +
+  facet_grid(rows = vars(fundedshare),
+             cols = vars(sharingincentive)) +
+  labs(title = "Outcome: mean total gini",
+       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
+       caption = "Network: None") +
+  theme(legend.position = "top")
+```
+
+
+## Panel B
+
+```{r}
+## Analyse individual level data -----
+sharing_costs_individuals <- spark_read_parquet(
+  sc,
+  name = "sharing_costs_individuals",
+  path = here("outputs/sharing-costs-sensitivity-individuals_re_arranged.parquet/"),
+  memory = FALSE)
+
+# Effort development
+no_network_intervention <- sharing_costs_individuals %>% 
+  filter(fundedshare == .1, network == "none")
+
+no_network_effort <- no_network_intervention %>% 
+  group_by(step, sharingincentive, sharingcostscap, funded) %>% 
+  summarise(mean_effort = mean(effort),
+            sd_effort = sd(effort)) %>% 
+  collect()
+
+# better_pal <- colorspace::sequential_hcl(5, palette = "Viridis")
+```
+
+
+```{r, fig.width=10, fig.height=10}
+no_network_effort %>% 
+  mutate(
+    funded = factor(
+      funded, levels = c(TRUE, FALSE),
+      labels = c("Funded teams", "Unfunded teams")
+    ),
+    sharingincentive = paste0(
+      "Incentive: ", scales::percent(sharingincentive)
+    )) %>% 
+  ggplot(aes(step, mean_effort, group = as.factor(sharingcostscap))) +
+  geom_ribbon(aes(ymin = mean_effort - sd_effort,
+                  ymax = mean_effort + sd_effort), 
+              fill = "grey40", alpha = .05, show.legend = FALSE) +
+  geom_line(aes(y = mean_effort, colour = as.factor(sharingcostscap))) +
+  facet_grid(vars(sharingincentive),
+             vars(funded)) +
+  theme(legend.position = "top") +
+  # coord_cartesian(xlim = c(0, 1500)) +
+  # scale_colour_manual(values = c(better_pal[2], better_pal[4])) +
+  labs(y = "Effort of teams", x = NULL, colour = "Cap on sharing costs",
+       caption = "Network: None")
+```
+
+
+Overall, this output figure (difference between funded and unfunded teams)
+is not very sensitive to the sharing costs. Only the case with 30% incentives
+shows a case where teams are sensitive to costs (faster uptake with no costs,
+but long-term lower effort)
+In network scenarios, no costs lead to higher effort, particularly also among
+the unfunded teams.
+
+
+
+## Panel C
+```{r}
+correlations_no_network <- no_network_intervention %>% 
+  group_by(step, sharingincentive, sharingcostscap, run_number) %>% 
+  summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
+            cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
+  group_by(step, sharingincentive, sharingcostscap) %>% 
+  summarise(mean_cor_funding = mean(cor_funding),
+            sd_cor_funding = sd(cor_funding),
+            mean_cor_init_resources = mean(cor_init_resources),
+            sd_cor_init_resources = sd(cor_init_resources)) %>% 
+  collect()
+```
+
+
+```{r}
+pdata <- correlations_no_network %>% 
+  pivot_longer(starts_with("mean"), values_to = "y", names_pattern = "mean_(.*)",
+               names_to = "outcome_var") %>% 
+  mutate(sharingincentive = scales::percent(sharingincentive, accuracy = 1),
+          ymin = case_when(
+            outcome_var == "cor_funding" ~ y - sd_cor_funding,
+            outcome_var == "cor_init_resources" ~ y - sd_cor_init_resources
+          ), 
+          ymax = case_when(
+            outcome_var == "cor_funding" ~ y + sd_cor_funding,
+            outcome_var == "cor_init_resources" ~ y + sd_cor_init_resources
+          ),
+         outcome_var = case_match(
+           outcome_var,
+           "cor_funding" ~ "Funding vs. previous funding",
+           "cor_init_resources" ~ "Funding vs. initial resources"
+          ))
+```
+
+
+```{r, fig.height=10, fig.width=7}
+pdata %>% 
+  ggplot(aes(step, y, group = as.factor(sharingcostscap),
+             colour = as.factor(sharingcostscap))) +
+    geom_line() +
+    facet_grid(rows = vars(sharingincentive), 
+               cols = vars(outcome_var)) +
+  labs(x = NULL,
+         y = "Correlation (Pearson)") +
+  theme(legend.position = "top")
+```
+
+
+# Sigma
+## Figure 1 - Panel A
+
+```{r}
+# read the data
+overview_set <- spark_read_parquet(sc, name = "overview_set_sigma", 
+                               path = here("outputs/sigma-sensitivity.parquet"),
+                               memory = FALSE)
+
+summarised_table <- overview_set %>%
+  filter(network == "none") %>% 
+  group_by(proposalsigma, sharingincentive, network, fundedshare, step) %>%
+  summarise(n = n(),
+            mean_gini = mean(gini_resources_of_turtles),
+            sd_gini = sd(gini_resources_of_turtles),
+            mean_cumulative_gini = mean(gini_totalfunding_of_turtles),
+            sd_cumulative_gini = sd(gini_totalfunding_of_turtles),
+            mean_sharing = mean(sharing),
+            sd_sharing = sd(sharing)) %>% 
+    collect()
+```
+
+### Rate of sharing
+```{r}
+summarised_table %>% 
+  ggplot(aes(step, mean_sharing, colour = as.factor(proposalsigma), group = proposalsigma)) +
+  geom_line() +
+  facet_grid(rows = vars(fundedshare),
+             cols = vars(sharingincentive)) +
+  labs(title = "Outcome: mean rate of sharing",
+       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
+       caption = "Network: None") +
+  theme(legend.position = "top")
+```
+
+### Current gini
+```{r}
+summarised_table %>% 
+  ggplot(aes(step, mean_gini, colour = as.factor(proposalsigma), group = proposalsigma)) +
+  geom_line() +
+  facet_grid(rows = vars(fundedshare),
+             cols = vars(sharingincentive)) +
+  labs(title = "Outcome: mean current gini",
+       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
+       caption = "Network: None") +
+  theme(legend.position = "top")
+```
+
+### Total Gini
+```{r}
+summarised_table %>% 
+  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(proposalsigma), group = proposalsigma)) +
+  geom_line() +
+  facet_grid(rows = vars(fundedshare),
+             cols = vars(sharingincentive)) +
+  labs(title = "Outcome: mean total gini",
+       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
+       caption = "Network: None") +
+  theme(legend.position = "top")
+```
+
+
+## Panel B
+
+```{r}
+## Analyse individual level data -----
+sigma_individuals <- spark_read_parquet(
+  sc,
+  name = "sharing_costs_individuals",
+  path = here("outputs/sigma-sensitivity-individuals_re_arranged.parquet/"),
+  memory = FALSE)
+
+# Effort development
+no_network_intervention <- sigma_individuals %>% 
+  filter(fundedshare == .1, network == "none")
+
+no_network_effort <- no_network_intervention %>% 
+  group_by(step, sharingincentive, proposalsigma, funded) %>% 
+  summarise(mean_effort = mean(effort),
+            sd_effort = sd(effort)) %>% 
+  collect()
+
+# better_pal <- colorspace::sequential_hcl(5, palette = "Viridis")
+```
+
+
+```{r, fig.width=10, fig.height=10}
+no_network_effort %>% 
+  mutate(
+    funded = factor(
+      funded, levels = c(TRUE, FALSE),
+      labels = c("Funded teams", "Unfunded teams")
+    ),
+    sharingincentive = paste0(
+      "Incentive: ", scales::percent(sharingincentive)
+    )) %>% 
+  ggplot(aes(step, mean_effort, group = as.factor(proposalsigma))) +
+  geom_ribbon(aes(ymin = mean_effort - sd_effort,
+                  ymax = mean_effort + sd_effort), 
+              fill = "grey40", alpha = .05, show.legend = FALSE) +
+  geom_line(aes(y = mean_effort, colour = as.factor(proposalsigma))) +
+  facet_grid(vars(sharingincentive),
+             vars(funded)) +
+  theme(legend.position = "top") +
+  # coord_cartesian(xlim = c(0, 1500)) +
+  # scale_colour_manual(values = c(better_pal[2], better_pal[4])) +
+  labs(y = "Effort of teams", x = NULL, colour = "Cap on sharing costs",
+       caption = "Network: None")
+```
+
+
+## Panel C
+```{r}
+correlations_no_network <- no_network_intervention %>% 
+  group_by(step, sharingincentive, proposalsigma, run_number) %>% 
+  summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
+            cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
+  group_by(step, sharingincentive, proposalsigma) %>% 
+  summarise(mean_cor_funding = mean(cor_funding),
+            sd_cor_funding = sd(cor_funding),
+            mean_cor_init_resources = mean(cor_init_resources),
+            sd_cor_init_resources = sd(cor_init_resources)) %>% 
+  collect()
+```
+
+
+```{r}
+pdata <- correlations_no_network %>% 
+  pivot_longer(starts_with("mean"), values_to = "y", names_pattern = "mean_(.*)",
+               names_to = "outcome_var") %>% 
+  mutate(sharingincentive = scales::percent(sharingincentive, accuracy = 1),
+          ymin = case_when(
+            outcome_var == "cor_funding" ~ y - sd_cor_funding,
+            outcome_var == "cor_init_resources" ~ y - sd_cor_init_resources
+          ), 
+          ymax = case_when(
+            outcome_var == "cor_funding" ~ y + sd_cor_funding,
+            outcome_var == "cor_init_resources" ~ y + sd_cor_init_resources
+          ),
+         outcome_var = case_match(
+           outcome_var,
+           "cor_funding" ~ "Funding vs. previous funding",
+           "cor_init_resources" ~ "Funding vs. initial resources"
+          ))
+```
+
+
+```{r, fig.height=10, fig.width=7}
+pdata %>% 
+  ggplot(aes(step, y, group = as.factor(proposalsigma),
+             colour = as.factor(proposalsigma))) +
+    geom_line() +
+    facet_grid(rows = vars(sharingincentive), 
+               cols = vars(outcome_var)) +
+  labs(x = NULL,
+         y = "Correlation (Pearson)") +
+  theme(legend.position = "top")
+```
+
+
+
+
+# Gain
+## Figure 1 - Panel A
+
+```{r}
+# read the data
+overview_set <- spark_read_parquet(sc, name = "overview_set_gain", 
+                               path = here("outputs/gain-sensitivity.parquet/"),
+                               memory = FALSE)
+
+summarised_table <- overview_set %>%
+  filter(network == "none") %>% 
+  group_by(gain, sharingincentive, network, fundedshare, step) %>%
+  summarise(n = n(),
+            mean_gini = mean(gini_resources_of_turtles),
+            sd_gini = sd(gini_resources_of_turtles),
+            mean_cumulative_gini = mean(gini_totalfunding_of_turtles),
+            sd_cumulative_gini = sd(gini_totalfunding_of_turtles),
+            mean_sharing = mean(sharing),
+            sd_sharing = sd(sharing)) %>% 
+    collect()
+```
+
+### Rate of sharing
+```{r}
+summarised_table %>% 
+  ggplot(aes(step, mean_sharing, colour = gain, group = gain)) +
+  geom_line() +
+  facet_grid(rows = vars(fundedshare),
+             cols = vars(sharingincentive)) +
+  labs(title = "Outcome: mean rate of sharing",
+       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
+       caption = "Network: None") +
+  theme(legend.position = "top") +
+  colorspace::scale_color_continuous_diverging(mid = 1)
+```
+
+### Current gini
+```{r}
+summarised_table %>% 
+  ggplot(aes(step, mean_gini, colour = gain, group = gain)) +
+  geom_line() +
+  facet_grid(rows = vars(fundedshare),
+             cols = vars(sharingincentive)) +
+  labs(title = "Outcome: mean current gini",
+       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
+       caption = "Network: None") +
+  theme(legend.position = "top") +
+  colorspace::scale_color_continuous_diverging(mid = 1)
+```
+
+### Total Gini
+```{r}
+summarised_table %>% 
+  ggplot(aes(step, mean_cumulative_gini, colour = gain, group = gain)) +
+  geom_line() +
+  facet_grid(rows = vars(fundedshare),
+             cols = vars(sharingincentive)) +
+  labs(title = "Outcome: mean total gini",
+       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
+       caption = "Network: None") +
+  theme(legend.position = "top") +
+  colorspace::scale_color_continuous_diverging(mid = 1)
+```
+
+
+## Panel B
+
+```{r}
+## Analyse individual level data -----
+sharing_costs_individuals <- spark_read_parquet(
+  sc,
+  name = "sharing_costs_individuals",
+  path = here("outputs/gain-sensitivity-individuals_re_arranged.parquet/"),
+  memory = FALSE)
+
+# Effort development
+no_network_intervention <- sharing_costs_individuals %>% 
+  filter(fundedshare == .1, network == "none")
+
+no_network_effort <- no_network_intervention %>% 
+  group_by(step, sharingincentive, gain, funded) %>% 
+  summarise(mean_effort = mean(effort),
+            sd_effort = sd(effort)) %>% 
+  collect()
+
+# better_pal <- colorspace::sequential_hcl(5, palette = "Viridis")
+```
+
+
+```{r, fig.width=10, fig.height=10}
+no_network_effort %>% 
+  mutate(
+    funded = factor(
+      funded, levels = c(TRUE, FALSE),
+      labels = c("Funded teams", "Unfunded teams")
+    ),
+    sharingincentive = paste0(
+      "Incentive: ", scales::percent(sharingincentive)
+    )) %>% 
+  ggplot(aes(step, mean_effort, group = as.factor(gain))) +
+  geom_line(aes(y = mean_effort, colour = as.factor(gain))) +
+  facet_grid(vars(sharingincentive),
+             vars(funded)) +
+  theme(legend.position = "top") +
+  # coord_cartesian(xlim = c(0, 1500)) +
+  # scale_colour_manual(values = c(better_pal[2], better_pal[4])) +
+  labs(y = "Effort of teams", x = NULL, colour = "Gain",
+       caption = "Network: None")
+```
+
+
+## Panel C
+```{r}
+correlations_no_network <- no_network_intervention %>% 
+  group_by(step, sharingincentive, gain, run_number) %>% 
+  summarise(cor_funding = cor(as.numeric(funded), as.numeric(funded_lag)),
+            cor_init_resources = cor(as.numeric(funded), as.numeric(initial_resources))) %>% 
+  group_by(step, sharingincentive, gain) %>% 
+  summarise(mean_cor_funding = mean(cor_funding),
+            sd_cor_funding = sd(cor_funding),
+            mean_cor_init_resources = mean(cor_init_resources),
+            sd_cor_init_resources = sd(cor_init_resources)) %>% 
+  collect()
+```
+
+
+```{r}
+pdata <- correlations_no_network %>% 
+  pivot_longer(starts_with("mean"), values_to = "y", names_pattern = "mean_(.*)",
+               names_to = "outcome_var") %>% 
+  mutate(sharingincentive = scales::percent(sharingincentive, accuracy = 1),
+          ymin = case_when(
+            outcome_var == "cor_funding" ~ y - sd_cor_funding,
+            outcome_var == "cor_init_resources" ~ y - sd_cor_init_resources
+          ), 
+          ymax = case_when(
+            outcome_var == "cor_funding" ~ y + sd_cor_funding,
+            outcome_var == "cor_init_resources" ~ y + sd_cor_init_resources
+          ),
+         outcome_var = case_match(
+           outcome_var,
+           "cor_funding" ~ "Funding vs. previous funding",
+           "cor_init_resources" ~ "Funding vs. initial resources"
+          ))
+```
+
+
+```{r, fig.height=10, fig.width=7}
+pdata %>% 
+  ggplot(aes(step, y, group = gain,
+             colour = as.factor(gain))) +
+    geom_line() +
+    facet_grid(rows = vars(sharingincentive), 
+               cols = vars(outcome_var)) +
+  labs(x = NULL,
+         y = "Correlation (Pearson)") +
+  theme(legend.position = "top") 
+```
+
+
+```{r}
+spark_disconnect(sc)
+```
+
