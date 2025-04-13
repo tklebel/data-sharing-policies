@@ -113,7 +113,15 @@ panel_a <- function(df, outcome, sensitivity_var, title,
   } 
   
   df %>% 
-    ggplot(aes(step, {{outcome}}, colour = {{sensitivity_var}}, group = {{sensitivity_var}})) +
+    ggplot(aes(step, {{outcome}}, colour = {{sensitivity_var}}, 
+               group = {{sensitivity_var}})) +
+    geom_rect(data = data.frame(
+      fundedshare = .1,  # First row
+      sharingincentive = unique(summarised_table$sharingincentive)
+    ), 
+    aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf),
+    fill = "lightgoldenrod", alpha = 0.2,
+    inherit.aes = FALSE) +
     geom_line() +
     facet_grid(rows = vars(fundedshare),
                cols = vars(sharingincentive)) +
