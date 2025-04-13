@@ -104,43 +104,43 @@ summarised_table <- overview_set %>%
     collect()
 ```
 
+```{r}
+panel_a <- function(df, outcome, sensitivity_var, title,
+                    use_factor = TRUE) {
+  
+  if (use_factor) {
+    df <- mutate(df, {{sensitivity_var}} := as.factor({{sensitivity_var}}))
+  } 
+  
+  df %>% 
+    ggplot(aes(step, {{outcome}}, colour = {{sensitivity_var}}, group = {{sensitivity_var}})) +
+    geom_line() +
+    facet_grid(rows = vars(fundedshare),
+               cols = vars(sharingincentive)) +
+    labs(title = title,
+         subtitle = "Rows: Share of funded teams; columns: sharing incentive",
+         caption = "Network: None") +
+    theme(legend.position = "top")
+}
+```
+
+
 ### Rate of sharing
 ```{r}
-summarised_table %>% 
-  ggplot(aes(step, mean_sharing, colour = as.factor(sharingcostscap), group = sharingcostscap)) +
-  geom_line() +
-  facet_grid(rows = vars(fundedshare),
-             cols = vars(sharingincentive)) +
-  labs(title = "Outcome: mean rate of sharing",
-       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
-       caption = "Network: None") +
-  theme(legend.position = "top")
+panel_a(summarised_table, mean_sharing, sharingcostscap,
+        title = "Outcome: mean rate of sharing")
 ```
 
 ### Current gini
 ```{r}
-summarised_table %>% 
-  ggplot(aes(step, mean_gini, colour = as.factor(sharingcostscap), group = sharingcostscap)) +
-  geom_line() +
-  facet_grid(rows = vars(fundedshare),
-             cols = vars(sharingincentive)) +
-  labs(title = "Outcome: mean current gini",
-       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
-       caption = "Network: None") +
-  theme(legend.position = "top")
+panel_a(summarised_table, mean_gini, sharingcostscap,
+        title = "Outcome: mean current gini")
 ```
 
 ### Total Gini
 ```{r}
-summarised_table %>% 
-  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(sharingcostscap), group = sharingcostscap)) +
-  geom_line() +
-  facet_grid(rows = vars(fundedshare),
-             cols = vars(sharingincentive)) +
-  labs(title = "Outcome: mean total gini",
-       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
-       caption = "Network: None") +
-  theme(legend.position = "top")
+panel_a(summarised_table, mean_cumulative_gini, sharingcostscap,
+        title = "Outcome: mean total gini")
 ```
 
 
@@ -273,43 +273,21 @@ summarised_table <- overview_set %>%
 
 ### Rate of sharing
 ```{r}
-summarised_table %>% 
-  ggplot(aes(step, mean_sharing, colour = as.factor(proposalsigma), group = proposalsigma)) +
-  geom_line() +
-  facet_grid(rows = vars(fundedshare),
-             cols = vars(sharingincentive)) +
-  labs(title = "Outcome: mean rate of sharing",
-       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
-       caption = "Network: None") +
-  theme(legend.position = "top")
+panel_a(summarised_table, mean_sharing, proposalsigma,
+        title = "Outcome: mean rate of sharing")
 ```
 
 ### Current gini
 ```{r}
-summarised_table %>% 
-  ggplot(aes(step, mean_gini, colour = as.factor(proposalsigma), group = proposalsigma)) +
-  geom_line() +
-  facet_grid(rows = vars(fundedshare),
-             cols = vars(sharingincentive)) +
-  labs(title = "Outcome: mean current gini",
-       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
-       caption = "Network: None") +
-  theme(legend.position = "top")
+panel_a(summarised_table, mean_gini, proposalsigma,
+        title = "Outcome: mean current gini")
 ```
 
 ### Total Gini
 ```{r}
-summarised_table %>% 
-  ggplot(aes(step, mean_cumulative_gini, colour = as.factor(proposalsigma), group = proposalsigma)) +
-  geom_line() +
-  facet_grid(rows = vars(fundedshare),
-             cols = vars(sharingincentive)) +
-  labs(title = "Outcome: mean total gini",
-       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
-       caption = "Network: None") +
-  theme(legend.position = "top")
+panel_a(summarised_table, mean_cumulative_gini, proposalsigma,
+        title = "Outcome: mean total gini")
 ```
-
 
 ## Panel B
 
@@ -435,43 +413,22 @@ summarised_table <- overview_set %>%
 
 ### Rate of sharing
 ```{r}
-summarised_table %>% 
-  ggplot(aes(step, mean_sharing, colour = gain, group = gain)) +
-  geom_line() +
-  facet_grid(rows = vars(fundedshare),
-             cols = vars(sharingincentive)) +
-  labs(title = "Outcome: mean rate of sharing",
-       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
-       caption = "Network: None") +
-  theme(legend.position = "top") +
+panel_a(summarised_table, mean_sharing, gain, use_factor = FALSE,
+        title = "Outcome: mean rate of sharing") +
   colorspace::scale_color_continuous_diverging(mid = 1)
 ```
 
 ### Current gini
 ```{r}
-summarised_table %>% 
-  ggplot(aes(step, mean_gini, colour = gain, group = gain)) +
-  geom_line() +
-  facet_grid(rows = vars(fundedshare),
-             cols = vars(sharingincentive)) +
-  labs(title = "Outcome: mean current gini",
-       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
-       caption = "Network: None") +
-  theme(legend.position = "top") +
+panel_a(summarised_table, mean_gini, gain, use_factor = FALSE,
+        title = "Outcome: mean current gini") +
   colorspace::scale_color_continuous_diverging(mid = 1)
 ```
 
 ### Total Gini
 ```{r}
-summarised_table %>% 
-  ggplot(aes(step, mean_cumulative_gini, colour = gain, group = gain)) +
-  geom_line() +
-  facet_grid(rows = vars(fundedshare),
-             cols = vars(sharingincentive)) +
-  labs(title = "Outcome: mean total gini",
-       subtitle = "Rows: Share of funded teams; columns: sharing incentive",
-       caption = "Network: None") +
-  theme(legend.position = "top") +
+panel_a(summarised_table, mean_cumulative_gini, gain, use_factor = FALSE,
+        title = "Outcome: mean total gini") +
   colorspace::scale_color_continuous_diverging(mid = 1)
 ```
 
