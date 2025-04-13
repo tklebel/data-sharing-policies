@@ -1,0 +1,199 @@
+---
+title: "Sensitivity analysis - Figure 3"
+date: today
+author: "Thomas Klebel"
+format: 
+  html:
+    embed-resources: true
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(fig.width = 10, fig.height = 10, dpi = 300, echo = FALSE,
+                      warning = FALSE, message = FALSE)
+```
+
+
+```{r}
+library(sparklyr)
+library(dplyr)
+library(here)
+library(ggplot2)
+# library(arrow)
+
+theme_set(theme_light())
+
+# Port forwarding for better UI access:
+#   ssh -L 4040:localhost:4040 username@your-server
+# Then access the UI at http://localhost:4040 on your local machine
+
+# Configuration optimized for 36-core, 128GB machine
+options(sparklyr.log.console = FALSE)
+conf <- spark_config()
+
+# Memory settings - optimized for 128GB RAM
+conf$spark.driver.memory <- "110g"
+conf$`sparklyr.shell.driver-memory` <- "110g"
+conf$spark.driver.maxResultSize <- "20g"
+
+# Parallelism settings - optimized for 36 cores
+conf$spark.sql.files.maxPartitionBytes <- "256m"
+conf$spark.sql.shuffle.partitions <- 360
+conf$spark.default.parallelism <- 72
+
+# Keep adaptive query execution enabled
+conf$spark.sql.adaptive.enabled <- "true"
+conf$spark.sql.adaptive.coalescePartitions.enabled <- "true"
+conf$spark.sql.adaptive.skewJoin.enabled <- "true"
+conf$spark.sql.adaptive.skewJoin.skewedPartitionFactor <- 5
+conf$spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes <- "512m"
+
+# Memory and shuffle optimization
+conf$spark.sql.shuffle.spill <- "true"
+conf$spark.shuffle.spill.compress <- "true"
+conf$spark.shuffle.compress <- "true"
+conf$spark.shuffle.file.buffer <- "1m"
+conf$spark.memory.fraction <- 0.8
+conf$spark.memory.storageFraction <- 0.3
+
+# Broadcast join optimization
+conf$spark.sql.autoBroadcastJoinThreshold <- "256m"
+
+# Serialization settings
+conf$spark.serializer <- "org.apache.spark.serializer.KryoSerializer"
+conf$spark.kryo.registrationRequired <- "false"
+conf$spark.kryo.unsafe <- "true"
+
+# Speculation settings
+conf$spark.speculation <- "true"
+conf$spark.speculation.multiplier <- 1.5
+conf$spark.speculation.quantile <- 0.9
+conf$spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version <- "2"
+
+# Off-heap memory settings
+conf$spark.memory.offHeap.enabled <- "true"
+conf$spark.memory.offHeap.size <- "20g"
+
+# Connect using 32 cores (leaving 4 for system)
+sc <- spark_connect(master = "local[32]", config = conf, version = "3.5.0")
+
+```
+
+```{r}
+the_plot <- function(outcome = c("costs", "sigma", "gain"), 
+                        panel = c("A", "B")) {
+  outcome_choice <- match.arg(outcome)
+  panel_choice <- match.arg(panel)
+  
+  path <- switch(outcome_choice,
+    costs = "outputs/sharing-costs-sensitivity.parquet/",
+    sigma = "outputs/sigma-sensitivity.parquet/",
+    gain = "outputs/gain-sensitivity.parquet/"
+  )
+  
+  variable <- switch(outcome_choice,
+    costs = "sharingcostscap",
+    sigma = "proposalsigma",
+    gain = "gain"
+  )
+  
+  variable_symbol <- rlang::sym(variable)
+  
+  row_var <- switch (panel_choice,
+    A = "sharingincentive",
+    B = "fundedshare"
+  )
+  
+  row_var <- rlang::sym(row_var)
+  
+  df <- spark_read_parquet(
+    sc,
+    name = "sharing_costs_individuals",
+    path = here(path),
+    memory = FALSE)
+  
+  if (panel_choice == "A") {
+      summarised_table <- df %>%
+        filter(fundedshare == .1) %>% 
+        group_by({{variable_symbol}}, sharingincentive, network, fundedshare, step) %>%
+        summarise(n = n(),
+                  mean_sharing = mean(sharing),
+                  sd_sharing = sd(sharing)) %>% 
+          collect()
+  } else if (panel_choice == "B") {
+      summarised_table <- df %>%
+        filter(sharingincentive == .4) %>% 
+        group_by({{variable_symbol}}, sharingincentive, network, fundedshare, step) %>%
+        summarise(n = n(),
+                  mean_sharing = mean(sharing),
+                  sd_sharing = sd(sharing)) %>% 
+          collect()
+  }
+  
+  pdata <- summarised_table %>% 
+    mutate(network = factor(
+      network,
+      levels = c("none", "random", "clustered", "fragmented"),
+      labels = c("No network", "Random network",
+                 "High clustering", "Low clustering")))
+  
+  if (variable != "gain") {
+    pdata <- mutate(pdata, {{variable_symbol}} := as.factor({{variable_symbol}}))
+  }
+
+  p <- pdata %>% 
+    ggplot(aes(step, mean_sharing, colour = {{variable_symbol}},
+               group = {{variable_symbol}})) +
+    geom_line() +
+    facet_grid(cols = vars(network),
+               rows = vars({{ row_var }})) +
+    theme(legend.position = "top")
+  
+  switch(outcome_choice,
+    costs = p,
+    sigma = p,
+    gain = p + colorspace::scale_color_continuous_diverging(mid = 1)
+  )
+}
+```
+
+
+# Panel A
+In Panel A, we fix the share of funded teams at 10%.
+
+
+
+```{r}
+the_plot("costs")
+```
+
+```{r}
+the_plot("sigma")
+```
+
+```{r}
+the_plot("gain")
+```
+
+
+
+
+# Panel B
+In Panel B, we fix the sharing incentive at 40%.
+
+```{r}
+the_plot("costs", "B")
+```
+
+```{r}
+the_plot("sigma", "B")
+```
+
+```{r}
+the_plot("gain", "B")
+```
+
+
+```{r}
+spark_disconnect(sc)
+```
+
