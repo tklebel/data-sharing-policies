@@ -83,7 +83,7 @@ sc <- spark_connect(master = "local[32]", config = conf, version = "3.5.0")
 ## Figure 1 - Panel A
 In Figure 1 - Panel A, we fix the share of funded teams at 10%. In the three 
 figures below, we show all combinations. The direct comparison to the figure
-in the main manuscript is the first row.
+in the main manuscript is the first row, highlighted in gold.
 
 ```{r}
 # read the data
