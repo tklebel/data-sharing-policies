@@ -248,7 +248,7 @@ pdata %>%
 # Sigma
 ## Figure 1 - Panel A
 
-Again, the row to compare to the main manscript is the first. The manuscript 
+Again, the row to compare to the main manuscript is the first. The manuscript 
 uses .15 for sigma.
 
 
