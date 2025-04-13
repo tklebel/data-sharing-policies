@@ -799,7 +799,7 @@ gain
 gain
 0
 2
-1.59
+1.0
 .01
 1
 NIL
@@ -1620,6 +1620,9 @@ NetLogo 6.4.0
     <enumeratedValueSet variable="max-initial-utility">
       <value value="-4"/>
     </enumeratedValueSet>
+    <enumeratedValueSet variable="gain">
+      <value value="1"/>
+    </enumeratedValueSet>
   </experiment>
   <experiment name="sharing-costs-sensitivity_high_res" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
@@ -1676,6 +1679,9 @@ NetLogo 6.4.0
     <enumeratedValueSet variable="max-initial-utility">
       <value value="-4"/>
     </enumeratedValueSet>
+    <enumeratedValueSet variable="gain">
+      <value value="1"/>
+    </enumeratedValueSet>
   </experiment>
   <experiment name="sigma-sensitivity" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
@@ -1720,6 +1726,9 @@ NetLogo 6.4.0
     </enumeratedValueSet>
     <enumeratedValueSet variable="max-initial-utility">
       <value value="-4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="gain">
+      <value value="1"/>
     </enumeratedValueSet>
   </experiment>
   <experiment name="gain-sensitivity" repetitions="100" runMetricsEveryStep="false">
@@ -1812,6 +1821,9 @@ NetLogo 6.4.0
     <enumeratedValueSet variable="max-initial-utility">
       <value value="-4"/>
     </enumeratedValueSet>
+    <enumeratedValueSet variable="gain">
+      <value value="1"/>
+    </enumeratedValueSet>
   </experiment>
   <experiment name="sigma-sensitivity-individuals" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
@@ -1854,6 +1866,9 @@ NetLogo 6.4.0
     </enumeratedValueSet>
     <enumeratedValueSet variable="max-initial-utility">
       <value value="-4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="gain">
+      <value value="1"/>
     </enumeratedValueSet>
   </experiment>
   <experiment name="gain-sensitivity-individuals" repetitions="100" runMetricsEveryStep="false">
