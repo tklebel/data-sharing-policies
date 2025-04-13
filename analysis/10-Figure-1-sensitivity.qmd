@@ -81,6 +81,9 @@ sc <- spark_connect(master = "local[32]", config = conf, version = "3.5.0")
 
 # Sharing costs
 ## Figure 1 - Panel A
+In Figure 1 - Panel A, we fix the share of funded teams at 10%. In the three 
+figures below, we show all combinations. The direct comparison to the figure
+in the main manuscript is the first row.
 
 ```{r}
 # read the data
@@ -142,6 +145,9 @@ summarised_table %>%
 
 
 ## Panel B
+Here we fix the rate of funded teams to 10%, as in the original figure. Note
+that the x-axis here shows steps 1-3000, in the main manuscript for space reasons
+only 1-1500.
 
 ```{r}
 ## Analyse individual level data -----
@@ -188,15 +194,6 @@ no_network_effort %>%
   labs(y = "Effort of teams", x = NULL, colour = "Cap on sharing costs",
        caption = "Network: None")
 ```
-
-
-Overall, this output figure (difference between funded and unfunded teams)
-is not very sensitive to the sharing costs. Only the case with 30% incentives
-shows a case where teams are sensitive to costs (faster uptake with no costs,
-but long-term lower effort)
-In network scenarios, no costs lead to higher effort, particularly also among
-the unfunded teams.
-
 
 
 ## Panel C
@@ -250,6 +247,10 @@ pdata %>%
 
 # Sigma
 ## Figure 1 - Panel A
+
+Again, the row to compare to the main manscript is the first. The manuscript 
+uses .15 for sigma.
+
 
 ```{r}
 # read the data
