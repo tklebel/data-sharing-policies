@@ -4,7 +4,7 @@
   --table outputs/sharing-costs-sensitivity.csv
   
 sed -i '1,6d' outputs/sharing-costs-sensitivity.csv
-pbzip2 outputs/sharing-costs-sensitivity.csv
+# pbzip2 outputs/sharing-costs-sensitivity.csv
 
 
 # Column names

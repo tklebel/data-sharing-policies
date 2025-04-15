@@ -4,5 +4,5 @@
   --table outputs/sharing-costs-sensitivity-individuals.csv
   
 sed -i '1,6d' outputs/sharing-costs-sensitivity-individuals.csv
-pbzip2 outputs/sharing-costs-sensitivity-individuals.csv
+# pbzip2 outputs/sharing-costs-sensitivity-individuals.csv
 
