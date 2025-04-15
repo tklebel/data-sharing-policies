@@ -1,10 +1,9 @@
 library(sparklyr)
 library(dplyr)
 library(here)
-library(ggplot2)
 
 # Configuration optimized for 36-core, 128GB machine
-options(sparklyr.log.console = TRUE)
+options(sparklyr.log.console = FALSE)
 conf <- spark_config()
 
 # Memory settings - optimized for 128GB RAM
@@ -53,13 +52,15 @@ conf$spark.memory.offHeap.size <- "20g"
 # Connect using 32 cores (leaving 4 for system)
 sc <- spark_connect(master = "local[32]", config = conf, version = "3.5.0")
 
-# Read the full parquet file
-parquet_df <- spark_read_parquet(sc, "sharing_costs_individuals",
-                                 path = "outputs/sharing-costs-sensitivity-individuals.parquet",
+
+## Sharing costs -----------------
+# Read the full file
+costs_df <- spark_read_csv(sc, "sharing_costs_individuals",
+                                 path = "outputs/sharing-costs-sensitivity-individuals.csv",
                                  memory = FALSE)
 
 # Register as a table - using the full dataset
-sdf_register(parquet_df, "sharing_costs_individuals_full")
+sdf_register(costs_df, "sharing_costs_individuals_full")
 
 # Define SQL query using the full dataset table
 sql <- "
@@ -102,13 +103,13 @@ spark_write_parquet(
   tbl(sc, "re_arranged"),
   path = "outputs/sharing-costs-sensitivity-individuals_re_arranged.parquet",
   mode = "overwrite",
-  partition_by = "network"
+  partition_by = c("network", "fundedshare")
 )
 
 # Print summary to confirm success
 cat("Processing complete! Full dataset transformation finished.\n")
 
-# 
+
 # ## For sigma ------
 # # Read the full parquet file
 # sigma_df <- spark_read_csv(sc, "sigma_individuals",
@@ -120,13 +121,13 @@ cat("Processing complete! Full dataset transformation finished.\n")
 # 
 # sql <- "
 # WITH cleaned_data AS (
-#   SELECT 
+#   SELECT
 #     *,
 #     regexp_replace(regexp_replace(individualdata, '^\\\\[\\\\[', ''), '\\\\]\\\\]$', '') AS clean_data
 #   FROM sigma_individuals
 # )
-# SELECT 
-#   t.`run_number`, 
+# SELECT
+#   t.`run_number`,
 #   t.`proposalsigma`,
 #   t.`sharingincentive`,
 #   t.`network`,
@@ -142,9 +143,9 @@ cat("Processing complete! Full dataset transformation finished.\n")
 #   CASE WHEN split(s.item, ' ')[6] = 'true' THEN true ELSE false END as shared_data_lag,
 #   CASE WHEN split(s.item, ' ')[7] = 'true' THEN true ELSE false END as funded,
 #   CASE WHEN split(s.item, ' ')[8] = 'true' THEN true ELSE false END as funded_lag
-# FROM 
+# FROM
 #   cleaned_data t
-# LATERAL VIEW 
+# LATERAL VIEW
 #   explode(split(clean_data, '\\\\] \\\\[')) s AS item
 # "
 # 
@@ -159,7 +160,7 @@ cat("Processing complete! Full dataset transformation finished.\n")
 #   path = "outputs/sigma-sensitivity-individuals_re_arranged.parquet",
 #   mode = "overwrite"
 # )
-
+# 
 
 
 # ## For gain ------
