@@ -1,9 +1,6 @@
 library(sparklyr)
 library(dplyr)
 library(here)
-library(ggplot2)
-
-source("R/functions.R")
 
 # Port forwarding for better UI access:
 #   ssh -L 4040:localhost:4040 mcmc
@@ -75,13 +72,13 @@ sc <- spark_connect(master = "local[32]", config = conf, version = "3.5.0")
 # #
 # 
 # core_set <- sensitive %>%
-#   select(run_number, step, sharingcostscap, sharingincentive, network, 
+#   select(run_number, step, sharingcostscap, sharingincentive, network,
 #          fundedshare, sharing, gini_resources_of_turtles, gini_totalfunding_of_turtles)
 # 
 # 
 # spark_write_parquet(core_set, "outputs/sharing-costs-sensitivity.parquet",
 #                     mode = "overwrite",
-#                     partition_by = c("network", "sharingcostscap")
+#                     partition_by = c("network", "fundedshare")
 # )
 
 # # Sensitivity high-res ------
