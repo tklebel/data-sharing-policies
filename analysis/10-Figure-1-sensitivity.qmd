@@ -155,8 +155,8 @@ panel_a <- function(df,
       sharingincentive = unique(summarised_table$sharingincentive)
     ), 
     aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf),
-    fill = "lightgoldenrod", alpha = 0.2,
-    inherit.aes = FALSE) +
+      fill = "lightgoldenrod", alpha = 0.2,
+      inherit.aes = FALSE) +
     geom_line() +
     facet_grid(rows = vars(fundedshare),
                cols = vars(sharingincentive)) +
