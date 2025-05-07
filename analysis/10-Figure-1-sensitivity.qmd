@@ -425,19 +425,19 @@ summarised_table <- overview_set %>%
     collect()
 ```
 
-### Rate of sharing
+### Outcome: % of teams sharing data
 ```{r}
 panel_a(summarised_table, "mean_sharing", "gain", use_factor = FALSE) +
   colorspace::scale_color_continuous_diverging(mid = 1)
 ```
 
-### Current gini
+### Outcome: Gini of current resources
 ```{r}
 panel_a(summarised_table, "mean_gini", "gain", use_factor = FALSE) +
   colorspace::scale_color_continuous_diverging(mid = 1)
 ```
 
-### Total Gini
+### Outcome: Gini of total resources
 ```{r}
 panel_a(summarised_table, "mean_cumulative_gini", "gain", use_factor = FALSE) +
   colorspace::scale_color_continuous_diverging(mid = 1)
