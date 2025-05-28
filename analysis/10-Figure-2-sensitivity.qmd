@@ -83,7 +83,7 @@ sc <- spark_connect(master = "local[32]", config = conf, version = "3.5.0")
 ## Panel A
 In Panel A, we fix the share of funded teams at 10%. In the three 
 figures below, we show all combinations. The direct comparison to the figure
-in the main manuscript is the fith column (.4).
+in the main manuscript is the fifth column (.4).
 
 ```{r}
 # read the data
@@ -105,58 +105,85 @@ summarised_table <- overview_set %>%
 ```
 
 ```{r}
-panel_a <- function(df, outcome, sensitivity_var, title,
-                    use_factor = TRUE) {
+panel_a <- function(df, 
+                    outcome = c("mean_sharing", "mean_gini", "mean_cumulative_gini"), 
+                    sensitivity_var = c("costs", "sigma", "gain"), use_factor = TRUE) {
+  
+  variable <- switch(sensitivity_var,
+    costs = "sharingcostscap",
+    sigma = "proposalsigma",
+    gain = "gain"
+  )
+  
+  sensitivity_symbol <- rlang::sym(variable)
+  
+  colour_label <- switch(sensitivity_var,
+    costs = "Cap on sharing costs",
+    sigma = "Sigma",
+    gain = "Gain"
+  )
   
   if (use_factor) {
-    df <- mutate(df, {{sensitivity_var}} := as.factor({{sensitivity_var}}))
+    df <- mutate(df, {{sensitivity_symbol}} := as.factor({{sensitivity_symbol}}))
   } 
   
+  outcome_choice <- switch(outcome,
+    mean_sharing = "mean_sharing",
+    mean_gini = "mean_gini",
+    mean_cumulative_gini = "mean_cumulative_gini"
+  )
+  
+  outcome_symbol <- rlang::sym(outcome_choice)
+  
+  outcome_label <- switch(outcome_choice,
+    mean_sharing = "% of teams sharing data",
+    mean_gini = "Gini of current resources",
+    mean_cumulative_gini = "Gini of total resources"
+  )
+  
   df %>% 
-    ggplot(aes(step, {{outcome}}, colour = {{sensitivity_var}}, 
-               group = {{sensitivity_var}})) +
+    ggplot(aes(step, {{outcome_symbol}}, colour = {{sensitivity_symbol}}, 
+               group = {{sensitivity_symbol}})) +
     geom_rect(data = data.frame(
         fundedshare = unique(summarised_table$fundedshare),
         sharingincentive = .4
       ),
-      aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf),
+    aes(xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf),
       fill = "lightgoldenrod", alpha = 0.2,
       inherit.aes = FALSE) +
     geom_line() +
-    geom_line() +
     facet_grid(rows = vars(fundedshare),
                cols = vars(sharingincentive)) +
-    labs(title = title,
-         subtitle = "Rows: Share of funded teams; columns: sharing incentive",
-         caption = "Network: None") +
+    labs(subtitle = "Rows: Share of funded teams; columns: sharing incentive",
+         caption = "Network: None",
+         colour = colour_label,
+         y = outcome_label,
+         x = NULL) +
     theme(legend.position = "top")
 }
 ```
 
 
-### Rate of sharing
+### Outcome: % of teams sharing data
 ```{r}
-panel_a(summarised_table, mean_sharing, sharingcostscap,
-        title = "Outcome: mean rate of sharing")
+panel_a(summarised_table, "mean_sharing", "costs")
 ```
 
-### Current gini
+### Outcome: Gini of current resources
 ```{r}
-panel_a(summarised_table, mean_gini, sharingcostscap,
-        title = "Outcome: mean current gini")
+panel_a(summarised_table, "mean_gini", "costs")
 ```
 
-### Total Gini
+### Outcome: Gini of total resources
 ```{r}
-panel_a(summarised_table, mean_cumulative_gini, sharingcostscap,
-        title = "Outcome: mean total gini")
+panel_a(summarised_table, "mean_cumulative_gini", "costs")
 ```
 
 
 ## Panel B
 Here we fix the sharing incentive to 40%, as in the original figure. Note
-that the x-axis here shows steps 1-3000, in the main manuscript for space reasons
-only 1-1500.
+that the x-axis here shows steps 1-3000, whereas the main manuscript shows only
+1-1500.
 
 ```{r}
 panel_b <- function(outcome = c("costs", "sigma", "gain")) {
@@ -299,7 +326,7 @@ panel_c <- function(outcome = c("costs", "sigma", "gain")) {
       geom_line() +
       facet_grid(rows = vars(fundedshare), 
                  cols = vars(outcome_var)) +
-    labs(x = NULL,
+    labs(x = NULL, colour = colour_label,
            y = "Correlation (Pearson)") +
     theme(legend.position = "top")
 }
@@ -312,9 +339,11 @@ panel_c()
 
 
 # Sigma
-## Panel A
+We now repeat all the above figures, but for variation in the parameter sigma.
 
-The manuscript uses .15 for sigma.
+## Figure 1 - Panel A
+Again, the column to compare to the main manuscript is the fifth. The manuscript 
+uses .15 for sigma.
 
 
 ```{r}
@@ -336,22 +365,19 @@ summarised_table <- overview_set %>%
     collect()
 ```
 
-### Rate of sharing
+### Outcome: % of teams sharing data
 ```{r}
-panel_a(summarised_table, mean_sharing, proposalsigma,
-        title = "Outcome: mean rate of sharing")
+panel_a(summarised_table, "mean_sharing", "sigma")
 ```
 
-### Current gini
+### Outcome: Gini of current resources
 ```{r}
-panel_a(summarised_table, mean_gini, proposalsigma,
-        title = "Outcome: mean current gini")
+panel_a(summarised_table, "mean_gini", "sigma")
 ```
 
-### Total Gini
+### Outcome: Gini of total resources
 ```{r}
-panel_a(summarised_table, mean_cumulative_gini, proposalsigma,
-        title = "Outcome: mean total gini")
+panel_a(summarised_table, "mean_cumulative_gini", "sigma")
 ```
 
 ## Panel B
@@ -369,10 +395,11 @@ panel_c("sigma")
 
 
 # Gain
+We now repeat all the above figures, but for variation in the parameter gain
 
-The gain value used in the manuscript is 1.
-
-## Panel A
+## Figure 1 - Panel A
+The column to compare to the main manuscript is the fifth. The manuscript 
+uses 1 for gain.
 
 ```{r}
 # read the data
@@ -393,24 +420,21 @@ summarised_table <- overview_set %>%
     collect()
 ```
 
-### Rate of sharing
+### Outcome: % of teams sharing data
 ```{r}
-panel_a(summarised_table, mean_sharing, gain, use_factor = FALSE,
-        title = "Outcome: mean rate of sharing") +
+panel_a(summarised_table, "mean_sharing", "gain", use_factor = FALSE) +
   colorspace::scale_color_continuous_diverging(mid = 1)
 ```
 
-### Current gini
+### Outcome: Gini of current resources
 ```{r}
-panel_a(summarised_table, mean_gini, gain, use_factor = FALSE,
-        title = "Outcome: mean current gini") +
+panel_a(summarised_table, "mean_gini", "gain", use_factor = FALSE) +
   colorspace::scale_color_continuous_diverging(mid = 1)
 ```
 
-### Total Gini
+### Outcome: Gini of total resources
 ```{r}
-panel_a(summarised_table, mean_cumulative_gini, gain, use_factor = FALSE,
-        title = "Outcome: mean total gini") +
+panel_a(summarised_table, "mean_cumulative_gini", "gain", use_factor = FALSE) +
   colorspace::scale_color_continuous_diverging(mid = 1)
 ```
 
