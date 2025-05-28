@@ -107,7 +107,7 @@ to share-data
     ] [
       .5 * individual-utility + .5 * descriptive-norm
     ]
-    set inv_effort 1 / (1 + exp ( - effort ))
+    set inv_effort 1 / (1 + exp ( - gain * effort ))
     set shared-data? random-float 1 > 1 - inv_effort
 
     if debug? [
@@ -117,7 +117,7 @@ to share-data
       type ifelse-value shared-data? [ "i shared data" ] [ "i did NOT share data" ]
     ]
 
-    set resources resources - (1 / (n-teams * 10)) * inv_effort ; costs are up to 10% of base funding budget
+    set resources resources - sharing-costs-cap * (1 / n-teams) * inv_effort ; costs are up to sharing-costs-cap% of base funding budget
   ]
 end
 
@@ -574,7 +574,7 @@ sharing-incentive
 sharing-incentive
 0
 1
-0.4
+0.5
 .01
 1
 NIL
@@ -588,7 +588,7 @@ CHOOSER
 network
 network
 "none" "random" "clustered" "fragmented"
-3
+0
 
 PLOT
 577
@@ -694,7 +694,7 @@ funded-share
 funded-share
 0
 1
-0.1
+0.6
 0.05
 1
 NIL
@@ -774,6 +774,36 @@ debug?
 1
 1
 -1000
+
+SLIDER
+57
+533
+229
+566
+sharing-costs-cap
+sharing-costs-cap
+0
+.5
+0.01
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+53
+603
+225
+636
+gain
+gain
+0
+2
+1.0
+.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1117,7 +1147,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.3.0
+NetLogo 6.4.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -1544,6 +1574,354 @@ NetLogo 6.3.0
     <enumeratedValueSet variable="max-initial-utility">
       <value value="-4"/>
       <value value="4"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="sharing-costs-sensitivity" repetitions="100" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
+    <metric>%-sharing</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-costs-cap" first="0" step="0.1" last="0.5"/>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;clustered&quot;"/>
+      <value value="&quot;fragmented&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="gain">
+      <value value="1"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="sharing-costs-sensitivity_high_res" repetitions="100" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
+    <metric>%-sharing</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-costs-cap" first="0" step="0.01" last="0.1"/>
+    <enumeratedValueSet variable="sharing-incentive">
+      <value value="0"/>
+      <value value="0.1"/>
+      <value value="0.13"/>
+      <value value="0.16"/>
+      <value value="0.2"/>
+      <value value="0.22"/>
+      <value value="0.24"/>
+      <value value="0.26"/>
+      <value value="0.28"/>
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;clustered&quot;"/>
+      <value value="&quot;fragmented&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="gain">
+      <value value="1"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="sigma-sensitivity" repetitions="100" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
+    <metric>%-sharing</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sharing-costs-cap">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="proposal-sigma" first="0.05" step="0.05" last="0.3"/>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;clustered&quot;"/>
+      <value value="&quot;fragmented&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="gain">
+      <value value="1"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="gain-sensitivity" repetitions="100" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>gini [resources] of turtles</metric>
+    <metric>gini [total-funding] of turtles</metric>
+    <metric>%-sharing</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sharing-costs-cap">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;clustered&quot;"/>
+      <value value="&quot;fragmented&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="gain" first="0" step="0.1" last="2"/>
+  </experiment>
+  <experiment name="sharing-costs-sensitivity-individuals" repetitions="100" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>individual-data</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-costs-cap" first="0" step="0.1" last="0.5"/>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;clustered&quot;"/>
+      <value value="&quot;fragmented&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="gain">
+      <value value="1"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="sigma-sensitivity-individuals" repetitions="100" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>individual-data</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sharing-costs-cap">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="proposal-sigma" first="0.05" step="0.05" last="0.3"/>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;clustered&quot;"/>
+      <value value="&quot;fragmented&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="gain">
+      <value value="1"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="gain-sensitivity-individuals" repetitions="100" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="3000"/>
+    <metric>individual-data</metric>
+    <runMetricsCondition>ticks mod 30 = 0</runMetricsCondition>
+    <enumeratedValueSet variable="initial-norm">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sharing-costs-cap">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="sharing-incentive" first="0" step="0.1" last="0.7"/>
+    <enumeratedValueSet variable="application-penalty">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources-dist">
+      <value value="&quot;uniform&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="proposal-sigma">
+      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="n-teams">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="third-party-funding-ratio">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="utility-change">
+      <value value="0.03"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="network">
+      <value value="&quot;none&quot;"/>
+      <value value="&quot;random&quot;"/>
+      <value value="&quot;clustered&quot;"/>
+      <value value="&quot;fragmented&quot;"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="funded-share" first="0.1" step="0.1" last="0.6"/>
+    <enumeratedValueSet variable="data-sharing?">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max-initial-utility">
+      <value value="-4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="gain">
+      <value value="0"/>
+      <value value="0.25"/>
+      <value value="0.5"/>
+      <value value="1"/>
+      <value value="1.5"/>
+      <value value="2"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
