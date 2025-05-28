@@ -5,7 +5,6 @@ output: pdf_document
 ---
  
 ## Overview and Purpose
-
 This agent-based model simulates the dynamics of data sharing practices among academic research teams competing for funding. The model explores how different funding schemes (competitive large grants vs. distributive small grants) and data sharing incentives affect the long-term uptake of data sharing practices in scientific communities.
 
 ## Entities, State Variables, and Scales
@@ -26,12 +25,12 @@ This agent-based model simulates the dynamics of data sharing practices among ac
 - `total-funding`: Cumulative funding received over simulation
 
 ### Global Parameters
-- `sharing-incentive` (α): Weight of data sharing in proposal evaluation (0-0.7)
+- `sharing-incentive` ($\alpha$): Weight of data sharing in proposal evaluation (0-0.7)
 - `funded-share`: Proportion of teams receiving funding each round (0.1-0.6)
 - `proposal-sigma`: Standard deviation of proposal quality (default 0.15)
 - `utility-change`: Increment for utility updates (default 0.03)
-- `sharing-costs-cap` (λ): Maximum cost of sharing as proportion of base funding (default 0.1)
-- `gain` (g): Gain factor for effort calculation (default 1)
+- `sharing-costs-cap` ($\lambda$): Maximum cost of sharing as proportion of base funding (default 0.1)
+- `gain` ($g$): Gain factor for effort calculation (default 1)
 - `network`: Type of collaboration network (none/random/clustered/fragmented)
 
 ### Temporal Scale
@@ -59,20 +58,16 @@ Each time step follows this sequence:
 
 ### Decision Making
 Teams make stochastic data sharing decisions using:
-```
-p = 1 / (1 + exp(-g * e))
-```
-where `e` is effort based on individual utility and social norms.
+$$p = \frac{1}{1 + \exp(-g \cdot e)}$$
+where $e$ is effort based on individual utility and social norms.
 
 ### Learning
 Teams use reinforcement learning: utility increases if (shared data AND gained resources) OR (didn't share AND didn't gain resources); otherwise utility decreases.
 
 ### Social Influence
 In network scenarios, teams incorporate neighbors' behavior:
-```
-d = (Σ neighbors who shared / total neighbors) - 0.5
-e = (utility + d) / 2
-```
+$$d = \frac{\sum \text{neighbors who shared}}{\text{total neighbors}} - 0.5$$
+$$e = \frac{\text{utility} + d}{2}$$
 
 ### Competition
 Teams compete for limited funding based on proposal quality, creating trade-offs between investing in data sharing vs. maintaining competitiveness.
@@ -87,16 +82,12 @@ Teams compete for limited funding based on proposal quality, creating trade-offs
 ## Submodels
 
 ### Data Sharing Cost
-```
-cost = λ * β * p
-```
-where λ is cost cap, β is base funding rate, and p is sharing probability.
+$$\text{cost} = \lambda \cdot \beta \cdot p$$
+where $\lambda$ is cost cap, $\beta$ is base funding rate, and $p$ is sharing probability.
 
 ### Proposal Strength
-```
-μ = (1 - α) * R_normalized + α * e
-proposal_strength ~ Normal(μ, σ)
-```
+$$\mu = (1 - \alpha) \cdot R_{\text{normalized}} + \alpha \cdot e$$
+$$\text{proposal\_strength} \sim \mathcal{N}(\mu, \sigma)$$
 
 ### Funding Distribution
 - Base funding: Each team receives 1/n units
@@ -111,6 +102,7 @@ proposal_strength ~ Normal(μ, σ)
 ## Model Variants
 
 The model supports different network topologies to represent various scientific community structures:
+
 - **No network**: Teams act independently
 - **Random network**: Erdős–Rényi random graph
 - **Clustered network**: High clustering coefficient representing tight-knit communities
