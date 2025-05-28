@@ -26,4 +26,19 @@ mapping between the output files and the reported networks is as follows:
 3. "vary_incentives_individuals_fragmented.csv.bz2" = low clustering.
 4. "vary_incentives_individuals_random network.csv.bz2" = random network.
 
+## Sensitivity analysis
+The repo also contains outputs and analysis notebooks for the sensitivity analysis.
+The analysis was done in Spark due to the large file sizes. We share three "packages"
+of data that we used for the sensitivity analysis:
+
+- gain-sensitivity-data.tar.bz2
+- sigma-sensitivity-data.tar.bz2
+- costs-sensitivity-data.tar.bz2
+
+These archives contain two files each: a general file for the sensitivity analysis,
+and one with individual-level data. Both are stored as `.parquet` files. 
+
+They are already processed (similar to step 2 above), so can be readily analysed
+using the files `10-Figure-1-sensitivity.qmd`, `10-Figure-2-sensitivity.qmd`, 
+and `10-Figure-3-sensitivity.qmd` which are available under `analysis`. 
 
